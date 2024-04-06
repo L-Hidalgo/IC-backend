@@ -15,12 +15,12 @@ class ImportarExcelController extends Controller
     public function importExcel(Request $request)
     {
         try {
-            $userAuth = Auth::user();
+            //$userAuth = Auth::user();
             $file = $request->file('archivoPlanilla');
             Excel::import(new ExcelDataImport, $file);
-            ImportLog::create([
+            /*ImportLog::create([
                 'usuario_id' => $userAuth->id,
-            ]);
+            ]);*/
         } catch (ValidationException $e) {
             $failures = $e->failures();
             $errorMessages = [];
@@ -36,4 +36,5 @@ class ImportarExcelController extends Controller
 
         return $this->sendSuccess(["msn"=>"Exitoso"]);
     }
+ 
 }
