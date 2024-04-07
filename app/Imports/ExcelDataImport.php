@@ -18,16 +18,16 @@ class ExcelDataImport implements ToModel, WithStartRow
 
     public function startRow(): int
     {
-        return 2;
+        return 6;
     }
 
     public function model(array $row)
     {
         $gerencia = $this->migrarGerencia($row[0], $row[2]);
 
-        $departamento = $this->migrarDepartamento($row[3], $gerencia->id);
+        $departamento = $this->migrarDepartamento($row[3], $gerencia->id_gerencia);
 
-        $puesto = $this->migrarPuesto($row[1], $row[4], $row[5], $row[6], $row[42], $departamento->id);
+        $puesto = $this->migrarPuesto($row[1], $row[4], $row[5], $row[6], $row[42], $departamento->id_departamento);
 
         if (isset($row[7], $row[12])) {
             $persona = $this->migrarPersona(
@@ -41,29 +41,29 @@ class ExcelDataImport implements ToModel, WithStartRow
                 $row[17],
                 $row[19]
             );
-        
-            $puesto->persona_actual_id = $persona->id;
+
+            $puesto->persona_actual_id = $persona->id_persona;
             $puesto->save();
-        
+
             $estadoOcupado = Estado::where('nombre_estado', 'Ocupado')->first();
-        
+
             if (!$estadoOcupado) {
                 $estadoOcupado = new Estado(['nombre_estado' => 'Ocupado']);
                 $estadoOcupado->save();
             }
-        
+
             $puesto->estado()->associate($estadoOcupado);
-        
+
             $funcionario = $this->migrarFuncionario(
-                $row[18], // file
+               // $row[0] . '-' . $row[7], // file
                 $row[20], // fecha inicio en el sin
                 $row[21], // fecha inicio en el cargo
-                $puesto->id,
-                $persona->id
+                $puesto->id_puesto,
+                $persona->id_persona
             );
-        }        
+        }
 
-        $requisitos = $this->migrarRequisito($puesto->id, $row[43], $row[44], $row[45], $row[46]);
+        $requisitos = $this->migrarRequisito($puesto->id_puesto, $row[43], $row[44], $row[45], $row[46]);
     }
 
     public function migrarGerencia($abreviaturaGerencia, $nombreGerencia): Gerencia
@@ -98,35 +98,48 @@ class ExcelDataImport implements ToModel, WithStartRow
         $objetivo,
         $departamentoId
     ): Puesto {
-        $puesto = Puesto::where('item', $item)->first();
-    
+        $puesto = Puesto::where('item_puesto', $item)->first();
+
         if (!isset($puesto)) {
             $estadoAcefalia = Estado::where('nombre_estado', 'Acefalo')->first();
-    
-            $puesto = Puesto::create([
-                'item_puesto' => $item,
-                'denominacion_puesto' => $denominacion,
-                'salario_puesto' => $salario,
-                'salario_literal_puesto' => $salario_literal,
-                'objetivo_puesto' => $objetivo,
-                'departamento_id' => $departamentoId,
-                'estado_id' => $estadoAcefalia->id,
-            ]);
+
+            if ($estadoAcefalia !== null) {
+                $puesto = Puesto::create([
+                    'item_puesto' => $item,
+                    'denominacion_puesto' => $denominacion,
+                    'salario_puesto' => $salario,
+                    'salario_literal_puesto' => $salario_literal,
+                    'objetivo_puesto' => $objetivo,
+                    'departamento_id' => $departamentoId,
+                    'estado_id' => $estadoAcefalia->id_estado, // Cambio aquí
+                ]);
+            } else {
+                // Manejo del caso en el que no se encuentra el estado "Acefalo"
+                // Por ejemplo, lanzar una excepción, registrar un mensaje de error, etc.
+                throw new \Exception('No se encontró el estado "Acefalo"');
+            }
         } else {
             $estadoAcefalia = Estado::where('nombre_estado', 'Acefalo')->first();
-    
-            $puesto->denominacion = $denominacion;
-            $puesto->salario = $salario;
-            $puesto->salario_literal = $salario_literal;
-            $puesto->objetivo = $objetivo;
-            $puesto->departamento_id = $departamentoId;
-            $puesto->estado_id = $estadoAcefalia->id;
-            $puesto->persona_actual_id = null;
-            $puesto->save();
+
+            if ($estadoAcefalia !== null) {
+                $puesto->denominacion_puesto = $denominacion;
+                $puesto->salario_puesto = $salario;
+                $puesto->salario_literal_puesto = $salario_literal;
+                $puesto->objetivo_puesto = $objetivo;
+                $puesto->departamento_id = $departamentoId;
+                $puesto->estado_id = $estadoAcefalia->id_estado; // Cambio aquí
+                $puesto->persona_actual_id = null;
+                $puesto->save();
+            } else {
+                // Manejo del caso en el que no se encuentra el estado "Acefalo"
+                // Por ejemplo, lanzar una excepción, registrar un mensaje de error, etc.
+                throw new \Exception('No se encontró el estado "Acefalo"');
+            }
         }
-    
+
         return $puesto;
     }
+
 
     public function migrarPersona(
         $ci,  // 7
@@ -139,7 +152,7 @@ class ExcelDataImport implements ToModel, WithStartRow
         $fechaNacimiento, // 17
         $telefono,        // 19
     ): Persona {
-        $persona = Persona::where('ci', $ci)->first();
+        $persona = Persona::where('ci_persona', $ci)->first();
         if (!isset($persona)) {
             // formato fecha Nac
             $timestamp = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fechaNacimiento);
@@ -161,7 +174,6 @@ class ExcelDataImport implements ToModel, WithStartRow
     }
 
     public function migrarFuncionario(
-        $codigoFileFuncionario,
         $fchInicioSinFuncionario,
         $fchInicioPuestoFuncionario,
         $puestoId,
@@ -174,9 +186,9 @@ class ExcelDataImport implements ToModel, WithStartRow
             return null;
         }
 
-        $fileAc = $puesto->item . '-' . $persona->ci;
+        $codigoFileFuncionario = $puesto->item_puesto . '-' . $persona->ci_persona;
 
-        $Funcionario = Funcionario::where('codigo_file_funcionario', $codigoFileFuncionario)
+        $Funcionario = Funcionario::where('fch_inicio_sin_funcionario', $fchInicioSinFuncionario)
             ->where('puesto_id', $puestoId)
             ->where('persona_id', $personaId)
             ->first();
@@ -194,8 +206,8 @@ class ExcelDataImport implements ToModel, WithStartRow
                 'codigo_file_funcionario' => $codigoFileFuncionario,
                 'fch_inicio_sin_funcionario' => $fchInicioSinFuncionario,
                 'fch_inicio_puesto_funcionario' => $fchInicioPuestoFuncionario,
-                'puesto_id' => $puesto->id,
-                'persona_id' => $persona->id,
+                'puesto_id' => $puesto->id_puesto,
+                'persona_id' => $persona->id_persona,
             ]);
         }
         return $Funcionario;

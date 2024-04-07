@@ -40,6 +40,11 @@ class Persona extends Model
         return $this->hasMany(Funcionario::class);
     }
 
+    public function incorporacionFormulario()
+    {
+        return $this->hasMany(Incorporacion::class);
+    }
+    
     public function puestos_actuales()
     {
         return $this->hasMany(Puesto::class, 'persona_actual_id', 'id');

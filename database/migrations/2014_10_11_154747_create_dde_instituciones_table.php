@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('dde_dde_instituciones', function (Blueprint $table) {
+        Schema::create('dde_instituciones', function (Blueprint $table) {
             $table->integer('id_institucion')->unsigned()->autoIncrement();
             $table->string('nombre_institucion', 60);
             $table->timestamps();
@@ -58,6 +58,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('dde_dde_instituci_personaones');
+        Schema::dropIfExists('dde_instituciones');
     }
 };

@@ -11,12 +11,13 @@ return new class extends Migration
     {
         Schema::create('dde_departamentos', function (Blueprint $table) {
             $table->integer('id_departamento')->unsigned()->autoIncrement();
-            $table->string('nombre_departamento', 50)->nullable();
-            $table->integer('gerencia_id')->unsigned();
-            $table->foreign('gerencia_id')->references('id_Gerencia')->on('dde_gerencias');
+            $table->string('nombre_departamento', 255)->nullable();
+            $table->unsignedInteger('gerencia_id');
             $table->timestamps();
             $table->timestamp('fecha_inicio')->nullable()->default(null);
             $table->timestamp('fecha_fin')->nullable()->default(null);
+
+            $table->foreign('gerencia_id')->references('id_gerencia')->on('dde_gerencias');
         });
     }
 

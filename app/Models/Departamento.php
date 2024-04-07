@@ -14,6 +14,7 @@ class Departamento extends Model
 
     protected $fillable = [
         'nombre_departamento',
+        'gerencia_id'
     ];
 
     protected $casts = [

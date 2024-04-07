@@ -19,8 +19,8 @@ class Puesto extends Model
         'salario_puesto',
         'salario_literal_puesto',
         'departamento_id',
-        'persona_actual_id'
-        //'estado',
+        'estado_id',
+        'persona_actual_id',
     ];
 
     protected $casts = [
@@ -33,9 +33,9 @@ class Puesto extends Model
         return $this->hasMany(Funcionario::class, 'puesto_id', 'id');
     }
 
-    public function estado()
+    public function Estado()
     {
-        return $this->hasMany(Estado::class);
+        return $this->belongsTo(Estado::class);
     }
 
     public function requisitos()
@@ -55,6 +55,6 @@ class Puesto extends Model
 
     public function persona_actual()
     {
-        return $this->belongsTo(Persona::class, 'persona_actual_id', 'id');
+        return $this->belongsTo(Persona::class, 'persona_actual_id', 'id_persona');
     }
 }

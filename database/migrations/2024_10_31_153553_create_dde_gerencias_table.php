@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('dde_gerencias', function (Blueprint $table) {
             $table->integer('id_gerencia')->unsigned()->autoIncrement();
-            $table->string('nombre_gerencia', 50)->nullable();
+            $table->string('nombre_gerencia', 255)->nullable();
             $table->string('abreviatura_gerencia', 5)->nullable();
             $table->timestamps();
             $table->timestamp('fecha_inicio')->nullable()->default(null);

@@ -9,18 +9,23 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('dde_estados', function (Blueprint $table) {
-            $table->increments('id_estado');
+            $table->integer('id_estado')->unsigned()->autoIncrement();
             $table->string('nombre_estado', 50);
-            $table->unsignedInteger('puesto_id');
-            $table->foreign('puesto_id')->references('id_puesto')->on('dde_puestos')->onDelete('cascade');
             $table->timestamps();
             $table->timestamp('fecha_inicio')->nullable()->default(null);
             $table->timestamp('fecha_fin')->nullable()->default(null);
         });
+        
+        // Insertar los estados "Acefalo" y "Ocupado"
+        DB::table('dde_estados')->insert([
+            ['id_estado' => 1, 'nombre_estado' => 'Acefalo', 'created_at' => now(), 'updated_at' => now()],
+            ['id_estado' => 2, 'nombre_estado' => 'Ocupado', 'created_at' => now(), 'updated_at' => now()]
+        ]);
     }
+
 
     /**
      * Reverse the migrations.
