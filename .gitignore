@@ -20,3 +20,4 @@ yarn-error.log
 docker-compose.yml
 Dockerfile
 start.sh
+server-entrypoint.sh
