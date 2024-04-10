@@ -12,3 +12,16 @@ Route::put('/incorporacion',[IncorporacionesController::class, 'crearActualizarI
 
 /* ------------------------------------------ Personas ------------------------------------------ */
 Route::post('/personas',[PersonasController::class, 'crearPersona']);
+// Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
+
+/* ------------------------------------------ GradoAcademico ------------------------------------------ */
+// Route::post('/grado-academico',[GradoAcademicoController::class, 'crearPersona']);
+// Route::get('/GradoAcademico/buscar',[GradoAcademicoController::class, 'buscarPersona']);
+
+/* ------------------------------------------ Formacion ------------------------------------------ */
+// Route::post('/personas',[PersonasController::class, 'crearPersona']);
+// Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
+
+/* ------------------------------------------ Institucion ------------------------------------------ */
+// Route::post('/personas',[PersonasController::class, 'crearPersona']);
+// Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
