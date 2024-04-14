@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Persona;
 use Illuminate\Http\Request;
+
 class PersonasController extends Controller
 {
 
@@ -27,4 +28,17 @@ class PersonasController extends Controller
     $persona->save();
     return $this->sendSuccess($persona);
   }
+
+  public function getByCi($ci_persona)
+  {
+    $persona = Persona::where('ci_persona', $ci_persona)->first();
+
+    if (!$persona) {
+      return response()->json(['message' => 'Persona no encontrada'], 404);
+    }
+
+    return response()->json($persona, 200);
+  }
+
+
 }

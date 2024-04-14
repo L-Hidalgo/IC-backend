@@ -30,3 +30,6 @@ Route::post('/personas',[PersonasController::class, 'crearPersona']);
 
 /* ------------------------------------------- Puesto ------------------------------------------- */
 Route::get('/puestos/{item}/by-item',[PuestoController::class,'getByItem']);
+
+/*------------------------------------------buscando a la <persona----------------------------></persona---------------------------->*/
+Route::get('/puestos/{ciPersona}/by-ci',[PersonasController::class,'getByCi']);
