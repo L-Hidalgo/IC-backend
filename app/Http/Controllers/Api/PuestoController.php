@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Puesto;
+use Illuminate\Support\Facades\Log;
 
 class PuestoController extends Controller
 {
@@ -17,8 +18,9 @@ class PuestoController extends Controller
         return $this->sendSuccess($puesto);
     }
 
-    public function getByitem_puesto($item_puesto) {
-        $puesto = Puesto::with(['persona_actual:id,nombre_completo,nombre_persona,primer_apellido_persona,segundo_apellido_persona,ci_persona,exp_persona,genero_persona'])->select(['denominacion_puesto', 'item_puesto', 'id','persona_actual_id'])->where('item_puesto', $item_puesto)->first();
-        return $this->sendSuccess($puesto);
+    public function getByItem($item_puesto) {
+        $puesto = Puesto::with(['persona_actual:id_persona,nombre_persona,primer_apellido_persona,segundo_apellido_persona'])->where('item_puesto', $item_puesto)->first();
+        Log::info($puesto);
+        return $this->sendObject($puesto);
     }
 }

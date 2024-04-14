@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\PuestoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ImportarExcelController;
 use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
+use App\Http\Middleware\ConvertResponseFieldsToCamelCase;
 
 Route::post('/planilla', [ImportarExcelController::class, 'importExcel']); 
 
@@ -25,3 +27,6 @@ Route::post('/personas',[PersonasController::class, 'crearPersona']);
 /* ------------------------------------------ Institucion ------------------------------------------ */
 // Route::post('/personas',[PersonasController::class, 'crearPersona']);
 // Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
+
+/* ------------------------------------------- Puesto ------------------------------------------- */
+Route::get('/puestos/{item}/by-item',[PuestoController::class,'getByItem']);

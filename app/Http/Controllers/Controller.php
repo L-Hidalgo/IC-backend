@@ -15,6 +15,14 @@ class Controller extends BaseController
         ], $http_code_response);
     }
 
+    public function sendObject($data,$message = 'Operacon realizada exitosamente', $http_code_response = 200) {
+      return response()->json([
+        'objeto'      => $data,
+        'message'   => $message,
+        'transsacton' => true,
+      ] ,$http_code_response);
+    }
+
     public function sendSuccess($data = [], $http_code_response = 200)
     {
         if(getType($data) == 'string'){
