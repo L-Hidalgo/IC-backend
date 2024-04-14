@@ -10,11 +10,10 @@ use App\Http\Middleware\ConvertResponseFieldsToCamelCase;
 Route::post('/planilla', [ImportarExcelController::class, 'importExcel']); 
 
 // Incorporaciones
-Route::put('/incorporacion',[IncorporacionesController::class, 'crearActualizarIncorporacion']);
+Route::group(['prefix' => 'incorporaciones'], function () {
+  Route::put('/',[IncorporacionesController::class, 'crearActualizarIncorporacion']);
+});
 
-/* ------------------------------------------ Personas ------------------------------------------ */
-Route::post('/personas',[PersonasController::class, 'crearPersona']);
-// Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
 
 /* ------------------------------------------ GradoAcademico ------------------------------------------ */
 // Route::post('/grado-academico',[GradoAcademicoController::class, 'crearPersona']);
@@ -31,5 +30,10 @@ Route::post('/personas',[PersonasController::class, 'crearPersona']);
 /* ------------------------------------------- Puesto ------------------------------------------- */
 Route::get('/puestos/{item}/by-item',[PuestoController::class,'getByItem']);
 
-/*------------------------------------------buscando a la <persona----------------------------></persona---------------------------->*/
-Route::get('/puestos/{ciPersona}/by-ci',[PersonasController::class,'getByCi']);
+/* ------------------------------------------ Personas ------------------------------------------ */
+Route::group(['prefix' => 'personas'], function () {
+  Route::put('/',[PersonasController::class, 'crearActualizarPersona']);
+  // Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
+  Route::get('/{idPersona}',[PersonasController::class,'getById']);
+  Route::get('/{ciPersona}/by-ci',[PersonasController::class,'getByCi']);
+});

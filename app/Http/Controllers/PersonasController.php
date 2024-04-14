@@ -8,22 +8,33 @@ use Illuminate\Http\Request;
 class PersonasController extends Controller
 {
 
-  public function crearPersona(Request $request)
+  public function crearActualizarPersona(Request $request)
   {
     $validatedData = $request->validate([
-      'ci_persona' => 'string',
-      'primer_apellido_persona' => 'string',
-      'segundo_apellido_persona' => 'string',
-      'nombre_persona' => 'string',
+      'idPersona' => 'nullable|integer',
+      'ciPersona' => 'string',
+      'expPersona' => 'nullable|string',
+      'nombrePersona' => 'string',
+      'primerApellidoPersona' => 'nullable|string',
+      'segundoApellidoPersona' => 'nullable|string',
+      'generoPersona' => 'nullable|string',
     ]);
     // dd($validatedData);
 
-    $persona = Persona::create([]);
+    if($validatedData['idPersona']) {
+      $persona = Persona::find($validatedData['idPersona']);
+    } else {
+      $persona = new Persona();
+    }
+
     // agregar campos para actualizacion
-    $persona->ci_persona = $validatedData['ci_persona'];
-    $persona->primer_apellido_persona = $validatedData['primer_apellido_persona'];
-    $persona->segundo_apellido_persona = $validatedData['segundo_apellido_persona'];
-    $persona->nombre_persona = $validatedData['nombre_persona'];
+    $persona->ci_persona = $validatedData['ciPersona'];
+    $persona->primer_apellido_persona = $validatedData['primerApellidoPersona'];
+    $persona->segundo_apellido_persona = $validatedData['segundoApellidoPersona'];
+    $persona->nombre_persona = $validatedData['nombrePersona'];
+    $persona->exp_persona = $validatedData['expPersona'];
+    $persona->genero_persona = $validatedData['generoPersona'];
+    
     // guardar
     $persona->save();
     return $this->sendSuccess($persona);
@@ -34,10 +45,19 @@ class PersonasController extends Controller
     $persona = Persona::where('ci_persona', $ci_persona)->first();
 
     if (!$persona) {
-      return response()->json(['message' => 'Persona no encontrada'], 404);
+      return $this->sendObject(null,'No se encontro la persona', 404);
     }
+    return $this->sendObject($persona);
+  }
 
-    return response()->json($persona, 200);
+  public function getById($id_persona)
+  {
+    $persona = Persona::find($id_persona);
+
+    if (!$persona) {
+      return $this->sendObject(null,'No se encontro la persona', 404);
+    }
+    return $this->sendObject($persona);
   }
 
 

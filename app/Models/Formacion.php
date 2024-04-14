@@ -19,6 +19,9 @@ class Formacion extends Model
         'area_formacion_id',
         'gestion_formacion',
         'estado_formacion',
+        'con_respaldo_formacion',
+        'fecha_inicio',
+        'fecha_fin',
     ];
 
     protected $casts = [

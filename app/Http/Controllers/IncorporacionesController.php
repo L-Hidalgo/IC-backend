@@ -22,19 +22,19 @@ class IncorporacionesController extends Controller
   public function crearActualizarIncorporacion(Request $request)
   {
     $validatedData = $request->validate([
-      'id_incorporacion' => 'integer',
-      'puesto_nuevo_id' => 'integer',
-      'persona_id' => 'integer',
+      'idIncorporacion' => 'nullable|integer',
+      'puestoNuevoId' => 'integer',
+      'personaId' => 'integer',
     ]);
     // dd($validatedData);
 
     if ($request->id_incorporacion)
-      $incorporacion = Incorporacion::find($validatedData['id_incorporacion']);
+      $incorporacion = Incorporacion::find($validatedData['idIncorporacion']);
     else
-      $incorporacion = Incorporacion::create([]);
+      $incorporacion = new Incorporacion();
     // agregar campos para actualizacion
-    $incorporacion->persona_id = $validatedData['persona_id'];
-    $incorporacion->puesto_nuevo_id = $validatedData['puesto_nuevo_id'];
+    $incorporacion->persona_id = $validatedData['personaId'];
+    $incorporacion->puesto_nuevo_id = $validatedData['puestoNuevoId'];
     // guardar
     $incorporacion->save();
     return $this->sendSuccess($incorporacion);

@@ -18,7 +18,8 @@ return new class extends Migration
              $table->integer('grado_academico_id')->nullable()->unsigned();
              $table->integer('area_formacion_id')->nullable()->unsigned();
              $table->date('gestion_formacion')->nullable();
-             $table->string('estado_formacion', 10)->nullable(); //si es irregular o carrera    
+             $table->string('estado_formacion', 10)->nullable(); //si es irregular o carrera
+             $table->integer('con_respaldo_formacion')->default(0);  
              $table->foreign('institucion_id')->references('id_institucion')->on('dde_instituciones');  
              $table->foreign('grado_academico_id')->references('id_grado_academico')->on('dde_grado_academicos');
              $table->foreign('area_formacion_id')->references('id_area_formacion')->on('dde_area_formaciones');
