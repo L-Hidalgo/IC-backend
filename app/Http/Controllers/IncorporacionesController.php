@@ -24,7 +24,7 @@ class IncorporacionesController extends Controller
     $validatedData = $request->validate([
       'idIncorporacion' => 'nullable|integer',
       'puestoNuevoId' => 'integer',
-      'personaId' => 'integer',
+      'personaId' => 'nullable|integer',
       'fchIncorporacion' => 'nullable|string',
       'hpIncorporacion' => 'nullable|string',
       'observacionIncorporacion' => 'nullable|string',      
@@ -43,14 +43,13 @@ class IncorporacionesController extends Controller
       'citeInformeIncorporacion' => 'nullable|string',
       'fchInformeIncorporacion' => 'nullable|string',
     ]);
-    // dd($validatedData);
 
-    if ($validatedData['idIncorporacion'])
+    if (isset($validatedData['idIncorporacion']))
       $incorporacion = Incorporacion::find($validatedData['idIncorporacion']);
     else
       $incorporacion = new Incorporacion();
     // agregar campos para actualizacion
-    if (isset($validatedData['puestoNuevoId'])) {
+    if (isset($validatedData['personaId'])) {
       $incorporacion->persona_id = $validatedData['personaId'];
     }
 

@@ -30,11 +30,19 @@ class FormacionController extends Controller
         }
     
         // agregar campos para actualizacion
+
         $formacion->persona_id = $validatedData['personaId'];
-        $formacion->institucion_id = $validatedData['institucionId'];
-        $formacion->grado_academico_id = $validatedData['gradoAcademicoId'];
-        $formacion->area_formacion_id = $validatedData['areaFormacionId'];
-        if(!empty($validatedData['gestionFormacion'])) {
+        
+        if (isset($validatedData['institucionId'])) {
+            $formacion->institucion_id = $validatedData['institucionId'];
+        }
+        if (isset($validatedData['gradoAcademicoId'])) {
+            $formacion->grado_academico_id = $validatedData['gradoAcademicoId'];
+        }
+        if (isset($validatedData['areaFormacionId'])) {
+            $formacion->area_formacion_id = $validatedData['areaFormacionId'];
+        }
+        if (isset($validatedData['gestionFormacion'])) {
             $year = intval($validatedData['gestionFormacion']);
             $date = \Carbon\Carbon::create($year, 1, 1, 0, 0, 0);
             $formacion->gestion_formacion = $date;
