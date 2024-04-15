@@ -119,7 +119,7 @@ class IncorporacionesController extends Controller
     // guardar
     $incorporacion->save();
 
-    return $this->sendSuccess($incorporacion);
+    return $this->sendObject($incorporacion);
   }
 
   public function listPaginateIncorporaciones(Request $request) {
