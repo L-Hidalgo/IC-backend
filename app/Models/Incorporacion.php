@@ -59,12 +59,12 @@ class Incorporacion extends Model
 
     public function puesto_nuevo()
     {
-        return $this->belongsTo(Puesto::class, 'puesto_nuevo_id', 'id');
+        return $this->belongsTo(Puesto::class, 'puesto_nuevo_id', 'id_puesto');
     }
 
     public function persona()
     {
-        return $this->belongsTo(Persona::class, 'persona_id', 'id');
+        return $this->belongsTo(Persona::class, 'persona_id', 'id_persona');
     }
 
 }

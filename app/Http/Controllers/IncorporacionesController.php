@@ -25,21 +25,120 @@ class IncorporacionesController extends Controller
       'idIncorporacion' => 'nullable|integer',
       'puestoNuevoId' => 'integer',
       'personaId' => 'integer',
+      'fchIncorporacion' => 'nullable|string',
+      'hpIncorporacion' => 'nullable|string',
+      'observacionIncorporacion' => 'nullable|string',      
+      // Experiencia de la incorporacion
+      'cumpleExpProfesionalIncorporacion' => 'nullable|integer',
+      'cumpleExpEspecificaIncorporacion' => 'nullable|integer',
+      'cumpleExpMandoIncorporacion' => 'nullable|integer',
+      'cumpleFormacionIncorporacion' => 'nullable|integer',
+      // Datos de cites y fechas
+      'citeNotaMinutaIncorporacion' => 'nullable|string',
+      'fchNotaMinutaIncorporacion' => 'nullable|string',
+      'citeMemorandumIncorporacion' => 'nullable|string',
+      'fchMemorandumIncorporacion' => 'nullable|string',
+      'citeRapIncorporacion' => 'nullable|string',
+      'fchRapIncorporacion' => 'nullable|string',
+      'citeInformeIncorporacion' => 'nullable|string',
+      'fchInformeIncorporacion' => 'nullable|string',
     ]);
     // dd($validatedData);
 
-    if ($request->id_incorporacion)
+    if ($validatedData['idIncorporacion'])
       $incorporacion = Incorporacion::find($validatedData['idIncorporacion']);
     else
       $incorporacion = new Incorporacion();
     // agregar campos para actualizacion
-    $incorporacion->persona_id = $validatedData['personaId'];
-    $incorporacion->puesto_nuevo_id = $validatedData['puestoNuevoId'];
+    if (isset($validatedData['puestoNuevoId'])) {
+      $incorporacion->persona_id = $validatedData['personaId'];
+    }
+
+    if(isset($validatedData['puestoNuevoId'])) {
+      $incorporacion->puesto_nuevo_id = $validatedData['puestoNuevoId'];
+    }
+    
+    if (isset($validatedData['fchIncorporacion'])) {
+      $incorporacion->fch_incorporacion = Carbon::parse($validatedData['fchIncorporacion'])->format('Y-m-d');
+    }
+    if (isset($validatedData['hpIncorporacion'])) {
+      $incorporacion->hp_incorporacion = $validatedData['hpIncorporacion'];
+    }
+
+    if(isset($validatedData['observacionIncorporacion'])) {
+      $incorporacion->observacion_incorporacion = $validatedData['observacionIncorporacion'];
+    }
+
+    /* ------------------------------- DATOS DE SI CUEMPLE LA PERSONA ------------------------------- */
+
+    if(isset($validatedData['cumpleExpProfesionalIncorporacion'])) {
+      $incorporacion->cumple_exp_profesional_incorporacion = $validatedData['cumpleExpProfesionalIncorporacion'];
+    }
+    if(isset($validatedData['cumpleExpEspecificaIncorporacion'])) {
+      $incorporacion->cumple_exp_especifica_incorporacion = $validatedData['cumpleExpEspecificaIncorporacion'];
+    }
+    if(isset($validatedData['cumpleExpMandoIncorporacion'])) {
+      $incorporacion->cumple_exp_mando_incorporacion = $validatedData['cumpleExpMandoIncorporacion'];
+    }
+    if(isset($validatedData['cumpleFormacionIncorporacion'])) {
+      $incorporacion->cumple_formacion_incorporacion = $validatedData['cumpleFormacionIncorporacion'];
+    }
+
+    /* ----------------------------------- DATOS DE CITES Y FECHAS ---------------------------------- */
+    if (isset($validatedData['citeNotaMinutaIncorporacion'])) {
+      $incorporacion->cite_nota_minuta_incorporacion = $validatedData['citeNotaMinutaIncorporacion'];
+    }
+
+    if (isset($validatedData['fchNotaMinutaIncorporacion'])) {
+      $incorporacion->fch_nota_minuta_incorporacion = Carbon::parse($validatedData['fchNotaMinutaIncorporacion'])->format('Y-m-d');
+    }
+
+    if (isset($validatedData['citeMemorandumIncorporacion'])) {
+      $incorporacion->cite_memorandum_incorporacion = $validatedData['citeMemorandumIncorporacion'];
+    }
+
+    if (isset($validatedData['fchMemorandumIncorporacion'])) {
+      $incorporacion->fch_memorandum_incorporacion = Carbon::parse($validatedData['fchMemorandumIncorporacion'])->format('Y-m-d');
+    }
+
+    if (isset($validatedData['citeRapIncorporacion'])) {
+      $incorporacion->cite_rap_incorporacion = $validatedData['citeRapIncorporacion'];
+    }
+
+    if (isset($validatedData['fchRapIncorporacion'])) {
+      $incorporacion->fch_rap_incorporacion = Carbon::parse($validatedData['fchRapIncorporacion'])->format('Y-m-d');
+    }
+
+    if (isset($validatedData['citeInformeIncorporacion'])) {
+      $incorporacion->cite_informe_incorporacion = $validatedData['citeInformeIncorporacion'];
+    }
+
+    if (isset($validatedData['fchInformeIncorporacion'])) {
+      $incorporacion->fch_informe_incorporacion = Carbon::parse($validatedData['fchInformeIncorporacion'])->format('Y-m-d');
+    }
+
     // guardar
     $incorporacion->save();
+
     return $this->sendSuccess($incorporacion);
   }
 
+  public function listPaginateIncorporaciones(Request $request) {
+    $limit = $request->input('limit', 10);
+    $page = $request->input('page', 0);
+    $query = Incorporacion::with([
+      'persona',
+      'puesto_nuevo:id_puesto,item_puesto',
+      // 'puesto_actual.departamento.Gerencia',
+      // 'puesto_nuevo.departamento.Gerencia',
+      // 'puesto_nuevo.persona_actual',
+      // 'puesto_nuevo.Funcionario.persona',
+      // 'puesto_nuevo.requisitos'
+    ]);
+    $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
+    // $incorporaciones->data;
+    return $this->sendPaginated($incorporaciones);
+  }
 
 
   /* ------------------------------------ SERVICIOS ANTERIORES ------------------------------------ */

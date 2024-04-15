@@ -3,27 +3,41 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AreaFormaci_personaon;
+use App\Models\AreaFormacion;
 use Illuminate\Http\Request;
 
-class AreaFormaci_personaonController extends Controller
+class AreaFormacionController extends Controller
 {
     public function listar()
     {
-        $areasFormaci_personaon = AreaFormaci_personaon::select(['id', 'nombre'])->get();
-        return $this->sendSuccess($areasFormaci_personaon);
+        $areasFormaci_personaon = AreaFormacion::select(['id_area_formacion', 'nombre_area_formacion'])->get();
+        return $this->sendList($areasFormaci_personaon);
     }
 
-    public function crearAreaFormaci_personaon(Request $request)
+    public function createAreaFormacion(Request $request)
     {
-        try {
-            $AreaFormaci_personaon = new AreaFormaci_personaon();
-            $AreaFormaci_personaon->nombre = $request->input('nombre');
-            $AreaFormaci_personaon->save();
-
-            return $this->sendSuccess($AreaFormaci_personaon);
-        } catch (\Exception $e) {
-            return $this->sendSuccess($e->getMessage());
-        }
+        $validatedData = $request->validate([
+            'nombreAreaFormacion' => 'required|string',
+        ]);
+        $areaFormacion = new AreaFormacion();
+        $areaFormacion->nombre_area_formacion = $validatedData['nombreAreaFormacion'];
+        $areaFormacion->save();
+        return $this->sendObject($areaFormacion);
     }
+
+
+    public function buscarOCrearAreaFormacion(Request $request)
+    {
+        $validatedData = $request->validate([
+            'nombreAreaFormacion' => 'required|string',
+        ]);
+        $areaFormacion = AreaFormacion::where('nombre_area_formacion', $validatedData['nombreAreaFormacion'])->first();
+        if(!isset($areaFormacion)) {
+          $areaFormacion = new AreaFormacion();
+          $areaFormacion->nombre_area_formacion = $validatedData['nombreAreaFormacion'];
+          $areaFormacion->save();
+        }
+        return $this->sendObject($areaFormacion);
+    }
+    
 }

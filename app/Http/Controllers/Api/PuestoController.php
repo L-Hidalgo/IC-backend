@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Puesto;
+use App\Models\Requisito;
 use Illuminate\Support\Facades\Log;
 
 class PuestoController extends Controller
@@ -22,5 +23,10 @@ class PuestoController extends Controller
         $puesto = Puesto::with(['persona_actual:id_persona,nombre_persona,primer_apellido_persona,segundo_apellido_persona'])->where('item_puesto', $item_puesto)->first();
         Log::info($puesto);
         return $this->sendObject($puesto);
+    }
+
+    public function getRequisitoPuesto($puestoId) {
+        $requisito = Requisito::where('puesto_id', $puestoId)->first();
+        return $this->sendObject($requisito);
     }
 }

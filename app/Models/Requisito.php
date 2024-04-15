@@ -16,7 +16,9 @@ class Requisito extends Model
         'exp_cargo_requisito',
         'exp_area_requisito',
         'exp_mando_requisito',
-        'puesto_id'
+        'puesto_id',
+        'fecha_inicio',
+        'fecha_fin',
     ];
 
     protected $casts = [

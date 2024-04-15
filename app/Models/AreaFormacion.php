@@ -14,10 +14,12 @@ class AreaFormacion extends Model
 
     protected $fillable = [
         'nombre_area_formacion',
+        'fecha_inicio',
+        'fecha_fin',
     ];
 
     protected $casts = [
-        'fecha_fin' => 'datetime',
+        'fecha_inicio' => 'datetime',
         'fecha_fin' => 'datetime',
     ];
     

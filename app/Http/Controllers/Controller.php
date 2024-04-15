@@ -23,6 +23,25 @@ class Controller extends BaseController
       ] ,$http_code_response);
     }
 
+    public function sendList($list,$message = 'Operacon realizada exitosamente', $http_code_response = 200) {
+      return response()->json([
+        'objetosList'   => $list,
+        'message'       => $message,
+        'transsacton'   => true,
+      ] ,$http_code_response);
+    }
+
+    public function sendPaginated($paginatedModel,$message = 'Operacon realizada exitosamente', $http_code_response = 200) {
+      return response()->json([
+        'objetosList'      => $paginatedModel->getCollection(),
+        'page' => $paginatedModel->currentPage(),
+        'total' => $paginatedModel->total(),
+        'limit' => $paginatedModel->perPage(),
+        'message'   => $message,
+        'transsacton' => true,
+      ] ,$http_code_response);
+    }
+
     public function sendSuccess($data = [], $http_code_response = 200)
     {
         if(getType($data) == 'string'){
