@@ -34,9 +34,9 @@ class Puesto extends Model
         return $this->hasMany(Funcionario::class, 'puesto_id', 'id_puesto');
     }
 
-    public function Estado()
+    public function estado()
     {
-        return $this->belongsTo(Estado::class);
+        return $this->belongsTo(Estado::class, 'estado_id', 'id_estado');
     }
 
     public function requisitos()

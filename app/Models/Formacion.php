@@ -41,7 +41,7 @@ class Formacion extends Model
 
     public function areaFormacion()
     {
-        return $this->belongsTo(AreaFormacion::class, 'area_formacion_id', 'id_area_formacion');
+        return $this->belongsTo(AreaFormacion::class);
     }
 
     public function institucion()

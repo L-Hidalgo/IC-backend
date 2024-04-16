@@ -28,4 +28,8 @@ class GradoAcademico extends Model
         return $this->hasMany(Formacion::class);
     }
 
+    public function personas()
+    {
+        return $this->belongsToMany(Persona::class, 'formacion', 'grado_academico_id', 'persona_id');
+    }
 }
