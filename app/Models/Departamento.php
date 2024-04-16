@@ -27,7 +27,7 @@ class Departamento extends Model
         return $this->hasMany(Puesto::class);
     }
 
-    public function Gerencia() {
+    public function gerencia() {
         return $this->belongsTo(Gerencia::class);
     }
 

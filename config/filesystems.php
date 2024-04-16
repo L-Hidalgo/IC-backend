@@ -56,6 +56,14 @@ return [
             'throw' => false,
         ],
 
+        'form_templates' => [
+            'driver' => 'local',
+            'root' => storage_path('app/form_templates'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
     ],
 
     /*

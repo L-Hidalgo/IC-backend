@@ -15,6 +15,10 @@ Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/',[IncorporacionesController::class, 'crearActualizarIncorporacion']);
   Route::post('/list',[IncorporacionesController::class, 'listPaginateIncorporaciones']);
+  Route::post('/{incorporacionId}/gen-form-evalR0078', [IncorporacionesController::class, 'generarFormularioEvalR0078']);
+  Route::post('/{incorporacionId}/gen-form-evalR1401', [IncorporacionesController::class, 'genFormEvalR1401']);
+
+
 });
 
 

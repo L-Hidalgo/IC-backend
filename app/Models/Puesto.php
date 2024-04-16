@@ -31,7 +31,7 @@ class Puesto extends Model
 
     public function funcionario()
     {
-        return $this->hasMany(Funcionario::class, 'puesto_id', 'id');
+        return $this->hasMany(Funcionario::class, 'puesto_id', 'id_puesto');
     }
 
     public function Estado()
@@ -49,13 +49,15 @@ class Puesto extends Model
         return $this->belongsTo(Departamento::class);
     }
 
+    public function persona_actual()
+    {
+        return $this->belongsTo(Persona::class, 'persona_actual_id', 'id_persona');
+    }
+    
     public function incorporacion()
     {
         return $this->hasMany(Incorporacion::class);
     }
 
-    public function persona_actual()
-    {
-        return $this->belongsTo(Persona::class, 'persona_actual_id', 'id_persona');
-    }
+    
 }

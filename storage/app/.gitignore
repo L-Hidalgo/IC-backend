@@ -1,3 +1,5 @@
 *
 !public/
 !.gitignore
+!form_templates
+!img_personas

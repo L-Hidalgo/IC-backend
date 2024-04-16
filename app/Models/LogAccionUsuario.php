@@ -34,9 +34,9 @@ class LogAccionUsuario extends Model
         return $this->hasOne(User::class, 'persona_id');
     }
 
-    public function incorporaci_personaonFormulario()
+    public function incorporacionFormulario()
     {
-        return $this->hasMany(Incorporaci_personaon::class);
+        return $this->hasMany(incorporacion::class);
     }
 
     public function puestos_actuales()

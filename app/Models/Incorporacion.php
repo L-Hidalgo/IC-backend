@@ -13,18 +13,11 @@ class Incorporacion extends Model
     protected $primaryKey = 'id_incorporacion';
 
     protected $fillable = [
-        // Section: Evaluaci_personaon
-        'paso_incorporacion',
+       
         'persona_id',
         'puesto_actual_id',
         'puesto_nevo_id',
-        'evaluacion_estado_incorporacion', // 1:inici_personao, 2: con_formulario, 3: cumple, 4: no_cumple, finalizado
-        // !Section
-        // Section: Incoporaci_personaon
         'estado_incorporacion',
-        'gerente_acta_posicion_incorporacion',
-        //'seguimiento_estado',
-        //'respaldo_formaci_personaon',
         'cumple_exp_profesional_incorporacion',
         'cumple_exp_especifica_incorporacion',
         'cumple_exp_mando_incorporacion',
@@ -54,7 +47,7 @@ class Incorporacion extends Model
     
     public function puesto_actual()
     {
-        return $this->belongsTo(Puesto::class, 'puesto_actual_id', 'id');
+        return $this->belongsTo(Puesto::class, 'puesto_actual_id', 'id_puesto');
     }
 
     public function puesto_nuevo()
