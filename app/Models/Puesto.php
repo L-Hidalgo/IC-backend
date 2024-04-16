@@ -41,9 +41,9 @@ class Puesto extends Model
 
     public function requisitos()
     {
-        return $this->hasMany(Requisito::class);
+        return $this->hasMany(Requisito::class, 'puesto_id', 'id_puesto');
     }
-
+ 
     public function departamento()
     {
         return $this->belongsTo(Departamento::class, 'departamento_id', 'id_departamento');
