@@ -216,7 +216,8 @@ class IncorporacionesController extends Controller
     $fileName = 'R-0078_' . $incorporacion->persona->nombre_persona;
     $savedPath = $disk->path('generados/') . $fileName . '.docx';
     $templateProcessor->saveAs($savedPath);
-    return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
+    // return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
+    return response()->download($savedPath)->deleteFileAfterSend(true);
   }
   
   public function genFormEvalR1401($incorporacionId)
@@ -291,7 +292,8 @@ class IncorporacionesController extends Controller
     $fileName = 'R-1401_' . $incorporacion->persona->nombre_persona;
     $savedPath = $disk->path('generados/') . $fileName . '.docx';
     $templateProcessor->saveAs($savedPath);
-    return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
+    // return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
+    return response()->download($savedPath)->deleteFileAfterSend(true);
   }
 
   public function downloadEvalForm($fileName)
