@@ -46,7 +46,7 @@ class Puesto extends Model
 
     public function departamento()
     {
-        return $this->belongsTo(Departamento::class);
+        return $this->belongsTo(Departamento::class, 'departamento_id', 'id_departamento');
     }
 
     public function persona_actual()

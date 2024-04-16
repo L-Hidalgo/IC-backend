@@ -28,7 +28,7 @@ class Departamento extends Model
     }
 
     public function gerencia() {
-        return $this->belongsTo(Gerencia::class);
+        return $this->belongsTo(Gerencia::class, 'gerencia_id', 'id_gerencia');
     }
 
 }

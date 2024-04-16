@@ -8,6 +8,8 @@ use App\Models\Incorporacion;
 use App\Models\Institucion;
 use App\Models\Persona;
 use App\Models\Puesto;
+use App\Models\Departamento;
+use App\Models\Gerencia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -155,12 +157,15 @@ class IncorporacionesController extends Controller
     $page = $request->input('page', 0);
     $query = Incorporacion::with([
       'persona',
-      'puesto_nuevo:id_puesto,item_puesto',
       // 'puesto_actual.departamento.Gerencia',
-      // 'puesto_nuevo.departamento.Gerencia',
+      //'puesto_nuevo.departamento.gerencia',
       // 'puesto_nuevo.persona_actual',
       // 'puesto_nuevo.Funcionario.persona',
       // 'puesto_nuevo.requisitos'
+
+        'puesto_nuevo:id_puesto,item_puesto,departamento_id', 
+        'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
+        'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
     ]);
     $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
     // $incorporaciones->data;
