@@ -37,7 +37,7 @@ class PersonasController extends Controller
     
     // guardar
     $persona->save();
-    return $this->sendSuccess($persona);
+    return $this->sendObject($persona);
   }
 
   public function getByCi($ci_persona)

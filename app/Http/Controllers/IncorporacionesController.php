@@ -241,6 +241,9 @@ class IncorporacionesController extends Controller
             'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
             'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
         ]);
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
         // $incorporaciones->data;
