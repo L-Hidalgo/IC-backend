@@ -33,11 +33,13 @@ return new class extends Migration
             $table->string('codigo_rap_incorporacion', 10)->nullable();
             $table->date('fch_rap_incorporacion')->nullable();
             $table->string('observacion_incorporacion', 10)->nullable();
+            //$table->unsignedBigInteger('responsable_id')->nullable();
           //  $table->integer('usuario_id_incorporaciones')->nullable();
             // !SECTION
             $table->foreign('persona_id')->references('id_persona')->on('dde_personas');
             $table->foreign('puesto_actual_id')->references('id_puesto')->on('dde_puestos');
             $table->foreign('puesto_nuevo_id')->references('id_puesto')->on('dde_puestos');
+            //$table->foreign('responsable_id')->references('id_persona')->on('dde_personas');
             //$table->foreignId('usuario_id')->nullable()->constrained('users');
             $table->timestamps();
             $table->timestamp('fecha_inicio')->nullable()->default(null);

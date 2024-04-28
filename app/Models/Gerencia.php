@@ -22,9 +22,8 @@ class Gerencia extends Model
         'fecha_fin' => 'datetime',
     ];
 
-    public function departamento()
+    public function departamentos()
     {
-        return $this->hasMany(Departamento::class);
+        return $this->hasMany(Departamento::class, 'gerencia_id', 'id_gerencia');
     }
-
 }

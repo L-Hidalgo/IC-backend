@@ -15,7 +15,7 @@ class Controller extends BaseController
         ], $http_code_response);
     }
 
-    public function sendObject($data,$message = 'Operacon realizada exitosamente', $http_code_response = 200) {
+    public function sendObject($data,$message = 'Operacion realizada exitosamente', $http_code_response = 200) {
       return response()->json([
         'objeto'      => $data,
         'message'   => $message,
@@ -23,7 +23,7 @@ class Controller extends BaseController
       ] ,$http_code_response);
     }
 
-    public function sendList($list,$message = 'Operacon realizada exitosamente', $http_code_response = 200) {
+    public function sendList($list,$message = 'Operacion realizada exitosamente', $http_code_response = 200) {
       return response()->json([
         'objetosList'   => $list,
         'message'       => $message,
@@ -31,7 +31,7 @@ class Controller extends BaseController
       ] ,$http_code_response);
     }
 
-    public function sendPaginated($paginatedModel,$message = 'Operacon realizada exitosamente', $http_code_response = 200) {
+    public function sendPaginated($paginatedModel,$message = 'Operacion realizada exitosamente', $http_code_response = 200) {
       return response()->json([
         'objetosList'      => $paginatedModel->getCollection(),
         'page' => $paginatedModel->currentPage(),

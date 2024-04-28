@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,7 +14,7 @@ class Incorporacion extends Model
     protected $primaryKey = 'id_incorporacion';
 
     protected $fillable = [
-       
+
         'persona_id',
         'puesto_actual_id',
         'puesto_nevo_id',
@@ -36,15 +37,15 @@ class Incorporacion extends Model
         'cite_rap_incorporacion',
         'codigo_rap_incorporacion',
         'fch_rap_incorporacion',
-        //'responsable',
-        'observacion_incorporacion'
+        'observacion_incorporacion',
+        //'responsable_id',
     ];
 
     protected $casts = [
         'fecha_inicio' => 'datetime',
         'fecha_fin' => 'datetime',
     ];
-    
+
     public function puesto_actual()
     {
         return $this->belongsTo(Puesto::class, 'puesto_actual_id', 'id_puesto');
@@ -60,4 +61,8 @@ class Incorporacion extends Model
         return $this->belongsTo(Persona::class, 'persona_id', 'id_persona');
     }
 
+    /*public function responsable()
+    {
+        return $this->belongsTo(Persona::class, 'responsable_id', 'id_persona');
+    }*/
 }

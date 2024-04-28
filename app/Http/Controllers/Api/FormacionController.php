@@ -8,31 +8,35 @@ use Illuminate\Http\Request;
 
 class FormacionController extends Controller
 {
-    public function getByPersonaId($personaId) {
-        $formaciones = Formacion::with(['institucion', 'gradoAcademico', 'areaFormacion:id_area_formacion,nombre_area_formacion'])->where('persona_id', $personaId)->first();
-        return $this->sendObject($formaciones);   
+    public function getByPersonaId($personaId)
+    {
+        $formacion = Formacion::with(['institucion:id_institucion,nombre_institucion', 'gradoAcademico:id_grado_academico,nombre_grado_academico', 'areaFormacion:id_area_formacion,nombre_area_formacion'])
+            ->where('persona_id', $personaId)
+            ->first();
+
+        return $this->sendObject($formacion);
     }
 
     public function crearActualizarFormacion(Request $request)
     {
         $validatedData = $request->validate([
-          'idFormacion' => 'nullable|integer',
-          'personaId' => 'integer',
-          'institucionId' => 'nullable|integer',
-          'gradoAcademicoId' => 'nullable|integer',
-          'areaFormacionId' => 'nullable|integer',
-          'gestionFormacion' => 'nullable|string',
+            'idFormacion' => 'nullable|integer',
+            'personaId' => 'integer',
+            'institucionId' => 'nullable|integer',
+            'gradoAcademicoId' => 'nullable|integer',
+            'areaFormacionId' => 'nullable|integer',
+            'gestionFormacion' => 'nullable|string',
         ]);
-        if($validatedData['idFormacion']) {
-          $formacion = Formacion::find($validatedData['idFormacion']);
+        if ($validatedData['idFormacion']) {
+            $formacion = Formacion::find($validatedData['idFormacion']);
         } else {
-          $formacion = new Formacion();
+            $formacion = new Formacion();
         }
-    
+
         // agregar campos para actualizacion
 
         $formacion->persona_id = $validatedData['personaId'];
-        
+
         if (isset($validatedData['institucionId'])) {
             $formacion->institucion_id = $validatedData['institucionId'];
         }
@@ -47,7 +51,7 @@ class FormacionController extends Controller
             $date = \Carbon\Carbon::create($year, 1, 1, 0, 0, 0);
             $formacion->gestion_formacion = $date;
         }
-        
+
         // guardar
         $formacion->save();
         return $this->sendSuccess($formacion);

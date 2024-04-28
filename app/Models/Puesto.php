@@ -59,5 +59,9 @@ class Puesto extends Model
         return $this->hasMany(Incorporacion::class);
     }
 
-    
+    public function setEstadoIdAttribute($value)
+    {
+        $this->attributes['estado_id'] = $this->persona_actual_id ? 2 : $value;
+    }
+
 }

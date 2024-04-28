@@ -43,19 +43,26 @@ class ExcelDataImport implements ToModel, WithStartRow
             );
 
             $puesto->persona_actual_id = $persona->id_persona;
+            
+            if ($puesto->persona_actual_id) {
+                $estado = Estado::where('nombre_estado', 'Ocupado')->first();
+            } else {
+                $estado = Estado::where('nombre_estado', 'Acefalo')->first();
+            }
+        
+            if (!$estado) {
+                if ($puesto->persona_actual_id) {
+                    $estado = new Estado(['nombre_estado' => 'Ocupado']);
+                } else {
+                    $estado = new Estado(['nombre_estado' => 'Acefalo']);
+                }
+                $estado->save();
+            }
+        
+            $puesto->estado()->associate($estado);
             $puesto->save();
 
-            $estadoOcupado = Estado::where('nombre_estado', 'Ocupado')->first();
-
-            if (!$estadoOcupado) {
-                $estadoOcupado = new Estado(['nombre_estado' => 'Ocupado']);
-                $estadoOcupado->save();
-            }
-
-            $puesto->estado()->associate($estadoOcupado);
-
             $funcionario = $this->migrarFuncionario(
-               // $row[0] . '-' . $row[7], // file
                 $row[20], // fecha inicio en el sin
                 $row[21], // fecha inicio en el cargo
                 $puesto->id_puesto,

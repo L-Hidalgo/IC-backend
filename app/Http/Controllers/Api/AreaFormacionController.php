@@ -19,6 +19,13 @@ class AreaFormacionController extends Controller
         $validatedData = $request->validate([
             'nombreAreaFormacion' => 'required|string',
         ]);
+
+        $existingAreaFormacion = AreaFormacion::where('nombre_area_formacion', $validatedData['nombreAreaFormacion'])->first();
+
+        if ($existingAreaFormacion) {
+            return response()->json(['error' => 'Ya existe un área de formación con este nombre.'], 422);
+        }
+
         $areaFormacion = new AreaFormacion();
         $areaFormacion->nombre_area_formacion = $validatedData['nombreAreaFormacion'];
         $areaFormacion->save();
@@ -32,12 +39,11 @@ class AreaFormacionController extends Controller
             'nombreAreaFormacion' => 'required|string',
         ]);
         $areaFormacion = AreaFormacion::where('nombre_area_formacion', $validatedData['nombreAreaFormacion'])->first();
-        if(!isset($areaFormacion)) {
-          $areaFormacion = new AreaFormacion();
-          $areaFormacion->nombre_area_formacion = $validatedData['nombreAreaFormacion'];
-          $areaFormacion->save();
+        if (!isset($areaFormacion)) {
+            $areaFormacion = new AreaFormacion();
+            $areaFormacion->nombre_area_formacion = $validatedData['nombreAreaFormacion'];
+            $areaFormacion->save();
         }
         return $this->sendObject($areaFormacion);
     }
-    
 }

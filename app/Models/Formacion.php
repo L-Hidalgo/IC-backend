@@ -31,21 +31,21 @@ class Formacion extends Model
 
     public function persona()
     {
-        return $this->belongsTo(Persona::class);
+        return $this->belongsTo(Persona::class, 'persona_id', 'id_persona');
     }
 
     public function gradoAcademico()
     {
-        return $this->belongsTo(GradoAcademico::class);
+        return $this->belongsTo(GradoAcademico::class, 'grado_academico_id', 'id_grado_academico');
     }
 
     public function areaFormacion()
     {
-        return $this->belongsTo(AreaFormacion::class);
+        return $this->belongsTo(AreaFormacion::class, 'area_formacion_id', 'id_area_formacion');
     }
 
     public function institucion()
     {
-        return $this->belongsTo(Institucion::class);
+        return $this->belongsTo(Institucion::class, 'institucion_id', 'id_institucion');
     }
 }

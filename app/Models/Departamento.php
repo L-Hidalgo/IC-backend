@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,10 +25,11 @@ class Departamento extends Model
 
     public function puesto()
     {
-        return $this->hasMany(Puesto::class);
+        return $this->hasMany(Puesto::class, 'departamento_id', 'id_departamento');
     }
 
-    public function gerencia() {
+    public function gerencia()
+    {
         return $this->belongsTo(Gerencia::class, 'gerencia_id', 'id_gerencia');
     }
 
