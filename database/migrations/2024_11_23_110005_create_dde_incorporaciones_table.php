@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('fch_incorporacion')->nullable();
             $table->string('hp_incorporacion', 10)->nullable();
             $table->string('cite_nota_minuta_incorporacion', 10)->nullable();
-            $table->string('codigo_nota_minuta_incorporacion', 10)->nullable();
+            $table->string('codigo_nota_minuta_incorporacion', 20)->nullable();
             $table->date('fch_nota_minuta_incorporacion')->nullable();
             $table->date('fch_recepcion_nota_incorporacion')->nullable();
             $table->string('cite_informe_incorporacion', 10)->nullable();

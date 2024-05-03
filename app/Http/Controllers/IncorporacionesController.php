@@ -64,7 +64,7 @@ class IncorporacionesController extends Controller
                 $incorporacion = Incorporacion::find($validatedData['idIncorporacion']);
             else
                 $incorporacion = new Incorporacion();*/
-            
+
             $puesto = Puesto::find($validatedData['puestoNuevoId']);
 
             if ($puesto) {
@@ -262,13 +262,13 @@ class IncorporacionesController extends Controller
         $pathTemplate = $disk->path('R-0078-01.docx'); // ruta de plantilla
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+        $templateProcessor->setValue('persona.nombreCompleto', strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona));
 
-        $templateProcessor->setValue('persona.profesion', $incorporacion->persona->profesion_persona);
+        $templateProcessor->setValue('persona.profesion', strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico) . ' ' . 'EN' . ' ' . strtoupper($incorporacion->persona->formacion[0]->areaFormacion->nombre_area_formacion));
 
         $fechaNacimiento = Carbon::parse($incorporacion->persona->fch_nacimiento_persona);
         $edad = $fechaNacimiento->age;
-        $templateProcessor->setValue('persona.edad', $edad);
+        $templateProcessor->setValue('persona.edad', $edad . ' ' . 'AÑOS');
 
         $templateProcessor->setValue('puesto_nuevo.item', $incorporacion->puesto_nuevo->item_puesto);
 
@@ -311,7 +311,7 @@ class IncorporacionesController extends Controller
         $pathTemplate = $disk->path('R-1401-01.docx');
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
         $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
         $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
 
@@ -376,6 +376,72 @@ class IncorporacionesController extends Controller
         return response()->download($savedPath)->deleteFileAfterSend(true);
     }
 
+    //0980
+    public function generarR0980($incorporacionId)
+    {
+        $incorporacion = Incorporacion::find($incorporacionId);
+
+        if (!isset($incorporacion)) {
+            return response('', 404);
+        }
+
+        $disk = Storage::disk('form_templates');
+        if (isset($incorporacion->puesto_actual)) {
+            $pathTemplate = $disk->path('R-0980-01.docx');
+        } else {
+            $pathTemplate = $disk->path('R-0980-01.docx');
+        }
+
+        $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $templateProcessor->setValue('puesto_nuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
+
+        $carbonFechaInfo = Carbon::parse($incorporacion->fch_informe_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaInfo->locale('es_UY');
+        $fechaInfoFormateada = $carbonFechaInfo->isoFormat('LL');
+        $templateProcessor->setValue('incorporacion.fechaInfo', $fechaInfoFormateada);
+
+        $templateProcessor->setValue('puesto_nuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
+
+        $gerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $gerenciasDepartamentos = array(
+            "Gerencia Distrital La Paz I" => "el Departamento Administrativo y Recursos Humanos",
+            "Gerencia Distrital La Paz II" => "la Administrativo y Recursos Humanos",
+            "Gerencia GRACO La Paz" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital El Alto" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Cochabamba" => "el Departamento Administrativo y Recursos Humanos",
+            "Gerencia GRACO Cochabamba" => "el Departamento Administrativo y Recursos Humanos",
+            "Gerencia Distrital Santa Cruz I" => "el Departamento Administrativo y Recursos Humanos",
+            "Gerencia Distrital Santa Cruz II" => "la Administrativo y Recursos Humanos",
+            "Gerencia GRACO Santa Cruz" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Montero" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Chuquisaca" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Tarija" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Yacuiba" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Oruro" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Potosí" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Beni" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Pando" => "la Administrativo y Recursos Humanos",
+        );
+
+        if (isset($gerenciasDepartamentos[$gerencia])) {
+            $departamento = $gerenciasDepartamentos[$gerencia];
+        } else {
+            $departamento = "el Departamento de Dotación y Evaluación";
+        }
+        $templateProcessor->setValue('puesto_nuevo.departamento', $departamento);
+
+        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
+        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
+
+        $fileName = 'R-0980-01_' . $incorporacion->persona->nombre_persona;
+        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        $templateProcessor->saveAs($savedPath);
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
     //para informe con nota
     public function genFormInformeNota($incorporacionId)
     {
@@ -393,18 +459,20 @@ class IncorporacionesController extends Controller
         }
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
-        $templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
+        $templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_nota_minuta_incorporacion);
 
-        $nombreCompleto = $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+        $nombreCompleto = $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
 
         $sexo = $incorporacion->persona->genero_persona;
         if ($sexo === 'F') {
             $templateProcessor->setValue('persona.referenciaMayuscula', 'DE LA SERVIDORA PÚBLICA INTERINA ' . mb_strtoupper($nombreCompleto, 'UTF-8'));
             $templateProcessor->setValue('persona.referenciaMayuscula1', 'SERVIDORA PÚBLICA INTERINA DE LA SEÑORA ' . mb_strtoupper($nombreCompleto, 'UTF-8'));
-            $templateProcessor->setValue('persona.referencia', 'de la servidora publica interina ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.referencia1', ' servidora publica interina de la señora ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.referenciaAlPrincipio', 'La servidora publica interina ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia', 'de la servidora  pública interina ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia1', ' servidora pública interina de la señora ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referenciaAlPrincipio', 'La servidora pública interina ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaAlPrincipio1', 'La señora ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia2', 'de la señora ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia3', 'de la señora ' . $nombreCompleto . 'como servidora pública interina');
         } else {
             $templateProcessor->setValue('persona.referenciaMayuscula', 'DEL SERVIDOR PÚBLICO INTERINO ' . mb_strtoupper($nombreCompleto, 'UTF-8'));
             $templateProcessor->setValue('persona.referenciaMayuscula1', 'SERVIDOR PÚBLICO INTERINO DEL SEÑOR ' . mb_strtoupper($nombreCompleto, 'UTF-8'));
@@ -412,6 +480,8 @@ class IncorporacionesController extends Controller
             $templateProcessor->setValue('persona.referencia1', 'servidor publico interino del señor ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaAlPrincipio', 'El servidor publico interino ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaAlPrincipio1', 'El señor ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia2', 'del señor ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia3', 'del señor ' . $nombreCompleto . 'como servidor público interino');
         }
 
         if ($incorporacion->puesto_actual) {
@@ -426,7 +496,9 @@ class IncorporacionesController extends Controller
 
             if (in_array($inicialDepartamento, ['D'])) {
                 $valorDepartamento = 'DEL ' . $nombreDepartamento;
-            } elseif (in_array($inicialDepartamento, ['G', 'A', 'U', 'P'])) {
+            } elseif (in_array($inicialDepartamento, [
+                'G', 'U'
+            ])) {
                 $valorDepartamento = 'DE LA ' . $nombreDepartamento;
             } else {
                 $valorDepartamento = 'DE ' . $nombreDepartamento;
@@ -434,7 +506,16 @@ class IncorporacionesController extends Controller
 
             $templateProcessor->setValue('puesto_actual.departamentoMayuscula', $valorDepartamento);
 
-            $templateProcessor->setValue('puesto_actual.gerenciaMayuscula', mb_strtoupper($incorporacion->puesto_actual->departamento->gerencia->nombre_gerencia, 'UTF-8'));
+            $nombreGerencia = mb_strtoupper($incorporacion->puesto_actual->departamento->gerencia->nombre_gerencia, 'UTF-8');
+            $inicialGerencia = mb_strtoupper(substr($nombreGerencia, 0, 1), 'UTF-8');
+
+            if (in_array($inicialGerencia, ['P'])) {
+                $valorGerencia = 'DE' . $nombreGerencia;
+            } else {
+                $valorGerencia = 'DE LA' . $nombreGerencia;
+            }
+
+            $templateProcessor->setValue('puesto_actual.gerenciaMayuscula', $valorGerencia);
         } else {
             $templateProcessor->setValue('puesto_actual.item_puesto', 'Valor predeterminado o mensaje de error');
             $templateProcessor->setValue('puesto_actual.denominacion_puestoMayuscula', 'Valor predeterminado o mensaje de error');
@@ -449,20 +530,28 @@ class IncorporacionesController extends Controller
         $inicialDepartamento = mb_strtoupper(substr($nombreDepartamento, 0, 1), 'UTF-8');
         if (in_array($inicialDepartamento, ['D'])) {
             $valorDepartamento = 'DEL ' . $nombreDepartamento;
-        } elseif (in_array($inicialDepartamento, ['G', 'A', 'U', 'P'])) {
+        } elseif (in_array($inicialDepartamento, ['G', 'U'])) {
             $valorDepartamento = 'DE LA ' . $nombreDepartamento;
         } else {
             $valorDepartamento = 'DE ' . $nombreDepartamento;
         }
         $templateProcessor->setValue('puesto_nuevo.departamentoMayuscula', $valorDepartamento);
 
-        $templateProcessor->setValue('puesto_nuevo.gerenciaMayuscula', mb_strtoupper($incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia, 'UTF-8'));
+        $nombreGerencia = mb_strtoupper($incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia, 'UTF-8');
+        $inicialGerencia = mb_strtoupper(substr($nombreGerencia, 0, 1), 'UTF-8');
+        if (in_array($inicialGerencia, ['P'])) {
+            $valorDepartamento = 'DE ' . $nombreGerencia;
+        } else {
+            $valorDepartamento = 'DE LA ' . $nombreGerencia;
+        }
+        $templateProcessor->setValue('puesto_nuevo.gerenciaMayuscula', $valorDepartamento);
+
 
         $carbonFechaInfo = Carbon::parse($incorporacion->fch_informe_incorporacion);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaInfo->locale('es_UY');
         $fechaInfoFormateada = $carbonFechaInfo->isoFormat('LL');
-        $templateProcessor->setValue('incorporacion.fechaInfo', $fechaInfoFormateada);
+        $templateProcessor->setValue('incorporacion.fechaInforme', $fechaInfoFormateada);
 
         $templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);
         $templateProcessor->setValue('incorporacion.citeInfNotaMinuta', $incorporacion->cite_nota_minuta_incorporacion);
@@ -479,7 +568,7 @@ class IncorporacionesController extends Controller
         $fechaRecepcionFormateada = $carbonFechaRecepcion->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaRecepcion', $fechaRecepcionFormateada);
 
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
 
         if ($incorporacion->puesto_actual) {
             $denominacion_puesto = isset($incorporacion->puesto_actual->denominacion_puesto) ? $incorporacion->puesto_actual->denominacion_puesto : 'Valor predeterminado o mensaje de error';
@@ -509,17 +598,22 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('puesto_nuevo.salario', $incorporacion->puesto_nuevo->salario_puesto);
         $templateProcessor->setValue('puesto_nuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
         $templateProcessor->setValue('puesto_nuevo.estado', $incorporacion->puesto_nuevo->estado->nombre_estado);
-        $templateProcessor->setValue('persona.formacion', $incorporacion->persona->profesion_persona);
+        $templateProcessor->setValue('persona.profesion', $incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico . ' ' . 'en' . ' ' . $incorporacion->persona->formacion[0]->areaFormacion->nombre_area_formacion);
 
-        $templateProcessor->setValue('persona.grado', $incorporacion->persona->gradoAcademico->nombre_grado_academico ?? 'Valor predeterminado');
-        $templateProcessor->setValue('persona.areaformacion', $incorporacion->persona->areaFormacion->nombre_area_formacion ?? 'Valor predeterminado');
-        $templateProcessor->setValue('persona.institucion', $incorporacion->persona->institucion->nombre_institucion ?? 'Valor predeterminado');
 
-        $carbonFechaConclusion = Carbon::parse($incorporacion->persona->gestion_formacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaConclusion->locale('es_UY');
-        $fechaConclusionFormateada = $carbonFechaConclusion->isoFormat('LL');
-        $templateProcessor->setValue('persona.conclusion', $fechaConclusionFormateada);
+        $templateProcessor->setValue('persona.grado', $incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico ?? 'Valor predeterminado');
+        $templateProcessor->setValue('persona.areaformacion', $incorporacion->persona->formacion[0]->areaFormacion->nombre_area_formacion ?? 'Valor predeterminado');
+        $templateProcessor->setValue('persona.institucion', $incorporacion->persona->formacion[0]->institucion->nombre_institucion ?? 'Valor predeterminado');
+
+        $respaldo = $incorporacion->observacion_incorporacion;
+        $valorRespaldo = ($respaldo == 'Cumple') ? 'Si' : 'No';
+        $templateProcessor->setValue('persona.respaldo', $valorRespaldo);
+
+
+        $formaciones = $incorporacion->persona->formacion->first(); // Obtener la primera formación asociada
+        $carbonFechaConclusion = Carbon::parse($formaciones->gestion_formacion);
+        $year = $carbonFechaConclusion->year;
+        $templateProcessor->setValue('persona.conclusion', $year);
 
         $formacion = $incorporacion->persona->formacion->first();
         if ($formacion) {
@@ -560,14 +654,24 @@ class IncorporacionesController extends Controller
         $inicialDepartamento = substr($nombreDepartamento, 0, 1);
         if (in_array($inicialDepartamento, ['D'])) {
             $valorDepartamento = 'del ' . $nombreDepartamento;
-        } elseif (in_array($inicialDepartamento, ['G', 'A', 'U', 'P'])) {
+        } elseif (in_array($inicialDepartamento, ['G', 'U'])) {
             $valorDepartamento = 'de la ' . $nombreDepartamento;
         } else {
             $valorDepartamento = 'de ' . $nombreDepartamento;
         }
         $templateProcessor->setValue('puesto_nuevo.departamentoRef', $valorDepartamento);
 
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $inicialGerencia = substr($nombreGerencia, 0, 1);
+        if (in_array($inicialGerencia, ['P'])) {
+            $valorDepartamento = 'de ' . $nombreGerencia;
+        } else {
+            $valorDepartamento = 'de la ' . $nombreGerencia;
+        }
+        $templateProcessor->setValue('puesto_nuevo.gerenciaRef', $valorDepartamento);
 
+        $templateProcessor->setValue('incorporacion.citeMemo', $incorporacion->cite_memorandum_incorporacion);
+        $templateProcessor->setValue('incorporacion.citeRap', $incorporacion->cite_rap_incorporacion);
         if (isset($incorporacion->puesto_actual)) {
             $fileName = 'InfNotaCambioitem_' . $incorporacion->persona->nombre_persona;
         } else {
@@ -577,7 +681,6 @@ class IncorporacionesController extends Controller
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
-        //return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
     }
 
     //para informe con minuta
@@ -606,10 +709,12 @@ class IncorporacionesController extends Controller
         if ($sexo === 'F') {
             $templateProcessor->setValue('persona.referenciaMayuscula', 'DE LA SERVIDORA PÚBLICA INTERINA ' . mb_strtoupper($nombreCompleto, 'UTF-8'));
             $templateProcessor->setValue('persona.referenciaMayuscula1', 'SERVIDORA PÚBLICA INTERINA DE LA SEÑORA ' . mb_strtoupper($nombreCompleto, 'UTF-8'));
-            $templateProcessor->setValue('persona.referencia', 'de la servidora publica interina ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.referencia1', ' servidora publica interina de la señora ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.referenciaAlPrincipio', 'La servidora publica interina ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia', 'de la servidora pública interina ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia1', ' servidora pública interina de la señora ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referenciaAlPrincipio', 'La servidora pública interina ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaAlPrincipio1', 'La señora ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia2', 'de la señora ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia3', 'de la señora ' . $nombreCompleto . 'como servidora pública interina');
         } else {
             $templateProcessor->setValue('persona.referenciaMayuscula', 'DEL SERVIDOR PÚBLICO INTERINO ' . mb_strtoupper($nombreCompleto, 'UTF-8'));
             $templateProcessor->setValue('persona.referenciaMayuscula1', 'SERVIDOR PÚBLICO INTERINO DEL SEÑOR ' . mb_strtoupper($nombreCompleto, 'UTF-8'));
@@ -617,6 +722,8 @@ class IncorporacionesController extends Controller
             $templateProcessor->setValue('persona.referencia1', 'servidor publico interino del señor ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaAlPrincipio', 'El servidor publico interino ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaAlPrincipio1', 'El señor ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia2', 'del señor ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia3', 'del señor ' . $nombreCompleto . 'como servidor público interino');
         }
 
         if ($incorporacion && $incorporacion->puesto_actual) {
@@ -824,8 +931,8 @@ class IncorporacionesController extends Controller
         $sexo = $incorporacion->persona->genero_persona;
 
         if ($sexo === 'F') {
-            $templateProcessor->setValue('persona.deLa', 'de la servidora publica ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.reasignada', 'a la servidora publica interina ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.deLa', 'de la servidora pública ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.reasignada', 'a la servidora pública interina ' . $nombreCompleto);
         } else {
             $templateProcessor->setValue('persona.deLa', 'del servidor publico ' . $nombreCompleto);
             $templateProcessor->setValue('persona.reasignada', 'al servidor publico interino ' . $nombreCompleto);
@@ -1451,8 +1558,7 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaDeIncorporacion', $incorporacion->fch_incorporacion);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'R-1469-01-Cambioitem_puesto_' . $incorporacion->persona->nombre_persona;
-            ;
+            $fileName = 'R-1469-01-Cambioitem_puesto_' . $incorporacion->persona->nombre_persona;;
         } else {
             $fileName = 'R-1469-01_' . $incorporacion->persona->nombre_persona;
         }
@@ -1553,67 +1659,6 @@ class IncorporacionesController extends Controller
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
         //return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
-    }
-
-    //form de cambio de item
-    public function generarR0980($incorporacionId)
-    {
-        $incorporacion = Incorporacion::find($incorporacionId);
-
-        if (!isset($incorporacion)) {
-            return response('', 404);
-        }
-
-        $disk = Storage::disk('form_templates');
-        $pathTemplate = $disk->path('R-0980-01.docx');
-        $templateProcessor = new TemplateProcessor($pathTemplate);
-
-        $templateProcessor->setValue('puesto_nuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
-
-        $carbonFechaInfo = Carbon::parse($incorporacion->fch_informe_incorporacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaInfo->locale('es_UY');
-        $fechaInfoFormateada = $carbonFechaInfo->isoFormat('LL');
-        $templateProcessor->setValue('incorporacion.fechaInfo', $fechaInfoFormateada);
-
-        $templateProcessor->setValue('puesto_nuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
-
-        $gerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
-        $gerenciasDepartamentos = array(
-            "Gerencia Distrital La Paz I" => "el Departamento Administrativo y Recursos Humanos",
-            "Gerencia Distrital La Paz II" => "la Administrativo y Recursos Humanos",
-            "Gerencia GRACO La Paz" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital El Alto" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Cochabamba" => "el Departamento Administrativo y Recursos Humanos",
-            "Gerencia GRACO Cochabamba" => "el Departamento Administrativo y Recursos Humanos",
-            "Gerencia Distrital Santa Cruz I" => "el Departamento Administrativo y Recursos Humanos",
-            "Gerencia Distrital Santa Cruz II" => "la Administrativo y Recursos Humanos",
-            "Gerencia GRACO Santa Cruz" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Montero" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Chuquisaca" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Tarija" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Yacuiba" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Oruro" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Potosí" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Beni" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Pando" => "la Administrativo y Recursos Humanos",
-        );
-
-        if (isset($gerenciasDepartamentos[$gerencia])) {
-            $departamento = $gerenciasDepartamentos[$gerencia];
-        } else {
-            $departamento = "el Departamento de Dotación y Evaluación";
-        }
-        $templateProcessor->setValue('puesto_nuevo.departamento', $departamento);
-
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
-        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
-        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
-
-        $fileName = 'R-0980-01_' . $incorporacion->persona->nombre_persona;
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        $templateProcessor->saveAs($savedPath);
-        return response()->download($savedPath)->deleteFileAfterSend(true);
     }
 
     public function generarR1023($incorporacionId)
@@ -1778,24 +1823,24 @@ class IncorporacionesController extends Controller
     public function obtenerTextoSegunValor($valor)
     {
         switch ($valor) {
-            case 0:
-                return 'No';
             case 1:
                 return 'Si';
             case 2:
+                return 'No';
+            case 3:
                 return 'No corresponde';
             default:
-                return 'Valor no reconoci_personado';
+                return 'Valor no reconocido';
         }
     }
 
     public function obtenerTextoSegunValorDeFormacion($valor)
     {
         switch ($valor) {
-            case 0:
-                return 'No Cumple';
             case 1:
                 return 'Cumple';
+            case 2:
+                return 'No Cumple';
             default:
                 return 'Valor no reconocido';
         }

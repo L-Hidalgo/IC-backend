@@ -18,6 +18,7 @@ class PersonasController extends Controller
       'primerApellidoPersona' => 'nullable|string',
       'segundoApellidoPersona' => 'nullable|string',
       'generoPersona' => 'nullable|string',
+      'fchNacimientoPersona' => 'nullable|string',
     ]);
     // dd($validatedData);
 
@@ -34,6 +35,7 @@ class PersonasController extends Controller
     $persona->nombre_persona = $validatedData['nombrePersona'];
     $persona->exp_persona = $validatedData['expPersona'];
     $persona->genero_persona = $validatedData['generoPersona'];
+    $persona->fch_nacimiento_persona = $validatedData['fchNacimientoPersona'];
     
     // guardar
     $persona->save();

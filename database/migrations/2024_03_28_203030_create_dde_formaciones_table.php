@@ -19,7 +19,6 @@ return new class extends Migration
             $table->integer('area_formacion_id')->nullable()->unsigned();
             $table->date('gestion_formacion')->nullable();
             $table->string('estado_formacion', 10)->nullable(); //si es irregular o carrera
-            $table->integer('con_respaldo_formacion')->default(0);
             $table->timestamps();
             $table->timestamp('fecha_inicio')->nullable()->default(null);
             $table->timestamp('fecha_fin')->nullable()->default(null);

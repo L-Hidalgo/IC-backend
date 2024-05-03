@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('dde_personas', function (Blueprint $table) {
             $table->integer('id_persona')->unsigned()->autoIncrement();
             $table->string('ci_persona', 15)->unique();
-            $table->string('exp_persona', 3);
+            $table->string('exp_persona', 10);
             $table->string('primer_apellido_persona', 60)->nullable();
             $table->string('segundo_apellido_persona', 60)->nullable();
             $table->string('nombre_persona', 60)->nullable();
