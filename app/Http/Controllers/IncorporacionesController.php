@@ -28,6 +28,7 @@ class IncorporacionesController extends Controller
             'puestoActualId' => 'nullable|integer',
             'personaId' => 'nullable|integer',
             'observacionIncorporacion' => 'nullable|string',
+            'experienciaIncorporacion' => 'nullable|string',
             'fchIncorporacion' => 'nullable|string',
             'hpIncorporacion' => 'nullable|string',
 
@@ -118,6 +119,10 @@ class IncorporacionesController extends Controller
 
                 if (isset($validatedData['observacionIncorporacion'])) {
                     $incorporacion->observacion_incorporacion = $validatedData['observacionIncorporacion'];
+                }
+
+                if (isset($validatedData['experienciaIncorporacion'])) {
+                    $incorporacion->experiencia_incorporacion = $validatedData['experienciaIncorporacion'];
                 }
 
                 if (isset($validatedData['fchIncorporacion'])) {

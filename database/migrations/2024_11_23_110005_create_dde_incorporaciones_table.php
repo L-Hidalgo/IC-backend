@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('cumple_exp_mando_incorporacion')->default(2);
             $table->integer('cumple_formacion_incorporacion')->default(0);
             $table->date('fch_incorporacion')->nullable();
-            $table->string('hp_incorporacion', 10)->nullable();
+            $table->string('hp_incorporacion', 20)->nullable();
             $table->string('cite_nota_minuta_incorporacion', 10)->nullable();
             $table->string('codigo_nota_minuta_incorporacion', 12)->nullable();
             $table->date('fch_nota_minuta_incorporacion')->nullable();
@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('codigo_rap_incorporacion', 12)->nullable();
             $table->date('fch_rap_incorporacion')->nullable();
             $table->string('observacion_incorporacion', 10)->nullable();
+            $table->string('experiencia_incorporacion', 25)->nullable();
             //$table->unsignedBigInteger('responsable_id')->nullable();
           //  $table->integer('usuario_id_incorporaciones')->nullable();
             // !SECTION

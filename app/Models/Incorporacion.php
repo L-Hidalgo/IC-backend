@@ -38,6 +38,7 @@ class Incorporacion extends Model
         'codigo_rap_incorporacion',
         'fch_rap_incorporacion',
         'observacion_incorporacion',
+        'experiencia_incorporacion',
         //'responsable_id',
     ];
 
