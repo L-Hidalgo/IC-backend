@@ -60,15 +60,23 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+      'users' => [
+        'driver' => 'ldap',
+        'model' => LdapRecord\Models\FreeIPA\User::class,
+        'rules' => [],
+        'database' => [
+          'model' => App\Models\User::class,
+          'sync_passwords' => false,
+          'sync_attributes' => [
+            'name' => 'cn',
+            'email' => 'mail',
+            'username' => 'uid',
+            'cargo'=> 'title',
+            'departamento'=> 'ou',
+            'gerencia' => 'l',
+          ],
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+      ],
     ],
 
     /*
