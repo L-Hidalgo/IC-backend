@@ -28,16 +28,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request)
     {
-        // Intentar autenticar al usuario
         try {
             $request->authenticate();
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Credenciales incorrectas'], 401);
         }
 
+        $request->session()->regenerate();
+        
         $user = Auth::user();
 
-        // Retornar los datos del usuario en la respuesta
         return response()->json([
             'message' => 'Autenticación exitosa',
 

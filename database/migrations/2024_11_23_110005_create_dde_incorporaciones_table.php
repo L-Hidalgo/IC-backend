@@ -29,8 +29,8 @@ return new class extends Migration
             $table->string('cite_memorandum_incorporacion', 10)->nullable();
             $table->string('codigo_memorandum_incorporacion', 12)->nullable();
             $table->date('fch_memorandum_incorporacion')->nullable();
-            $table->string('cite_rap_incorporacion', 10)->nullable();
-            $table->string('codigo_rap_incorporacion', 12)->nullable();
+            $table->string('cite_rap_incorporacion', 10)->nullable()->unique();
+            $table->string('codigo_rap_incorporacion', 12)->nullable()->unique();
             $table->date('fch_rap_incorporacion')->nullable();
             $table->string('observacion_incorporacion', 10)->nullable();
             $table->string('experiencia_incorporacion', 25)->nullable();

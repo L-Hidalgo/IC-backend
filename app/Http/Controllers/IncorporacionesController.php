@@ -190,6 +190,8 @@ class IncorporacionesController extends Controller
 
                 if (isset($validatedData['codigoRapIncorporacion'])) {
                     $incorporacion->codigo_rap_incorporacion = $validatedData['codigoRapIncorporacion'];
+                } else {
+                    $incorporacion->codigo_rap_incorporacion = '032400000';
                 }
 
                 if (isset($validatedData['fchRapIncorporacion'])) {
@@ -499,9 +501,12 @@ class IncorporacionesController extends Controller
 
             if (in_array($inicialDepartamento, ['D'])) {
                 $valorDepartamento = 'DEL ' . $nombreDepartamento;
-            } elseif (in_array($inicialDepartamento, [
-                'G', 'U'
-            ])) {
+            } elseif (
+                in_array($inicialDepartamento, [
+                    'G',
+                    'U'
+                ])
+            ) {
                 $valorDepartamento = 'DE LA ' . $nombreDepartamento;
             } else {
                 $valorDepartamento = 'DE ' . $nombreDepartamento;
@@ -742,9 +747,12 @@ class IncorporacionesController extends Controller
 
             if (in_array($inicialDepartamento, ['D'])) {
                 $valorDepartamento = 'DEL ' . $nombreDepartamento;
-            } elseif (in_array($inicialDepartamento, [
-                'G', 'U'
-            ])) {
+            } elseif (
+                in_array($inicialDepartamento, [
+                    'G',
+                    'U'
+                ])
+            ) {
                 $valorDepartamento = 'DE LA ' . $nombreDepartamento;
             } else {
                 $valorDepartamento = 'DE ' . $nombreDepartamento;
@@ -1657,7 +1665,8 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaDeIncorporacion', $incorporacion->fch_incorporacion);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'R-1469-01-Cambioitem_puesto_' . $incorporacion->persona->nombre_persona;;
+            $fileName = 'R-1469-01-Cambioitem_puesto_' . $incorporacion->persona->nombre_persona;
+            ;
         } else {
             $fileName = 'R-1469-01_' . $incorporacion->persona->nombre_persona;
         }
