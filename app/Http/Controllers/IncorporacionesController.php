@@ -178,6 +178,8 @@ class IncorporacionesController extends Controller
 
                 if (isset($validatedData['codigoMemorandumIncorporacion'])) {
                     $incorporacion->codigo_memorandum_incorporacion = $validatedData['codigoMemorandumIncorporacion'];
+                } else {
+                    $incorporacion->codigo_memorandum_incorporacion = '08240000';
                 }
 
                 if (isset($validatedData['fchMemorandumIncorporacion'])) {
@@ -951,24 +953,132 @@ class IncorporacionesController extends Controller
 
         $disk = Storage::disk('form_templates');
         if (isset($incorporacion->puesto_actual)) {
-            $pathTemplate = $disk->path('RAPCambioItem.docx');
+            $pathTemplate = $disk->path('RapCambioItem.docx');
         } else {
             $pathTemplate = $disk->path('RAP.docm');
         }
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
-        $templateProcessor->setValue('incorporacion.citeRAP', $incorporacion->cite_rap_incorporacion);
-        $templateProcessor->setValue('incorporacion.codigoRAP', $incorporacion->codigo_rap_incorporacion);
-        $templateProcessor->setValue('codigo', $incorporacion->codigo_rap_incorporacion);
+        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaIncorporacion->locale('es_UY');
+        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
+        $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
+
+        $templateProcessor->setValue('incorporacion.citeRap', $incorporacion->cite_rap_incorporacion);
+
+        $templateProcessor->setValue('incorporacion.codigoRap', $incorporacion->codigo_rap_incorporacion);
 
         $carbonFechaRap = Carbon::parse($incorporacion->fch_rap_incorporacion);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaRap->locale('es_UY');
         $fechaRapFormateada = $carbonFechaRap->isoFormat('LL');
-        $templateProcessor->setValue('incorporacion.fechaRAP', $fechaRapFormateada);
+        $templateProcessor->setValue('incorporacion.fechaRap', $fechaRapFormateada);
 
-        $templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
+        $templateProcessor->setValue('codigoRap', $incorporacion->codigo_rap_incorporacion);
+
+        $nombreCompleto = $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+        $sexo = $incorporacion->persona->genero_persona;
+
+        if ($sexo === 'F') {
+            //$templateProcessor->setValue('persona.deLa', 'de la servidora pública ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.reasignada', 'a la servidora pública interina ' . $nombreCompleto);
+            //$templateProcessor->setValue('persona.referencia', 'de la señora ' . $nombreCompleto);
+            //$templateProcessor->setValue('persona.referenciaInc', 'a la señora ' . $nombreCompleto);
+        } else {
+            //$templateProcessor->setValue('persona.deLa', 'del servidor publico ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.reasignada', 'al servidor publico interino ' . $nombreCompleto);
+            //$templateProcessor->setValue('persona.referencia', 'del señor ' . $nombreCompleto);
+            //$templateProcessor->setValue('persona.referenciaInc', 'al señor ' . $nombreCompleto);
+        }
+
+        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
+
+        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
+
+        $templateProcessor->setValue('puestoNuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
+
+        $nombreDepartamento = $incorporacion->puesto_nuevo->departamento->nombre_departamento;
+
+        $inicialDepartamento = substr($nombreDepartamento, 0, 1);
+        if (in_array($inicialDepartamento, ['D'])) {
+            $valorDepartamento = 'del ' . $nombreDepartamento;
+        } elseif (in_array($inicialDepartamento, ['G', 'U'])) {
+            $valorDepartamento = 'de la ' . $nombreDepartamento;
+        } else {
+            $valorDepartamento = 'de ' . $nombreDepartamento;
+        }
+        $templateProcessor->setValue('puestoNuevo.departamento', $valorDepartamento);
+
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $inicialGerencia = substr($nombreGerencia, 0, 1);
+        if (in_array($inicialGerencia, ['P'])) {
+            $valorGerencia = 'de ' . $nombreGerencia;
+        } else {
+            $valorGerencia = 'de la ' . $nombreGerencia;
+        }
+
+        $templateProcessor->setValue('puestoNuevo.gerencia', $valorGerencia);
+
+        $valorGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $valorGerencia = '';
+
+        if ($nombreGerencia == 'Gerencia Distrital La Paz I') {
+            $valorGerencia = 'GDLPI';
+        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') {
+            $valorGerencia = 'GDLPII';
+        } elseif ($nombreGerencia == 'Gerencia GRACO La Paz') {
+            $valorGerencia = 'GGLP';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Cochabamba') {
+            $valorGerencia = 'GDCBBA';
+        } elseif ($nombreGerencia == 'Gerencia GRACO Cochabamba') {
+            $valorGerencia = 'GGCBBA';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Quillacollo') {
+            $valorGerencia = 'GDQUI';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') {
+            $valorGerencia = 'GDSCZI';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') {
+            $valorGerencia = 'GDSCZII';
+        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') {
+            $valorGerencia = 'GGSCZ';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Montero') {
+            $valorGerencia = 'GDMO';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') {
+            $valorGerencia = 'GDCH';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') {
+            $valorGerencia = 'GDTJA';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') {
+            $valorGerencia = 'GDYA';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') {
+            $valorGerencia = 'GDOR';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') {
+            $valorGerencia = 'GDPT';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') {
+            $valorGerencia = 'GDBE';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Pando') {
+            $valorGerencia = 'GDPD';
+        } else {
+            $valorGerencia = '';
+        }
+
+        $templateProcessor->setValue('puestoNuevo.gerenciaAbreviatura', $valorGerencia);
+
+
+        $templateProcessor->setValue('puestoNuevo.gerencia', $valorGerencia . ' ');
+
+        $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
+
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto, 0, '.', ',');
+
+        $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
+
+
+        $templateProcessor->setValue('puestoNuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
+
+        /*$templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
 
         $carbonFechaInforme = Carbon::parse($incorporacion->fch_informe_incorporacion);
         setlocale(LC_TIME, 'es_UY');
@@ -983,71 +1093,19 @@ class IncorporacionesController extends Controller
         }
         $templateProcessor->setValue('descripcion', $descripcion);
 
-        $nombreCompleto = $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
-        $sexo = $incorporacion->persona->genero_persona;
-
-        if ($sexo === 'F') {
-            $templateProcessor->setValue('persona.deLa', 'de la servidora pública ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.reasignada', 'a la servidora pública interina ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.referencia', 'de la señora ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.referenciaInc', 'a la señora ' . $nombreCompleto);
-        } else {
-            $templateProcessor->setValue('persona.deLa', 'del servidor publico ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.reasignada', 'al servidor publico interino ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.referencia', 'del señor ' . $nombreCompleto);
-            $templateProcessor->setValue('persona.referenciaInc', 'al señor ' . $nombreCompleto);
-        }
-
-        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
-        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
-        $templateProcessor->setValue('puesto_nuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
-
-        $nombreDepartamento = $incorporacion->puesto_nuevo->departamento->nombre_departamento;
-        $inicialDepartamento = substr($nombreDepartamento, 0, 1);
-        if (in_array($inicialDepartamento, ['D'])) {
-            $valorDepartamento = 'del ' . $nombreDepartamento;
-        } elseif (in_array($inicialDepartamento, ['G', 'U'])) {
-            $valorDepartamento = 'de la ' . $nombreDepartamento;
-        } else {
-            $valorDepartamento = 'de ' . $nombreDepartamento;
-        }
-        $templateProcessor->setValue('puesto_nuevo.departamento', $valorDepartamento);
-
-        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
-        $inicialGerencia = substr($nombreGerencia, 0, 1);
-        if (in_array($inicialGerencia, ['P'])) {
-            $valorGerencia = 'de ' . $nombreGerencia;
-        } else {
-            $valorGerencia = 'de la ' . $nombreGerencia;
-        }
-        $templateProcessor->setValue('puesto_nuevo.gerencia', $valorGerencia);
-
-
-        $valorGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
-        $templateProcessor->setValue('puesto_nuevo.gerencia', $valorGerencia . ' ');
-
-        $templateProcessor->setValue('puesto_nuevo.item', $incorporacion->puesto_nuevo->item_puesto);
-        $templateProcessor->setValue('puesto_nuevo.salario', $incorporacion->puesto_nuevo->salario_puesto);
-        $templateProcessor->setValue('puesto_nuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
-
-        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaIncorporacion->locale('es_UY');
-        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
-        $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
-
-        $templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);
+        $templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);*/
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'RAPCambioitem_puesto_' . $incorporacion->persona->nombre_persona;
+            $fileName = 'RAP CAMBIO DE ITEM ' . strtoupper($nombreCompleto);
         } else {
-            $fileName = 'RAP_' . $incorporacion->persona->nombre_persona;
+            $fileName = 'RAP ' . strtoupper($nombreCompleto);
         }
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
-        //return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
     }
 
     //PARA MEMORANDUM
@@ -1061,7 +1119,7 @@ class IncorporacionesController extends Controller
 
         $disk = Storage::disk('form_templates');
         if (isset($incorporacion->puesto_actual)) {
-            $pathTemplate = $disk->path('MemoCambioItem.docx');
+            $pathTemplate = $disk->path('MemCambioItem.docx');
         } else {
             $pathTemplate = $disk->path('memorandum.docx');
         }
@@ -1069,15 +1127,65 @@ class IncorporacionesController extends Controller
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
         $templateProcessor->setValue('incorporacion.codigoMemorandum', $incorporacion->codigo_memorandum_incorporacion);
+
         $templateProcessor->setValue('incorporacion.citeMemorandum', $incorporacion->cite_memorandum_incorporacion);
 
         $carbonFechaMemo = Carbon::parse($incorporacion->fch_memorandum_incorporacion);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaMemo->locale('es_UY');
         $fechaMemoFormateada = $carbonFechaMemo->isoFormat('LL');
-        $templateProcessor->setValue('fechaMemo', $fechaMemoFormateada);
+        $templateProcessor->setValue('incorporacion.fechaMemorandum', $fechaMemoFormateada);
+
+        $templateProcessor->setValue('incorporacion.codigoRap', $incorporacion->codigo_rap_incorporacion);
+
+        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaIncorporacion->locale('es_UY');
+        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
+        $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
+
+        if (isset($incorporacion->puesto_actual) && isset($incorporacion->puesto_nuevo)) {
+            $denominacion_puesto_nuevo = $incorporacion->puesto_nuevo->denominacion_puesto;
+            if (
+                substr($denominacion_puesto_nuevo, 0, 7) === "Gerente" ||
+                substr($denominacion_puesto_nuevo, 0, 17) === "Responsable Staff" ||
+                substr($denominacion_puesto_nuevo, 0, 18) === "Servicios Generales" ||
+                substr($denominacion_puesto_nuevo, 0, 9) === "Secretaria"
+            ) {
+
+                $templateProcessor->setValue('incorporacion.tipoIncorporacion', 'DESIGNACIÓN A LIBRE NOMBRAMIENTO');
+            } else {
+                $templateProcessor->setValue('incorporacion.tipoIncorporacion', 'CAMBIO DE ÍTEM');
+            }
+        } else {
+            $denominacion_puesto_nuevo = $incorporacion->puesto_nuevo->denominacion_puesto;
+            if (
+                substr($denominacion_puesto_nuevo, 0, 7) === "Gerente" ||
+                substr($denominacion_puesto_nuevo, 0, 17) === "Responsable Staff" ||
+                substr($denominacion_puesto_nuevo, 0, 18) === "Servicios Generales" ||
+                substr($denominacion_puesto_nuevo, 0, 9) === "Secretaria"
+            ) {
+
+                $templateProcessor->setValue('incorporacion.tipoIncorporacion', 'DESIGNACIÓN A LIBRE NOMBRAMIENTO');
+            } else {
+                $templateProcessor->setValue('incorporacion.tipoIncorporacion', 'DESIGNACIÓN DE PERSONAL INTERINO');
+            }
+        }
 
         $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+
+        $primerApellido = $incorporacion->persona->primer_apellido_persona;
+        $genero = $incorporacion->persona->genero_persona;
+
+        if ($genero === 'F') {
+            $templateProcessor->setValue('persona.para', 'Señora ' . $primerApellido);
+            $templateProcessor->setValue('persona.asignada', 'asignada' . ' ');
+            $templateProcessor->setValue('persona.reasignada', 'reasignada' . ' ');
+        } else {
+            $templateProcessor->setValue('persona.para', 'Señor ' . $primerApellido);
+            $templateProcessor->setValue('persona.asignada', 'asignado' . ' ');
+            $templateProcessor->setValue('persona.reasignada', 'reasignado' . ' ');
+        }
 
         if (isset($incorporacion->puesto_actual)) {
             $denominacion_puesto = $incorporacion->puesto_actual->denominacion_puesto;
@@ -1085,21 +1193,9 @@ class IncorporacionesController extends Controller
             $denominacion_puesto = $incorporacion->puesto_nuevo->denominacion_puesto;
         }
         $denominacion_puestoEnMayusculas = mb_strtoupper($denominacion_puesto, 'UTF-8');
-        $templateProcessor->setValue('denominacionPuesto', $denominacion_puestoEnMayusculas);
+        $templateProcessor->setValue('puestoActual.denominacion', $denominacion_puestoEnMayusculas);
 
-        $primerApellido = $incorporacion->persona->primer_apellido_persona;
-        $sexo = $incorporacion->persona->genero_persona;
-
-        if ($sexo === 'F') {
-            $templateProcessor->setValue('persona.para', 'Señora ' . $primerApellido);
-            $templateProcessor->setValue('persona.reasignada', 'reasignada' . ' ');
-        } else {
-            $templateProcessor->setValue('persona.para', 'Señor ' . $primerApellido);
-            $templateProcessor->setValue('persona.reasignada', 'reasignado' . ' ');
-        }
-
-        $templateProcessor->setValue('incoporacion.codigoRap', $incorporacion->codigo_rap_incorporacion);
-        $templateProcessor->setValue('puesto_nuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
+        $templateProcessor->setValue('puestoNuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
 
         $nombreDepartamento = $incorporacion->puesto_nuevo->departamento->nombre_departamento;
         $inicialDepartamento = substr($nombreDepartamento, 0, 1);
@@ -1110,7 +1206,7 @@ class IncorporacionesController extends Controller
         } else {
             $valorDepartamento = 'de ' . $nombreDepartamento;
         }
-        $templateProcessor->setValue('puesto_nuevo.departamento', $valorDepartamento);
+        $templateProcessor->setValue('puestoNuevo.departamento', $valorDepartamento);
 
         $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
         $inicialGerencia = substr($nombreGerencia, 0, 1);
@@ -1119,30 +1215,72 @@ class IncorporacionesController extends Controller
         } else {
             $valorGerencia = 'de la ' . $nombreGerencia;
         }
-        $templateProcessor->setValue('puesto_nuevo.gerencia', $valorGerencia);
+        $templateProcessor->setValue('puestoNuevo.gerencia', $valorGerencia);
 
-        $templateProcessor->setValue('puesto_nuevo.item', $incorporacion->puesto_nuevo->item_puesto);
-        $templateProcessor->setValue('puesto_nuevo.salario', $incorporacion->puesto_nuevo->salario_puesto);
-        $templateProcessor->setValue('puesto_nuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
+        $valorGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
 
-        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaIncorporacion->locale('es_UY');
-        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
-        $templateProcessor->setValue('incorporacion.fechaDeIncorporacion', $fechaIncorporacionFormateada);
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $valorGerencia = '';
 
-        $templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);
+        if ($nombreGerencia == 'Gerencia Distrital La Paz I') {
+            $valorGerencia = 'GDLPI';
+        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') {
+            $valorGerencia = 'GDLPII';
+        } elseif ($nombreGerencia == 'Gerencia GRACO La Paz') {
+            $valorGerencia = 'GGLP';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Cochabamba') {
+            $valorGerencia = 'GDCBBA';
+        } elseif ($nombreGerencia == 'Gerencia GRACO Cochabamba') {
+            $valorGerencia = 'GGCBBA';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Quillacollo') {
+            $valorGerencia = 'GDQUI';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') {
+            $valorGerencia = 'GDSCZI';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') {
+            $valorGerencia = 'GDSCZII';
+        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') {
+            $valorGerencia = 'GGSCZ';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Montero') {
+            $valorGerencia = 'GDMO';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') {
+            $valorGerencia = 'GDCH';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') {
+            $valorGerencia = 'GDTJA';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') {
+            $valorGerencia = 'GDYA';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') {
+            $valorGerencia = 'GDOR';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') {
+            $valorGerencia = 'GDPT';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') {
+            $valorGerencia = 'GDBE';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Pando') {
+            $valorGerencia = 'GDPD';
+        } else {
+            $valorGerencia = '';
+        }
+
+        $templateProcessor->setValue('puestoNuevo.gerenciaAbreviatura', $valorGerencia);
+
+        $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
+
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto, 0, '.', ',');
+
+        $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
+
+        $templateProcessor->setValue('puestoNuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
+
+        //$templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'MemoCambioItem_' . $incorporacion->persona->nombre_persona;
+            $fileName = 'MEM CAMBIO DE ITEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
         } else {
-            $fileName = 'Memorandum_' . $incorporacion->persona->nombre_persona;
+            $fileName = 'MEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
         }
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
-        //return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
     }
 
     //para acta de posesion de cambio de item_puesto
@@ -1162,6 +1300,21 @@ class IncorporacionesController extends Controller
             $pathTemplate = $disk->path('R-0242-01.docx');
         }
         $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaIncorporacion->locale('es_UY');
+        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
+        $nombreDiaIncorporacion = $carbonFechaIncorporacion->isoFormat('dddd');
+        $templateProcessor->setValue('incorporacion.nombreDiaIncorporacion', $nombreDiaIncorporacion);
+
+        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaIncorporacion->locale('es_UY');
+        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
+        $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
+
+        $templateProcessor->setValue('incorporacion.codigoRap', $incorporacion->codigo_rap_incorporacion);
 
         $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
         switch ($nombreGerencia) {
@@ -1208,36 +1361,18 @@ class IncorporacionesController extends Controller
                 $ubicacion = 'La Paz';
                 break;
         }
-        $templateProcessor->setValue('ubicacion', $ubicacion);
+        $templateProcessor->setValue('puestoNuevo.gerenciaUbicacion', $ubicacion);
 
-        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaIncorporacion->locale('es_UY');
-        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
-        $nombreDiaIncorporacion = $carbonFechaIncorporacion->isoFormat('dddd');
-        $templateProcessor->setValue('incorporacion.nombreDiaDeIncorporacion', $nombreDiaIncorporacion);
-
-        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaIncorporacion->locale('es_UY');
-        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
-        $templateProcessor->setValue('incorporacion.fechaDeIncorporacion', $fechaIncorporacionFormateada);
-
-        $sexo = $incorporacion->persona->genero_persona;
-
-        if ($sexo === 'F') {
-            $templateProcessor->setValue('ciudadano', 'la ciudadana');
-            $templateProcessor->setValue('designado', 'designada');
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $inicialGerencia = substr($nombreGerencia, 0, 1);
+        if (in_array($inicialGerencia, ['P'])) {
+            $valorGerencia = 'de ' . $nombreGerencia;
         } else {
-            $templateProcessor->setValue('ciudadano', 'el ciudadano');
-            $templateProcessor->setValue('designado', 'designado');
+            $valorGerencia = 'de la ' . $nombreGerencia;
         }
+        $templateProcessor->setValue('puestoNuevo.gerencia', $valorGerencia);
 
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
-        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
-        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
-        $templateProcessor->setValue('incorporacion.codigoRAP', $incorporacion->codigo_rap_incorporacion);
-        $templateProcessor->setValue('puesto_nuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
+        $templateProcessor->setValue('puestoNuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
 
         $nombreDepartamento = $incorporacion->puesto_nuevo->departamento->nombre_departamento;
         $inicialDepartamento = substr($nombreDepartamento, 0, 1);
@@ -1248,26 +1383,39 @@ class IncorporacionesController extends Controller
         } else {
             $valorDepartamento = 'de ' . $nombreDepartamento;
         }
-        $templateProcessor->setValue('puesto_nuevo.departamento', $valorDepartamento);
+        $templateProcessor->setValue('puestoNuevo.departamento', $valorDepartamento);
 
-        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
-        $inicialGerencia = substr($nombreGerencia, 0, 1);
-        if (in_array($inicialGerencia, ['P'])) {
-            $valorGerencia = 'de ' . $nombreGerencia;
+        $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
+
+        $nombre_gerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $nombre_gerencia = str_replace("Gerencia", "Gerente", $nombre_gerencia);
+
+        $templateProcessor->setValue('puestoNuevo.gerente', $nombre_gerencia);
+
+        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+
+        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
+
+        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
+
+        $sexo = $incorporacion->persona->genero_persona;
+
+        if ($sexo === 'F') {
+            $templateProcessor->setValue('persona.ciudadano', 'la ciudadana');
+
+            $templateProcessor->setValue('persona.designado', 'designada');
         } else {
-            $valorGerencia = 'de la ' . $nombreGerencia;
+            $templateProcessor->setValue('persona.ciudadano', 'el ciudadano');
+
+            $templateProcessor->setValue('persona.designado', 'designado');
         }
-        $templateProcessor->setValue('puesto_nuevo.gerencia', $valorGerencia);
-
-        $templateProcessor->setValue('puesto_nuevo.gerenciaSinConector', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
-
-        $templateProcessor->setValue('puesto_nuevo.item', $incorporacion->puesto_nuevo->item_puesto);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'ActaDePosesionCambioDeitem_' . $incorporacion->persona->nombre_persona;
+            $fileName = 'Acta de Posesion Cambio de Item ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
         } else {
-            $fileName = 'ActaDePosesion_' . $incorporacion->persona->nombre_persona;
+            $fileName = 'Acta de Posesion ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
         }
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
         $templateProcessor->saveAs($savedPath);
 
@@ -1291,6 +1439,20 @@ class IncorporacionesController extends Controller
         }
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
+        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaIncorporacion->locale('es_UY');
+        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
+        $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
+
+        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+
+        $templateProcessor->setValue('puesto_nuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
+
+        $templateProcessor->setValue('puesto_nuevo.departamento', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
+
+        $templateProcessor->setValue('puesto_nuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
+
         $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
         switch ($nombreGerencia) {
             case 'El Alto':
@@ -1336,29 +1498,17 @@ class IncorporacionesController extends Controller
                 $ubicacion = 'La Paz';
                 break;
         }
-        $templateProcessor->setValue('ubicacion', $ubicacion);
-
-        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaIncorporacion->locale('es_UY');
-        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
-        $templateProcessor->setValue('fechaIncorporacion', $fechaIncorporacionFormateada);
-
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
-        $templateProcessor->setValue('puesto_nuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
-        $templateProcessor->setValue('puesto_nuevo.departamento', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
-        $templateProcessor->setValue('puesto_nuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
+        $templateProcessor->setValue('puestoNuevo.gerenciaUbicacion', $ubicacion);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'ActaEntregaCambioDeitem_puesto_' . $incorporacion->persona->nombre_persona;
+            $fileName = 'Acta Entrega Cambio de item ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
         } else {
-            $fileName = 'ActaEntrega_' . $incorporacion->persona->nombre_persona;
+            $fileName = 'Acta Entrega' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
         }
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
-        //return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
     }
 
     //para informe R-0976 compromiso
@@ -1665,8 +1815,7 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaDeIncorporacion', $incorporacion->fch_incorporacion);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'R-1469-01-Cambioitem_puesto_' . $incorporacion->persona->nombre_persona;
-            ;
+            $fileName = 'R-1469-01-Cambioitem_puesto_' . $incorporacion->persona->nombre_persona;;
         } else {
             $fileName = 'R-1469-01_' . $incorporacion->persona->nombre_persona;
         }

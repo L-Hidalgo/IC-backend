@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
             return response()->json(['error' => 'Credenciales incorrectas'], 401);
         }
 
-        $request->session()->regenerate();
+        //$request->session()->regenerate();
         
         $user = Auth::user();
 
