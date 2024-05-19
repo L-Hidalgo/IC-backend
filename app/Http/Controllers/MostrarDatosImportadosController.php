@@ -10,4 +10,6 @@ class PersonaController extends Controller
         $personas = Persona::with('puestoPersona.puesto')->get();
         return view('tu_vista', compact('personas'));
     }
+
+   
 }

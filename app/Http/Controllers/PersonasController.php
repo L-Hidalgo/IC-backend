@@ -22,7 +22,7 @@ class PersonasController extends Controller
     ]);
     // dd($validatedData);
 
-    if($validatedData['idPersona']) {
+    if ($validatedData['idPersona']) {
       $persona = Persona::find($validatedData['idPersona']);
     } else {
       $persona = new Persona();
@@ -36,7 +36,7 @@ class PersonasController extends Controller
     $persona->exp_persona = $validatedData['expPersona'];
     $persona->genero_persona = $validatedData['generoPersona'];
     $persona->fch_nacimiento_persona = $validatedData['fchNacimientoPersona'];
-    
+
     // guardar
     $persona->save();
     return $this->sendObject($persona);
@@ -47,7 +47,7 @@ class PersonasController extends Controller
     $persona = Persona::where('ci_persona', $ci_persona)->first();
 
     if (!$persona) {
-      return $this->sendObject(null,'No se encontro la persona', 404);
+      return $this->sendObject(null, 'No se encontro la persona', 404);
     }
     return $this->sendObject($persona);
   }
@@ -57,10 +57,8 @@ class PersonasController extends Controller
     $persona = Persona::find($id_persona);
 
     if (!$persona) {
-      return $this->sendObject(null,'No se encontro la persona', 404);
+      return $this->sendObject(null, 'No se encontro la persona', 404);
     }
     return $this->sendObject($persona);
   }
-
-
 }

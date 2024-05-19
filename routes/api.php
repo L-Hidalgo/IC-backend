@@ -27,6 +27,8 @@ Route::group(['prefix' => 'incorporaciones'], function () {
 
   Route::post('/by-persona', [IncorporacionesController::class, 'getByPersona']);
 
+  Route::get('/{persona_id}/by-persona-incorporacion', [IncorporacionesController::class, 'getByPersonaIncorporacion']);
+
   Route::get('/{incorporacionId}/gen-form-evalR0078', [IncorporacionesController::class, 'generarFormularioEvalR0078']);
   Route::get('/{incorporacionId}/gen-form-evalR1401', [IncorporacionesController::class, 'genFormEvalR1401']);
   Route::get('/{incorporacionId}/gen-form-informe-con-nota', [IncorporacionesController::class, 'genFormInformeNota']);
@@ -82,13 +84,6 @@ Route::group(['prefix' => 'instituciones'], function () {
   Route::post('/', [InstitucionController::class, 'createInstitucion']);
   Route::post('/by-name', [InstitucionController::class, 'buscarOCrearInstitucion']);
 });
-// Route::post('/personas',[PersonasController::class, 'crearPersona']);
-// Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
-
-/* ------------------------------------------ Institucion ------------------------------------------ */
-// Route::post('/personas',[PersonasController::class, 'crearPersona']);
-// Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
-
 /* ------------------------------------------- Puesto ------------------------------------------- */
 Route::group(['prefix' => 'puestos'], function () {
   Route::get('/{item}/by-item', [PuestoController::class, 'getByItem']);
@@ -98,7 +93,7 @@ Route::group(['prefix' => 'puestos'], function () {
 /* ------------------------------------------ Personas ------------------------------------------ */
 Route::group(['prefix' => 'personas'], function () {
   Route::put('/', [PersonasController::class, 'crearActualizarPersona']);
-  // Route::get('/personas/buscar',[PersonasController::class, 'buscarPersona']);
   Route::get('/{idPersona}', [PersonasController::class, 'getById']);
   Route::get('/{ciPersona}/by-ci', [PersonasController::class, 'getByCi']);
+
 });
