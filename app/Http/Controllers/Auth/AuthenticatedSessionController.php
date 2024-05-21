@@ -26,7 +26,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request)
+    /*public function store(LoginRequest $request)
     {
         try {
             $request->authenticate();
@@ -43,6 +43,30 @@ class AuthenticatedSessionController extends Controller
 
             'user' => $user
         ]);
+    }*/
+    public function store(LoginRequest $request)
+    {
+        try {
+            $request->authenticate();
+            $user = Auth::user();
+
+            // Obtener el factory de tokens de acceso
+            $token = $user->createToken("API Token")->plainTextToken;
+
+            return response()->json([
+                'status' => true,
+                'message' => 'El usuario inició sesión correctamente',
+                'user' => $user,
+                'token' => $token
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => 'Credenciales incorrectas'], 401);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**

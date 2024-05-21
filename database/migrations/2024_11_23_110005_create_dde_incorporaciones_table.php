@@ -15,7 +15,7 @@ return new class extends Migration
             $table->integer('puesto_nuevo_id')->nullable()->unsigned(); //item_puesto nuevo 
             $table->integer('estado_incorporacion')->default(1); // 1:sin_registro , 2: con_registro, 3: finalizado
             $table->integer('cumple_exp_profesional_incorporacion')->default(2);
-            $table->integer('cumple_exp_especifica_incorporacion' )->default(2);
+            $table->integer('cumple_exp_especifica_incorporacion')->default(2);
             $table->integer('cumple_exp_mando_incorporacion')->default(2);
             $table->integer('cumple_formacion_incorporacion')->default(0);
             $table->date('fch_incorporacion')->nullable();
@@ -27,25 +27,22 @@ return new class extends Migration
             $table->string('cite_informe_incorporacion', 18)->nullable();
             $table->date('fch_informe_incorporacion')->nullable();
             $table->string('cite_memorandum_incorporacion', 10)->nullable();
-            $table->string('codigo_memorandum_incorporacion', 13)->nullable()->unique();
+            $table->string('codigo_memorandum_incorporacion', 13)->nullable();
             $table->date('fch_memorandum_incorporacion')->nullable();
             $table->string('cite_rap_incorporacion', 10)->nullable()->unique();
-            $table->string('codigo_rap_incorporacion', 12)->nullable()->unique();
+            $table->string('codigo_rap_incorporacion', 12)->nullable();
             $table->date('fch_rap_incorporacion')->nullable();
             $table->string('observacion_incorporacion', 10)->nullable();
             $table->string('experiencia_incorporacion', 25)->nullable();
-            //$table->unsignedBigInteger('responsable_id')->nullable();
-          //  $table->integer('usuario_id_incorporaciones')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
             // !SECTION
             $table->foreign('persona_id')->references('id_persona')->on('dde_personas');
             $table->foreign('puesto_actual_id')->references('id_puesto')->on('dde_puestos');
             $table->foreign('puesto_nuevo_id')->references('id_puesto')->on('dde_puestos');
-            //$table->foreign('responsable_id')->references('id_persona')->on('dde_personas');
-            //$table->foreignId('usuario_id')->nullable()->constrained('users');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
             $table->timestamp('fecha_inicio')->nullable()->default(null);
             $table->timestamp('fecha_fin')->nullable()->default(null);
-
         });
     }
 

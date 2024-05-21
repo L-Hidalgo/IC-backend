@@ -16,6 +16,7 @@ use RealRashid\SweetAlert\Facades\Alert;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class IncorporacionesController extends Controller
 {
@@ -23,6 +24,7 @@ class IncorporacionesController extends Controller
     public function crearActualizarIncorporacion(Request $request)
     {
         $validatedData = $request->validate([
+            'userId' => 'nullable|integer',
             'idIncorporacion' => 'nullable|integer',
             'puestoNuevoId' => 'nullable|integer',
             'puestoActualId' => 'nullable|integer',
@@ -52,9 +54,6 @@ class IncorporacionesController extends Controller
             'citeRapIncorporacion' => 'nullable|string',
             'codigoRapIncorporacion' => 'nullable|string',
             'fchRapIncorporacion' => 'nullable|string',
-
-            //responsable
-            //'responsableId' => 'nullable|integer'
         ]);
 
         $puesto = null;
@@ -105,9 +104,9 @@ class IncorporacionesController extends Controller
                     $incorporacion->persona_id = $validatedData['personaId'];
                 }
 
-                /*if (isset($validatedData['responsableId'])) {
-                    $incorporacion->responsable_id = $validatedData['responsableId'];
-                }*/
+                if (isset($validatedData['userId'])) {
+                    $incorporacion->user_id = $validatedData['userId'];
+                }
 
                 if (isset($validatedData['puestoNuevoId'])) {
                     $incorporacion->puesto_nuevo_id = $validatedData['puestoNuevoId'];
@@ -217,6 +216,7 @@ class IncorporacionesController extends Controller
             return response()->json(['error' => 'Tanto puesto como persona deben estar presentes para realizar la incorporación.'], 400);
         }
     }
+
     public function getByPersona(Request $request)
     {
         $nombrePersona = $request->input('nombre_persona'); // Obtener el nombre de la persona desde la solicitud
@@ -609,6 +609,18 @@ class IncorporacionesController extends Controller
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
+        $templateProcessor->setValue('incorporacion.nombreUsuario', $incorporacion->user->name);
+
+        $templateProcessor->setValue('incorporacion.cargoUsuario', $incorporacion->user->cargo);
+
+        $nombreCompleto = $incorporacion->user->name;
+        $partesNombre = explode(' ', $nombreCompleto); 
+        $iniciales = '';
+        foreach ($partesNombre as $parte) {
+            $iniciales .= substr($parte, 0, 1); 
+        }
+        $templateProcessor->setValue('incorporacion.abrevNombreUsuario', $iniciales);
+
         $carbonFechaInfo = Carbon::parse($incorporacion->fch_informe_incorporacion);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaInfo->locale('es_UY');
@@ -617,11 +629,16 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
 
-        $partes = explode(',', $incorporacion->hp_incorporacion);
-        $templateProcessor->setValue('incorporacion.hp', $partes[0]);
-
-        $templateProcessor->setValue('incorporacion.numeroHp', $partes[1]);
-
+        if (!empty($incorporacion->hp_incorporacion)) {
+            $partes = explode(',', $incorporacion->hp_incorporacion);
+            $templateProcessor->setValue('incorporacion.hp', $partes[0]);
+            $templateProcessor->setValue('incorporacion.numeroHp', $partes[1]);
+        } else {
+            // Si no hay datos en $incorporacion->hp_incorporacion, mostrar el mensaje "Registrar Hp"
+            $templateProcessor->setValue('incorporacion.hp', 'Registrar Hp');
+            $templateProcessor->setValue('incorporacion.numeroHp', '');
+        }
+        
         $templateProcessor->setValue('incorporacion.citeInfNotaMinuta', $incorporacion->cite_nota_minuta_incorporacion);
 
         $templateProcessor->setValue('incorporacion.codigoNotaMinuta', $incorporacion->codigo_nota_minuta_incorporacion);

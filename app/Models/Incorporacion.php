@@ -39,7 +39,7 @@ class Incorporacion extends Model
         'fch_rap_incorporacion',
         'observacion_incorporacion',
         'experiencia_incorporacion',
-        //'responsable_id',
+        'user_id',
     ];
 
     protected $casts = [
@@ -62,8 +62,8 @@ class Incorporacion extends Model
         return $this->belongsTo(Persona::class, 'persona_id', 'id_persona');
     }
 
-    /*public function responsable()
+    public function user()
     {
-        return $this->belongsTo(Persona::class, 'responsable_id', 'id_persona');
-    }*/
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }
