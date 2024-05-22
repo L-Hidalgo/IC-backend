@@ -20,6 +20,7 @@ class User extends Authenticatable implements LdapAuthenticatable
    *
    * @var array<int, string>
    */
+
   protected $fillable = [
     'ci',
     'name',
@@ -82,5 +83,10 @@ class User extends Authenticatable implements LdapAuthenticatable
   public function setLdapGuid(?string $guid): void
   {
     $this->guid = $guid;
+  }
+
+  public function incorporacion()
+  {
+    return $this->hasMany(Incorporacion::class, 'user_id', 'id');
   }
 }

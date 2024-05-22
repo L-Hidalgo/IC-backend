@@ -153,6 +153,8 @@ class IncorporacionesController extends Controller
 
                 if (isset($validatedData['codigoNotaMinutaIncorporacion'])) {
                     $incorporacion->codigo_nota_minuta_incorporacion = $validatedData['codigoNotaMinutaIncorporacion'];
+                } else {
+                    $incorporacion->codigo_nota_minuta_incorporacion = '022400000';
                 }
 
                 if (isset($validatedData['fchNotaMinutaIncorporacion'])) {
@@ -236,7 +238,7 @@ class IncorporacionesController extends Controller
     }
     public function listPaginateIncorporaciones(Request $request)
     {
-        $limit = $request->input('limit', 10);
+        $limit = $request->input('limit', 1000);
         $page = $request->input('page', 0);
         $query = Incorporacion::with([
             'persona',
@@ -251,6 +253,7 @@ class IncorporacionesController extends Controller
             'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
             'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'user',
         ]);
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
         // $incorporaciones->data;
@@ -328,16 +331,10 @@ class IncorporacionesController extends Controller
 
         $experiencia = $incorporacion->experiencia_incorporacion;
         if ($experiencia == 0) {
-            $mensajeExperiencia = 'NO TIENE EXPERIENCIA TRABAJANDO EN EL SIN';
+            $mensajeExperiencia = 'NO CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
         } elseif ($experiencia == 1) {
-            $mensajeExperiencia = 'TIENE 1 AÑO DE EXPERIENCIA TRABAJANDO EN EL SIN';
-        } elseif ($experiencia >= 2 && $experiencia <= 4) {
-            $mensajeExperiencia = 'TIENE ' . $experiencia . ' AÑOS DE EXPERIENCIA TRABAJANDO EN EL SIN';
-        } elseif ($experiencia >= 5) {
-            $mensajeExperiencia = 'TIENE MAS DE 5 AÑOS TRABAJANDO EN EL SIN';
-        } else {
-            $mensajeExperiencia = 'EXPERIENCIA NO DEFINIDA';
-        }
+            $mensajeExperiencia = 'SI CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
+        } 
         $templateProcessor->setValue('incorporacion.experiencia', strtoupper($mensajeExperiencia));
 
 
@@ -614,10 +611,10 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.cargoUsuario', $incorporacion->user->cargo);
 
         $nombreCompleto = $incorporacion->user->name;
-        $partesNombre = explode(' ', $nombreCompleto); 
+        $partesNombre = explode(' ', $nombreCompleto);
         $iniciales = '';
         foreach ($partesNombre as $parte) {
-            $iniciales .= substr($parte, 0, 1); 
+            $iniciales .= substr($parte, 0, 1);
         }
         $templateProcessor->setValue('incorporacion.abrevNombreUsuario', $iniciales);
 
@@ -638,7 +635,7 @@ class IncorporacionesController extends Controller
             $templateProcessor->setValue('incorporacion.hp', 'Registrar Hp');
             $templateProcessor->setValue('incorporacion.numeroHp', '');
         }
-        
+
         $templateProcessor->setValue('incorporacion.citeInfNotaMinuta', $incorporacion->cite_nota_minuta_incorporacion);
 
         $templateProcessor->setValue('incorporacion.codigoNotaMinuta', $incorporacion->codigo_nota_minuta_incorporacion);
@@ -895,6 +892,18 @@ class IncorporacionesController extends Controller
         }
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
+        $templateProcessor->setValue('incorporacion.nombreUsuario', $incorporacion->user->name);
+
+        $templateProcessor->setValue('incorporacion.cargoUsuario', $incorporacion->user->cargo);
+
+        $nombreCompleto = $incorporacion->user->name;
+        $partesNombre = explode(' ', $nombreCompleto);
+        $iniciales = '';
+        foreach ($partesNombre as $parte) {
+            $iniciales .= substr($parte, 0, 1);
+        }
+        $templateProcessor->setValue('incorporacion.abrevNombreUsuario', $iniciales);
+
         $templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
 
         $carbonFechaInfo = Carbon::parse($incorporacion->fch_informe_incorporacion);
@@ -904,10 +913,13 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaInforme', $fechaInfoFormateada);
 
         $partes = explode(',', $incorporacion->hp_incorporacion);
-
-        $templateProcessor->setValue('incorporacion.hp', $partes[0]);
-
-        $templateProcessor->setValue('incorporacion.numeroHp', $partes[1]);
+        if (!empty($partes[0]) && !empty($partes[1])) {
+            $templateProcessor->setValue('incorporacion.hp', $partes[0]);
+            $templateProcessor->setValue('incorporacion.numeroHp', $partes[1]);
+        } else {
+            $mensaje = "No se encontró HP registrado.";
+            $templateProcessor->setValue('mensaje_hp', $mensaje);
+        }
 
         $templateProcessor->setValue('incorporacion.citeInfNotaMinuta', $incorporacion->cite_nota_minuta_incorporacion);
 
@@ -1179,6 +1191,14 @@ class IncorporacionesController extends Controller
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
+        $nombreCompleto = $incorporacion->user->name;
+        $partesNombre = explode(' ', $nombreCompleto);
+        $iniciales = '';
+        foreach ($partesNombre as $parte) {
+            $iniciales .= substr($parte, 0, 1);
+        }
+        $templateProcessor->setValue('incorporacion.abrevNombreUsuario', $iniciales);
+
         $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaIncorporacion->locale('es_UY');
@@ -1200,13 +1220,17 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
 
         $partes = explode(',', $incorporacion->hp_incorporacion);
-        $templateProcessor->setValue('incorporacion.hp', $partes[0]);
 
-        $templateProcessor->setValue('incorporacion.numeroHp', $partes[1]);
+        if (!empty($partes[0]) && !empty($partes[1])) {
+            $templateProcessor->setValue('incorporacion.hp', $partes[0]);
+            $templateProcessor->setValue('incorporacion.numeroHp', $partes[1]);
+        } else {
+            $mensaje = "No se encontró HP registrado.";
+            $templateProcessor->setValue('mensaje_hp', $mensaje);
+        }
 
         $nombreCompleto = $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
         $sexo = $incorporacion->persona->genero_persona;
-
         if ($sexo === 'F') {
             //$templateProcessor->setValue('persona.deLa', 'de la servidora pública ' . $nombreCompleto);
             $templateProcessor->setValue('persona.reasignada', 'a la servidora pública interina ' . $nombreCompleto);
@@ -1351,6 +1375,14 @@ class IncorporacionesController extends Controller
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
+        $nombreCompleto = $incorporacion->user->name;
+        $partesNombre = explode(' ', $nombreCompleto);
+        $iniciales = '';
+        foreach ($partesNombre as $parte) {
+            $iniciales .= substr($parte, 0, 1);
+        }
+        $templateProcessor->setValue('incorporacion.abrevNombreUsuario', $iniciales);
+
         $templateProcessor->setValue('incorporacion.codigoMemorandum', $incorporacion->codigo_memorandum_incorporacion);
 
         $templateProcessor->setValue('incorporacion.citeMemorandum', $incorporacion->cite_memorandum_incorporacion);
@@ -1370,9 +1402,15 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
         $partes = explode(',', $incorporacion->hp_incorporacion);
-        $templateProcessor->setValue('incorporacion.hp', $partes[0]);
 
-        $templateProcessor->setValue('incorporacion.numeroHp', $partes[1]);
+        if (!empty($partes[0]) && !empty($partes[1])) {
+            $templateProcessor->setValue('incorporacion.hp', $partes[0]);
+            $templateProcessor->setValue('incorporacion.numeroHp', $partes[1]);
+        } else {
+            $mensaje = "No se encontró HP registrado.";
+            $templateProcessor->setValue('mensaje_hp', $mensaje);
+        }
+
 
         if (isset($incorporacion->puesto_actual) && isset($incorporacion->puesto_nuevo)) {
             $denominacion_puesto_nuevo = $incorporacion->puesto_nuevo->denominacion_puesto;
