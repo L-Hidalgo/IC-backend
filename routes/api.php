@@ -25,10 +25,7 @@ Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
   Route::post('/list', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
-  Route::post('/byNombreCompletoPersonaIncorporacion', [IncorporacionesController::class, 'byIncorporacionNombrePersona']);
-  Route::post('/byNombreUserIncorporacion', [IncorporacionesController::class, 'byIncorporacionNombreUser']);
-  Route::post('/byTipoIncorporacion', [IncorporacionesController::class, 'byTipoIncorporacion']);
-  Route::post('/byFechaIncorporacion', [IncorporacionesController::class, 'byFechaIncorporacion']);
+  Route::post('/byFiltrosIncorporacion', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
 
   Route::get('/{incorporacionId}/gen-form-evalR0078', [IncorporacionesController::class, 'generarFormularioEvalR0078']);

@@ -203,11 +203,16 @@ class IncorporacionesController extends Controller
             return response()->json(['error' => 'Tanto puesto como persona deben estar presentes para realizar la incorporación.'], 400);
         }
     }
-    public function byIncorporacionNombrePersona(Request $request)
+
+    public function byFiltrosIncorporacion(Request $request)
     {
         $limit = $request->input('limit', 1000);
         $page = $request->input('page', 0);
+        $name = $request->input('name');
         $nombreCompletoPersona = $request->input('nombreCompletoPersona');
+        $tipo = $request->input('tipo');
+        $fechaInicio = $request->input('fechaInicio');
+        $fechaFin = $request->input('fechaFin');
 
         $query = Incorporacion::with([
             'persona',
@@ -219,6 +224,12 @@ class IncorporacionesController extends Controller
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
             'user',
         ]);
+
+        if ($name) {
+            $query->whereHas('user', function ($q) use ($name) {
+                $q->where('name', 'LIKE', '%' . $name . '%');
+            });
+        }
 
         if ($nombreCompletoPersona) {
             $query->whereHas('persona', function ($q) use ($nombreCompletoPersona) {
@@ -226,115 +237,23 @@ class IncorporacionesController extends Controller
             });
         }
 
-        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
-
-        return $this->sendPaginated($incorporaciones);
-    }
-
-    public function byIncorporacionNombreUser(Request $request)
-    {
-        $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0);
-        $name = $request->input('name');
-
-        // Construimos la consulta con las relaciones necesarias
-        $query = Incorporacion::with([
-            'persona',
-            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'user',
-        ]);
-
-        // Si se proporciona un nombre, agregamos la condición de búsqueda
-        if ($name) {
-            $query->whereHas('user', function ($q) use ($name) {
-                $q->where('name', 'LIKE', '%' . $name . '%');
-            });
-        }
-
-        // Paginamos los resultados
-        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
-
-        // Devolvemos los resultados paginados
-        return $this->sendPaginated($incorporaciones);
-    }
-
-    public function byTipoIncorporacion(Request $request)
-    {
-        $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0);
-        $tipo = $request->input('tipo');
-
-        // Construimos la consulta base con las relaciones necesarias
-        $query = Incorporacion::with([
-            'persona',
-            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'user',
-        ]);
-
-        // Aplicar los filtros según el valor del tipo
         if ($tipo == 1) {
-            $query->whereNotNull('puesto_nuevo_id');
+            $query->whereNotNull('puesto_nuevo_id')->whereNull('puesto_actual_id');
         } elseif ($tipo == 2) {
             $query->whereNotNull('puesto_nuevo_id')->whereNotNull('puesto_actual_id');
         }
 
-        // Paginamos los resultados
+        if ($fechaInicio) {
+            $query->whereDate('created_at', '>=', $fechaInicio);
+        }
+
+        if ($fechaFin) {
+            $query->whereDate('created_at', '<=', $fechaFin);
+        }
+
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
 
-        // Devolvemos los resultados paginados
-        return $this->sendPaginated($incorporaciones);
-    }
-
-    public function byFechaIncorporacion(Request $request)
-    {
-        $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0);
-        $tipo = $request->input('tipo');
-        $fecha_inicio = $request->input('fecha_inicio');
-        $fecha_fin = $request->input('fecha_fin');
-
-        // Construimos la consulta base con las relaciones necesarias
-        $query = Incorporacion::with([
-            'persona',
-            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'user',
-        ]);
-
-        // Aplicar los filtros según el valor del tipo
-        if ($tipo == 1) {
-            $query->whereNotNull('puesto_nuevo_id');
-        } elseif ($tipo == 2) {
-            $query->whereNotNull('puesto_nuevo_id')->whereNotNull('puesto_actual_id');
-        }
-
-        // Aplicar el filtro de fechas si se proporcionan
-        if ($fecha_inicio) {
-            $query->whereDate('created_at', '>=', $fecha_inicio);
-        }
-        if ($fecha_fin) {
-            $query->whereDate('created_at', '<=', $fecha_fin);
-        }
-
-        // Paginamos los resultados
-        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
-
-        // Devolvemos los resultados paginados
-        return $this->sendPaginated($incorporaciones);
+        return response()->json($incorporaciones);
     }
 
     public function darBajaIncorporacion($incorporacionId)
@@ -363,8 +282,6 @@ class IncorporacionesController extends Controller
 
         return response()->json(['message' => 'Incorporación dada de baja exitosamente'], 200);
     }
-
-
 
     public function listPaginateIncorporaciones(Request $request)
     {
@@ -399,12 +316,12 @@ class IncorporacionesController extends Controller
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
-        $templateProcessor->setValue('persona.nombreCompleto', strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona));
+        $templateProcessor->setValue('persona.nombreCompleto', mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona));
 
-        $gradoAcademico = strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico ?? '');
-        $areaFormacion = strtoupper($incorporacion->persona->formacion[0]->areaFormacion->nombre_area_formacion ?? '');
+        $gradoAcademico = mb_strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico ?? '', 'UTF-8');
+        $areaFormacion = mb_strtoupper($incorporacion->persona->formacion[0]->areaFormacion->nombre_area_formacion ?? '', 'UTF-8');
         if (empty($gradoAcademico) || empty($areaFormacion)) {
-            $profesion = 'Registrar grado academico y area de formacion';
+            $profesion = 'Registrar grado académico y área de formación';
         } else {
             $profesion = $gradoAcademico . ' EN ' . $areaFormacion;
         }
@@ -416,11 +333,11 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
 
-        $templateProcessor->setValue('puestoNuevo.gerencia', strtoupper($incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia));
+        $templateProcessor->setValue('puestoNuevo.gerencia', mb_strtoupper($incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia));
 
-        $templateProcessor->setValue('puestoNuevo.departamento', strtoupper($incorporacion->puesto_nuevo->departamento->nombre_departamento));
+        $templateProcessor->setValue('puestoNuevo.departamento', mb_strtoupper($incorporacion->puesto_nuevo->departamento->nombre_departamento));
 
-        $templateProcessor->setValue('puestoNuevo.denominacion', strtoupper($incorporacion->puesto_nuevo->denominacion_puesto));
+        $templateProcessor->setValue('puestoNuevo.denominacion', mb_strtoupper($incorporacion->puesto_nuevo->denominacion_puesto));
 
         $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto, 0, '.', ',');
         $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
@@ -435,7 +352,7 @@ class IncorporacionesController extends Controller
             }
         }
 
-        $templateProcessor->setValue('incorporacion.observacion', strtoupper($incorporacion->observacion_incorporacion));
+        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->observacion_incorporacion));
 
         $experiencia = $incorporacion->experiencia_incorporacion;
         if ($experiencia == 0) {
@@ -443,10 +360,10 @@ class IncorporacionesController extends Controller
         } elseif ($experiencia == 1) {
             $mensajeExperiencia = 'SI CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
         }
-        $templateProcessor->setValue('incorporacion.experiencia', strtoupper($mensajeExperiencia));
+        $templateProcessor->setValue('incorporacion.experiencia', mb_strtoupper($mensajeExperiencia));
 
 
-        $fileName = 'R-0078 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona);
+        $fileName = 'R-0078 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona);
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -613,8 +530,8 @@ class IncorporacionesController extends Controller
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
-        $templateProcessor->setValue('persona.nombreCompleto', strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona));
-        $templateProcessor->setValue('persona.formacion', strtoupper($incorporacion->persona->profesion_persona));
+        $templateProcessor->setValue('persona.nombreCompleto', mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona));
+        $templateProcessor->setValue('persona.formacion', mb_strtoupper($incorporacion->persona->profesion_persona));
 
         if (!$incorporacion->puesto_actual->funcionario->isEmpty()) {
             $fechaDesignacion = $incorporacion->puesto_actual->funcionario->first()->fch_inicio_sin_funcionario;
@@ -655,9 +572,9 @@ class IncorporacionesController extends Controller
             }
         }
 
-        $templateProcessor->setValue('incorporacion.observacion', strtoupper($incorporacion->observacion_incorporacion));
+        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->observacion_incorporacion));
 
-        $fileName = 'R-1023-01 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona);
+        $fileName = 'R-1023-01 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona);
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
