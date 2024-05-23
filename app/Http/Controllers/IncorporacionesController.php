@@ -60,31 +60,18 @@ class IncorporacionesController extends Controller
 
         if (isset($validatedData['puestoNuevoId']) && isset($validatedData['personaId'])) {
 
-            /*if (isset($validatedData['idIncorporacion']))
-                $incorporacion = Incorporacion::find($validatedData['idIncorporacion']);
-            else
-                $incorporacion = new Incorporacion();*/
-
             $puesto = Puesto::find($validatedData['puestoNuevoId']);
 
             if ($puesto) {
-                // Verificar si la persona tiene un puesto actual asignado
                 if (isset($validatedData['personaId']) && isset($validatedData['puestoActualId'])) {
-                    // Obtener el puesto actual de la persona
                     $puestoActual = Puesto::find($validatedData['puestoActualId']);
-
-                    // Verificar si el puesto actual pertenece a la misma persona
                     if ($puestoActual && $puestoActual->persona_actual_id == $validatedData['personaId']) {
-                        // Modificar el estado_id y persona_actual_id del puesto actual
                         $puestoActual->estado_id = 1;
                         $puestoActual->persona_actual_id = null;
-
-                        // Guardar los cambios en el puesto actual
                         $puestoActual->save();
                     }
                 }
 
-                // Actualizar el nuevo puesto con la persona asignada y cambiar su estado
                 $puesto->persona_actual_id = $validatedData['personaId'];
                 $puesto->estado_id = 2;
                 $puesto->save();
@@ -99,7 +86,6 @@ class IncorporacionesController extends Controller
                     $incorporacion = new Incorporacion();
                 }
 
-                // agregar campos para actualizacion
                 if (isset($validatedData['personaId'])) {
                     $incorporacion->persona_id = $validatedData['personaId'];
                 }
@@ -219,34 +205,69 @@ class IncorporacionesController extends Controller
         }
     }
 
-    public function getByPersona(Request $request)
+    public function byIncorporacionNombrePersona(Request $request)
     {
-        $nombrePersona = $request->input('nombre_persona'); // Obtener el nombre de la persona desde la solicitud
+        $limit = $request->input('limit', 1000);
+        $page = $request->input('page', 0);
+        $nombreCompletoPersona = $request->input('nombreCompletoPersona');
 
-        $incorporaciones = Incorporacion::with([
-            'puesto_actual:id_puesto,nombre_puesto',
-            'puesto_nuevo:id_puesto,nombre_puesto',
-            'persona:id_persona,nombre_persona',
-            'responsable:id_persona,nombre_persona'
-        ])
-            ->whereHas('persona', function ($query) use ($nombrePersona) {
-                $query->where('nombre_persona', $nombrePersona);
-            })
-            ->get();
+        $query = Incorporacion::with([
+            'persona',
+            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'user',
+        ]);
 
-        return $this->sendObject($incorporaciones);
+        if ($nombreCompletoPersona) {
+            $query->whereHas('persona', function ($q) use ($nombreCompletoPersona) {
+                $q->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $nombreCompletoPersona . '%']);
+            });
+        }
+
+        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
+
+        return $this->sendPaginated($incorporaciones);
     }
+
+    /*public function byIncorporacionNombreUser(Request $request)
+    {
+        $limit = $request->input('limit', 1000);
+        $page = $request->input('page', 0);
+        $nombreCompleto = $request->input('name');
+
+        $query = Incorporacion::with([
+            'persona',
+            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'user',
+        ]);
+
+        if ($nombreCompleto) {
+            $query->whereHas('user', function ($q) use ($nombreCompleto) {
+                $q->where('name', 'LIKE', '%' . $nombreCompleto . '%');
+            });
+        }
+
+        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
+
+        return $this->sendPaginated($incorporaciones);
+    }*/
+
+
     public function listPaginateIncorporaciones(Request $request)
     {
         $limit = $request->input('limit', 1000);
         $page = $request->input('page', 0);
         $query = Incorporacion::with([
             'persona',
-            // 'puesto_actual.departamento.Gerencia',
-            //'puesto_nuevo.departamento.gerencia',
-            // 'puesto_nuevo.persona_actual',
-            // 'puesto_nuevo.Funcionario.persona',
-            // 'puesto_nuevo.requisitos'
             'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
             'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
@@ -258,23 +279,6 @@ class IncorporacionesController extends Controller
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
         // $incorporaciones->data;
         return $this->sendPaginated($incorporaciones);
-    }
-
-    public function getByPersonaIncorporacion(Request $request)
-    {
-        $request->validate([
-            'personaId' => 'required|numeric',
-        ]);
-
-        $personaId = $request->input('personaId');
-
-        $incorporacion = Incorporacion::where('persona_id', $personaId)->first();
-
-        if ($incorporacion) {
-            return response()->json($incorporacion);
-        } else {
-            return response()->json(['message' => 'No se encontró ninguna incorporación para la persona con el ID proporcionado'], 404);
-        }
     }
 
     //R-0078 
@@ -334,7 +338,7 @@ class IncorporacionesController extends Controller
             $mensajeExperiencia = 'NO CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
         } elseif ($experiencia == 1) {
             $mensajeExperiencia = 'SI CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
-        } 
+        }
         $templateProcessor->setValue('incorporacion.experiencia', strtoupper($mensajeExperiencia));
 
 

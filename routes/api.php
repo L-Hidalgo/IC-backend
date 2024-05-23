@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ImportarExcelController;
 use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -24,10 +25,8 @@ Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
   Route::post('/list', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
-
-  Route::post('/by-persona', [IncorporacionesController::class, 'getByPersona']);
-
-  Route::get('/{persona_id}/by-persona-incorporacion', [IncorporacionesController::class, 'getByPersonaIncorporacion']);
+  Route::post('/byNombreCompletoPersonaIncorporacion', [IncorporacionesController::class, 'byIncorporacionNombrePersona']);
+  /*Route::post('/byNombreUserIncorporacion', [IncorporacionesController::class, 'byIncorporacionNombreUser']);*/
 
   Route::get('/{incorporacionId}/gen-form-evalR0078', [IncorporacionesController::class, 'generarFormularioEvalR0078']);
   Route::get('/{incorporacionId}/gen-form-evalR1401', [IncorporacionesController::class, 'genFormEvalR1401']);
@@ -55,11 +54,6 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-form-R-1129', [IncorporacionesController::class, 'generarR1129']);
   Route::get('/{incorporacionId}/gen-form-R-1401', [IncorporacionesController::class, 'generarR1401']);
 });
-
-
-/* ------------------------------------------ GradoAcademico ------------------------------------------ */
-// Route::post('/grado-academico',[GradoAcademicoController::class, 'crearPersona']);
-// Route::get('/GradoAcademico/buscar',[GradoAcademicoController::class, 'buscarPersona']);
 
 /* ------------------------------------------ Formacion ------------------------------------------ */
 Route::group(['prefix' => 'formaciones'], function () {
@@ -95,5 +89,10 @@ Route::group(['prefix' => 'personas'], function () {
   Route::put('/', [PersonasController::class, 'crearActualizarPersona']);
   Route::get('/{idPersona}', [PersonasController::class, 'getById']);
   Route::get('/{ciPersona}/by-ci', [PersonasController::class, 'getByCi']);
+
+});
+/* ------------------------------------------ Usuarios ------------------------------------------ */
+Route::group(['prefix' => 'users'], function () {
+  Route::get('/', [UserController::class, 'listar']);
 
 });

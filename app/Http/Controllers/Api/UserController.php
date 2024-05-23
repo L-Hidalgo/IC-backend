@@ -80,4 +80,10 @@ class UserController extends Controller
         $user->delete();
         return response()->json(['message' => 'User deleted successfully']);
     }
+
+    public function listar()
+    {
+        $user = User::select(['id', 'name'])->get();
+        return $this->sendList($user);
+    }
 }
