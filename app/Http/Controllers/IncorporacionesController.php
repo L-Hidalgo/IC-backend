@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Auth;
 
 class IncorporacionesController extends Controller
 {
-
     public function crearActualizarIncorporacion(Request $request)
     {
         $validatedData = $request->validate([
@@ -204,7 +203,6 @@ class IncorporacionesController extends Controller
             return response()->json(['error' => 'Tanto puesto como persona deben estar presentes para realizar la incorporación.'], 400);
         }
     }
-
     public function byIncorporacionNombrePersona(Request $request)
     {
         $limit = $request->input('limit', 1000);
@@ -233,12 +231,13 @@ class IncorporacionesController extends Controller
         return $this->sendPaginated($incorporaciones);
     }
 
-    /*public function byIncorporacionNombreUser(Request $request)
+    public function byIncorporacionNombreUser(Request $request)
     {
         $limit = $request->input('limit', 1000);
         $page = $request->input('page', 0);
-        $nombreCompleto = $request->input('name');
+        $name = $request->input('name');
 
+        // Construimos la consulta con las relaciones necesarias
         $query = Incorporacion::with([
             'persona',
             'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
@@ -250,16 +249,121 @@ class IncorporacionesController extends Controller
             'user',
         ]);
 
-        if ($nombreCompleto) {
-            $query->whereHas('user', function ($q) use ($nombreCompleto) {
-                $q->where('name', 'LIKE', '%' . $nombreCompleto . '%');
+        // Si se proporciona un nombre, agregamos la condición de búsqueda
+        if ($name) {
+            $query->whereHas('user', function ($q) use ($name) {
+                $q->where('name', 'LIKE', '%' . $name . '%');
             });
         }
 
+        // Paginamos los resultados
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
 
+        // Devolvemos los resultados paginados
         return $this->sendPaginated($incorporaciones);
-    }*/
+    }
+
+    public function byTipoIncorporacion(Request $request)
+    {
+        $limit = $request->input('limit', 1000);
+        $page = $request->input('page', 0);
+        $tipo = $request->input('tipo');
+
+        // Construimos la consulta base con las relaciones necesarias
+        $query = Incorporacion::with([
+            'persona',
+            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'user',
+        ]);
+
+        // Aplicar los filtros según el valor del tipo
+        if ($tipo == 1) {
+            $query->whereNotNull('puesto_nuevo_id');
+        } elseif ($tipo == 2) {
+            $query->whereNotNull('puesto_nuevo_id')->whereNotNull('puesto_actual_id');
+        }
+
+        // Paginamos los resultados
+        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
+
+        // Devolvemos los resultados paginados
+        return $this->sendPaginated($incorporaciones);
+    }
+
+    public function byFechaIncorporacion(Request $request)
+    {
+        $limit = $request->input('limit', 1000);
+        $page = $request->input('page', 0);
+        $tipo = $request->input('tipo');
+        $fecha_inicio = $request->input('fecha_inicio');
+        $fecha_fin = $request->input('fecha_fin');
+
+        // Construimos la consulta base con las relaciones necesarias
+        $query = Incorporacion::with([
+            'persona',
+            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'user',
+        ]);
+
+        // Aplicar los filtros según el valor del tipo
+        if ($tipo == 1) {
+            $query->whereNotNull('puesto_nuevo_id');
+        } elseif ($tipo == 2) {
+            $query->whereNotNull('puesto_nuevo_id')->whereNotNull('puesto_actual_id');
+        }
+
+        // Aplicar el filtro de fechas si se proporcionan
+        if ($fecha_inicio) {
+            $query->whereDate('created_at', '>=', $fecha_inicio);
+        }
+        if ($fecha_fin) {
+            $query->whereDate('created_at', '<=', $fecha_fin);
+        }
+
+        // Paginamos los resultados
+        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
+
+        // Devolvemos los resultados paginados
+        return $this->sendPaginated($incorporaciones);
+    }
+
+    public function darBajaIncorporacion($incorporacionId)
+    {
+        // Buscar la incorporación por ID
+        $incorporacion = Incorporacion::find($incorporacionId);
+
+        // Verificar si la incorporación existe
+        if (!$incorporacion) {
+            return response()->json(['error' => 'Incorporación no encontrada'], 404);
+        }
+
+        // Guardar los valores antiguos de los puestos
+        $puestoActualAnterior = $incorporacion->puesto_actual_id;
+        $puestoNuevoAnterior = $incorporacion->puesto_nuevo_id;
+
+        // Restaurar los valores antiguos de los puestos
+        $incorporacion->puesto_actual_id = $puestoActualAnterior;
+        $incorporacion->puesto_nuevo_id = $puestoNuevoAnterior;
+
+        // Cambiar el estado de la incorporación a dada de baja
+        $incorporacion->estado_incorporacion = 3;
+
+        // Guardar los cambios en la base de datos
+        $incorporacion->save();
+
+        return response()->json(['message' => 'Incorporación dada de baja exitosamente'], 200);
+    }
+
 
 
     public function listPaginateIncorporaciones(Request $request)
