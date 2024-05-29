@@ -22,6 +22,7 @@ class Puesto extends Model
         'departamento_id',
         'estado_id',
         'persona_actual_id',
+        'persona_anterior_id'
     ];
 
     protected $casts = [

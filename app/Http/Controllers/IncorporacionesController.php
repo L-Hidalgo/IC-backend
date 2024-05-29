@@ -17,10 +17,11 @@ use PhpOffice\PhpWord\TemplateProcessor;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class IncorporacionesController extends Controller
 {
-    public function crearActualizarIncorporacion(Request $request)
+    public function crearActualizarIncorporacion(Request $request) 
     {
         $validatedData = $request->validate([
             'userId' => 'nullable|integer',
@@ -62,17 +63,19 @@ class IncorporacionesController extends Controller
             $puesto = Puesto::find($validatedData['puestoNuevoId']);
 
             if ($puesto) {
+                
+
                 if (isset($validatedData['personaId']) && isset($validatedData['puestoActualId'])) {
                     $puestoActual = Puesto::find($validatedData['puestoActualId']);
                     if ($puestoActual && $puestoActual->persona_actual_id == $validatedData['personaId']) {
-                        $puestoActual->estado_id = 1;
                         $puestoActual->persona_actual_id = null;
+                        $puestoActual->estado_id = 1; //desocupado
                         $puestoActual->save();
                     }
                 }
 
                 $puesto->persona_actual_id = $validatedData['personaId'];
-                $puesto->estado_id = 2;
+                $puesto->estado_id = 2; //ocuapdo
                 $puesto->save();
 
                 $existingIncorporacion = Incorporacion::where('persona_id', $validatedData['personaId'])
@@ -206,13 +209,15 @@ class IncorporacionesController extends Controller
 
     public function byFiltrosIncorporacion(Request $request)
     {
-        $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0);
-        $name = $request->input('name');
-        $nombreCompletoPersona = $request->input('nombreCompletoPersona');
-        $tipo = $request->input('tipo');
-        $fechaInicio = $request->input('fechaInicio');
-        $fechaFin = $request->input('fechaFin');
+        $params = $request->all();
+
+        $limit = $params['limit'] ?? 1000;
+        $page = $params['page'] ?? 0;
+        $name = $params['name'] ?? null;
+        $nombre_completo_persona = $params['nombreCompletoPersona'] ?? null;
+        $tipo = $params['tipo'] ?? null;
+        $fecha_inicio = $params['fechaInicio'] ?? null;
+        $fecha_fin = $params['fechaFin'] ?? null;
 
         $query = Incorporacion::with([
             'persona',
@@ -227,13 +232,13 @@ class IncorporacionesController extends Controller
 
         if ($name) {
             $query->whereHas('user', function ($q) use ($name) {
-                $q->where('name', 'LIKE', '%' . $name . '%');
+                $q->whereRaw("name LIKE ?", ['%' . $name . '%']);
             });
         }
 
-        if ($nombreCompletoPersona) {
-            $query->whereHas('persona', function ($q) use ($nombreCompletoPersona) {
-                $q->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $nombreCompletoPersona . '%']);
+        if ($nombre_completo_persona) {
+            $query->whereHas('persona', function ($q) use ($nombre_completo_persona) {
+                $q->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $nombre_completo_persona . '%']);
             });
         }
 
@@ -243,45 +248,64 @@ class IncorporacionesController extends Controller
             $query->whereNotNull('puesto_nuevo_id')->whereNotNull('puesto_actual_id');
         }
 
-        if ($fechaInicio) {
-            $query->whereDate('created_at', '>=', $fechaInicio);
+        if ($fecha_inicio) {
+            $query->whereDate('created_at', '>=', $fecha_inicio);
         }
-
-        if ($fechaFin) {
-            $query->whereDate('created_at', '<=', $fechaFin);
+        if ($fecha_fin) {
+            $query->whereDate('created_at', '<=', $fecha_fin);
         }
 
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
 
-        return response()->json($incorporaciones);
+        return $this->sendPaginated($incorporaciones);
     }
-
+    
     public function darBajaIncorporacion($incorporacionId)
     {
-        // Buscar la incorporación por ID
         $incorporacion = Incorporacion::find($incorporacionId);
-
-        // Verificar si la incorporación existe
+    
         if (!$incorporacion) {
             return response()->json(['error' => 'Incorporación no encontrada'], 404);
         }
-
-        // Guardar los valores antiguos de los puestos
+    
         $puestoActualAnterior = $incorporacion->puesto_actual_id;
         $puestoNuevoAnterior = $incorporacion->puesto_nuevo_id;
+    
+        $puestoActual = Puesto::find($puestoActualAnterior);
+        if ($puestoActual) {
+            if ($puestoActual->persona_anterior_id === null) {
+                $puestoActual->persona_actual_id = $puestoActual->persona_anterior_id; 
+                $puestoActual->estado_id = 1;
 
-        // Restaurar los valores antiguos de los puestos
-        $incorporacion->puesto_actual_id = $puestoActualAnterior;
-        $incorporacion->puesto_nuevo_id = $puestoNuevoAnterior;
+            } else {
+                $puestoActual->persona_actual_id = $puestoActual->persona_anterior_id; 
+                $puestoActual->persona_anterior_id= null;
+                $puestoActual->estado_id = 2;
+            }
+            $puestoActual->save();
+        }
+    
+        $puestoNuevo = Puesto::find($puestoNuevoAnterior);
+        if ($puestoNuevo) {
+            if ($puestoNuevo->persona_anterior_id === null) {
+                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_anterior_id; 
+                $puestoNuevo->estado_id = 1;
 
-        // Cambiar el estado de la incorporación a dada de baja
+            } else {
+                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_anterior_id; 
+                $puestoNuevo->persona_anterior_id= null;
+                $puestoNuevo->estado_id = 2;
+            }
+            $puestoNuevo->save();
+        }
+    
         $incorporacion->estado_incorporacion = 3;
-
-        // Guardar los cambios en la base de datos
+    
         $incorporacion->save();
-
+    
         return response()->json(['message' => 'Incorporación dada de baja exitosamente'], 200);
     }
+    
 
     public function listPaginateIncorporaciones(Request $request)
     {
@@ -298,7 +322,6 @@ class IncorporacionesController extends Controller
             'user',
         ]);
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
-        // $incorporaciones->data;
         return $this->sendPaginated($incorporaciones);
     }
 

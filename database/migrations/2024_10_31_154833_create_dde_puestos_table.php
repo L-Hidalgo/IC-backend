@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedInteger('estado_id'); 
             $table->unsignedInteger('departamento_id');
             $table->unsignedInteger('persona_actual_id')->nullable();
+            $table->integer('persona_anterior_id')->nullable()->unsigned();
             $table->timestamps();
             $table->timestamp('fecha_inicio')->nullable()->default(null);
             $table->timestamp('fecha_fin')->nullable()->default(null);
@@ -28,8 +29,6 @@ return new class extends Migration
             $table->foreign('persona_actual_id')->references('id_persona')->on('dde_personas')->nullable(); 
             //$table->foreignId('persona_actual_id')->nullable()->constrained('personas'); //noda
         });
-        
-        
     }
 
     public function down(): void

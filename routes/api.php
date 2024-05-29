@@ -27,12 +27,14 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::post('/list', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
   Route::post('/byFiltrosIncorporacion', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
-
+  Route::get('/{incorporacionId}/gen-form-R-0980', [IncorporacionesController::class, 'generarR0980']);
+  Route::get('/{incorporacionId}/gen-form-R-1023', [IncorporacionesController::class, 'generarR1023']);
+  Route::get('/{incorporacionId}/gen-form-R-1129', [IncorporacionesController::class, 'generarR1129']);
+  Route::get('/{incorporacionId}/gen-form-R-1401', [IncorporacionesController::class, 'generarR1401']);
   Route::get('/{incorporacionId}/gen-form-evalR0078', [IncorporacionesController::class, 'generarFormularioEvalR0078']);
   Route::get('/{incorporacionId}/gen-form-evalR1401', [IncorporacionesController::class, 'genFormEvalR1401']);
   Route::get('/{incorporacionId}/gen-form-informe-con-nota', [IncorporacionesController::class, 'genFormInformeNota']);
   Route::get('/{incorporacionId}/gen-form-informe-con-minuta', [IncorporacionesController::class, 'genFormInformeMinuta']);
-
   Route::get('/{incorporacionId}/gen-form-evalR0078', [IncorporacionesController::class, 'generarFormularioEvalR0078']);
   Route::get('/{incorporacionId}/gen-form-evalR1401', [IncorporacionesController::class, 'genFormEvalR1401']);
   Route::get('/{incorporacionId}/gen-form-RAP', [IncorporacionesController::class, 'genFormRAP']);
@@ -40,19 +42,11 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-form-RemisionDeDocumentos', [IncorporacionesController::class, 'genFormRemisionDeDocumentos']);
   Route::get('/{incorporacionId}/gen-form-acta-de-posesion', [IncorporacionesController::class, 'genFormActaDePosesion']);
   Route::get('/{incorporacionId}/gen-form-acta-de-entrega', [IncorporacionesController::class, 'genFormActaDeEntrega']);
-
-
   Route::get('/{incorporacionId}/gen-form-informe-con-minuta', [IncorporacionesController::class, 'genFormInformeMinuta']);
   Route::get('/{incorporacionId}/gen-form-compromiso', [IncorporacionesController::class, 'genFormCompromiso']);
   Route::get('/{incorporacionId}/gen-form-declaracion-incompatibilidad', [IncorporacionesController::class, 'genFormDeclaracionIncompatibilidad']);
   Route::get('/{incorporacionId}/gen-form-etica', [IncorporacionesController::class, 'genFormEtica']);
   Route::get('/{incorporacionId}/gen-form-confidencialidad', [IncorporacionesController::class, 'genFormConfidencialidad']);
-
-  //form cambio de item
-  Route::get('/{incorporacionId}/gen-form-R-0980', [IncorporacionesController::class, 'generarR0980']);
-  Route::get('/{incorporacionId}/gen-form-R-1023', [IncorporacionesController::class, 'generarR1023']);
-  Route::get('/{incorporacionId}/gen-form-R-1129', [IncorporacionesController::class, 'generarR1129']);
-  Route::get('/{incorporacionId}/gen-form-R-1401', [IncorporacionesController::class, 'generarR1401']);
 });
 
 /* ------------------------------------------ Formacion ------------------------------------------ */

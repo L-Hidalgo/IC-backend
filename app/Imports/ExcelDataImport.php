@@ -121,8 +121,6 @@ class ExcelDataImport implements ToModel, WithStartRow
                     'estado_id' => $estadoAcefalia->id_estado, // Cambio aquí
                 ]);
             } else {
-                // Manejo del caso en el que no se encuentra el estado "Acefalo"
-                // Por ejemplo, lanzar una excepción, registrar un mensaje de error, etc.
                 throw new \Exception('No se encontró el estado "Acefalo"');
             }
         } else {
@@ -138,8 +136,6 @@ class ExcelDataImport implements ToModel, WithStartRow
                 $puesto->persona_actual_id = null;
                 $puesto->save();
             } else {
-                // Manejo del caso en el que no se encuentra el estado "Acefalo"
-                // Por ejemplo, lanzar una excepción, registrar un mensaje de error, etc.
                 throw new \Exception('No se encontró el estado "Acefalo"');
             }
         }
@@ -161,7 +157,6 @@ class ExcelDataImport implements ToModel, WithStartRow
     ): Persona {
         $persona = Persona::where('ci_persona', $ci)->first();
         if (!isset($persona)) {
-            // formato fecha Nac
             $timestamp = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fechaNacimiento);
             $fechaNacimiento = Carbon::createFromTimestamp($timestamp)->format('Y-m-d');
 
@@ -201,8 +196,6 @@ class ExcelDataImport implements ToModel, WithStartRow
             ->first();
 
         if (!isset($Funcionario)) {
-
-            // formato fecha inicio en SIN
             $timestampfsin = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fchInicioSinFuncionario);
             $fchInicioSinFuncionario = Carbon::createFromTimestamp($timestampfsin)->format('Y-m-d');
 

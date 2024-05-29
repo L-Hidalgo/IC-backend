@@ -83,7 +83,9 @@ class UserController extends Controller
 
     public function listar()
     {
-        $user = User::select(['id', 'name'])->get();
+        $user = User::select(['id', 'name'])
+             ->where('gerencia', '=', 'Dotacion Evaluacion y Capacitacion')
+             ->get();
         return $this->sendList($user);
     }
 }

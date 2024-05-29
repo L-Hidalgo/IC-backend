@@ -21,20 +21,30 @@ class PuestoController extends Controller
         return $this->sendSuccess($puesto);
     }
 
-    /*public function getByItem($item_puesto) {
-        $puesto = Puesto::with(['persona_actual:id_persona,nombre_persona,primer_apellido_persona,segundo_apellido_persona,departamento:id_departamento,nombre_departamento,departamento.gerencia:id_gerencia,nombre_gerencia'])->where('item_puesto', $item_puesto)->first();
-        Log::info($puesto);
-        return $this->sendObject($puesto);
-    } */
-
-    public function getByItem($item_puesto)
+    /*public function getByItem($item_puesto)
     {
         $puesto = Puesto::where('item_puesto', $item_puesto)
-        ->with('departamento', 'departamento.gerencia', 'persona_actual')
-        ->first();
+            ->with('departamento', 'departamento.gerencia', 'persona_actual')
+            ->first();
 
         if ($puesto) {
             Log::info($puesto);
+            return $this->sendObject($puesto);
+        } else {
+            return null;
+        }
+    }*/
+    public function getByItem($item_puesto)
+    {
+        $puesto = Puesto::where('item_puesto', $item_puesto)
+            ->with('departamento', 'departamento.gerencia', 'persona_actual')
+            ->first();
+
+        if ($puesto) {
+            if ($puesto->persona_actual_id) {
+                $puesto->persona_anterior_id = $puesto->persona_actual_id;
+                $puesto->save();
+            }
             return $this->sendObject($puesto);
         } else {
             return null;
@@ -48,7 +58,12 @@ class PuestoController extends Controller
             ->first();
 
         if ($puesto) {
-            Log::info($puesto);
+            if ($puesto->persona_actual_id) {
+
+                $puesto->persona_anterior_id = $puesto->persona_actual_id;
+
+                $puesto->save();
+            }
             return $this->sendObject($puesto);
         } else {
             return null;
