@@ -12,6 +12,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
 {
@@ -20,12 +22,9 @@ class UserController extends Controller
         $data = $datatable->make($request);
         return response()->json($data);
     }
-    public function store(
-        Request    $request,
-        CreateUser $createUser
-    )
+
+    public function store(Request    $request, CreateUser $createUser)
     {
-        //abort_if(!auth()->user()->admin, 403);
 
         $request->validate([
             'name' => ['required', 'string'],
@@ -46,36 +45,13 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(
-        Request    $request,
-        User       $user,
-        UpdateUser $updateUser
-    ): JsonResponse
+    public function update(Request $request, User $user)
     {
-        // abort_if(!auth()->user()->admin, 403);
-
-        $request->validate([
-            'name' => ['required', 'string'],
-            'email' => ['required', 'email', 'unique:users,email,' . $user->id],
-            'password' => ['nullable', 'string']
-        ]);
-
-        $updateUser->execute($user, new UserDTO([
-            'name' => $request['name'],
-            'email' => $request['email'],
-            'password' => $request['password'] ?
-                Hash::make($request['password']) : null,
-        ]));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully',
-        ]);
+        $user->roles()->sync($request->roles);
     }
 
     public function destroy(User $user): JsonResponse
     {
-        // abort_if(!auth()->user()->admin, 403);
 
         $user->delete();
         return response()->json(['message' => 'User deleted successfully']);
@@ -84,8 +60,32 @@ class UserController extends Controller
     public function listar()
     {
         $user = User::select(['id', 'name'])
-             ->where('gerencia', '=', 'Dotacion Evaluacion y Capacitacion')
-             ->get();
+            ->where('gerencia', '=', 'Dotacion Evaluacion y Capacitacion')
+            ->get();
         return $this->sendList($user);
+    }
+
+    public function listarUserAdmin()
+    {
+        $users = User::select(['id', 'name', 'username', 'email', 'cargo'])->get();
+        return $this->sendList($users);
+    }
+
+    public function ByNameUser($nombre = null)
+    {
+        $query = User::select(['id', 'name', 'username', 'email', 'cargo']);
+
+        if ($nombre !== null) {
+            $query->where('name', 'LIKE', '%' . $nombre . '%');
+        }
+
+        $users = $query->get();
+
+        return $this->sendList($users);
+    }
+
+    public function edit($user)
+    {
+        $roles = Role::all();
     }
 }
