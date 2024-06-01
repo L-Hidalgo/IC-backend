@@ -32,11 +32,11 @@ class AuthenticatedSessionController extends Controller
             
             $token = $user->createToken("API Token")->plainTextToken;
 
-            $role3 = Role::where('name', 'Reading')->first();
+            $role3 = Role::where('name', 'Lectura')->first();
             if ($role3) {
                 $user->assignRole($role3);
             } else {
-                return response()->json(['error' => 'No se encontró el rol "Reading"'], 500);
+                return response()->json(['error' => 'No se encontró el rol "Lectura"'], 500);
             }
 
             return response()->json([

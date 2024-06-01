@@ -45,12 +45,27 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, $userId)
     {
-        $user->roles()->sync($request->roles);
+        $user = User::findOrFail($userId);
 
-        return response()->json(['message' => 'Roles actualizados correctamente'], 200);
+        if ($user) {
+            if ($request->has('roles')) {
+                $rolesExist = Role::whereIn('id', $request->roles)->count() === count($request->roles);
+                if ($rolesExist) {
+                    $user->roles()->sync($request->roles);
+                    return response()->json(['message' => 'Roles actualizados correctamente'], 200);
+                } else {
+                    return response()->json(['error' => 'Algunos roles proporcionados no existen'], 400);
+                }
+            } else {
+                return response()->json(['error' => 'No se proporcionaron roles en la solicitud'], 400);
+            }
+        } else {
+            return response()->json(['error' => 'No se encontró el usuario'], 404);
+        }
     }
+
 
     public function destroy(User $user): JsonResponse
     {
@@ -67,7 +82,7 @@ class UserController extends Controller
         return $this->sendList($user);
     }
 
-    public function listarUserAdmin(Request $request)
+    public function listarUser(Request $request)
     {
         $query = User::select(['id', 'name', 'username', 'email', 'cargo', 'gerencia'])->get();
         $users = $query;
@@ -86,5 +101,4 @@ class UserController extends Controller
 
         return $this->sendList($users);
     }
-
 }
