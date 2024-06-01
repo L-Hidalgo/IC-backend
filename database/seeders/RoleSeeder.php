@@ -29,6 +29,6 @@ class RoleSeeder extends Seeder
         $permission = Permission::create(['name' => 'incorporaciones.edit'])->syncRoles([$role1, $role2]);
         $permission = Permission::create(['name' => 'incorporaciones.destroy'])->syncRoles([$role1, $role2]);
 
-        //para asignarle a un usuario un rol deberia ser asi ->assignRole('Admin');
+        
     }
 }

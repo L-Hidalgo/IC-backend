@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AreaFormacionController;
 use App\Http\Controllers\Api\InstitucionController;
 use App\Http\Controllers\Api\FormacionController;
 use App\Http\Controllers\Api\PuestoController;
+use App\Http\Controllers\Api\RolController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ImportarExcelController;
 use App\Http\Controllers\IncorporacionesController;
@@ -85,8 +86,11 @@ Route::group(['prefix' => 'personas'], function () {
   Route::get('/{ciPersona}/by-ci', [PersonasController::class, 'getByCi']);
 
 });
-/* ------------------------------------------ Usuarios ------------------------------------------ */
+/* ------------------------------------------ Usuarios y Roles ------------------------------------------ */
 Route::group(['prefix' => 'users'], function () {
   Route::get('/', [UserController::class, 'listar']);
-
+  Route::get('/listarUsuariosAdmin', [UserController::class, 'listarUserAdmin']);
+  Route::put('/{user}', [UserController::class, 'update']);
+  Route::get('/rol', [RolController::class, 'listar']);
 });
+

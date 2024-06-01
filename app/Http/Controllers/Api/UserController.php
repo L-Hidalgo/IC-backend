@@ -48,6 +48,8 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $user->roles()->sync($request->roles);
+
+        return response()->json(['message' => 'Roles actualizados correctamente'], 200);
     }
 
     public function destroy(User $user): JsonResponse
@@ -65,9 +67,10 @@ class UserController extends Controller
         return $this->sendList($user);
     }
 
-    public function listarUserAdmin()
+    public function listarUserAdmin(Request $request)
     {
-        $users = User::select(['id', 'name', 'username', 'email', 'cargo'])->get();
+        $query = User::select(['id', 'name', 'username', 'email', 'cargo', 'gerencia'])->get();
+        $users = $query;
         return $this->sendList($users);
     }
 
@@ -84,8 +87,4 @@ class UserController extends Controller
         return $this->sendList($users);
     }
 
-    public function edit($user)
-    {
-        $roles = Role::all();
-    }
 }

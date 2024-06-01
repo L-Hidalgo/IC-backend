@@ -8,9 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -25,33 +23,21 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
-     */
-    /*public function store(LoginRequest $request)
-    {
-        try {
-            $request->authenticate();
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => 'Credenciales incorrectas'], 401);
-        }
-
-        //$request->session()->regenerate();
-        
-        $user = Auth::user();
-
-        return response()->json([
-            'message' => 'Autenticación exitosa',
-
-            'user' => $user
-        ]);
-    }*/
+    */
     public function store(LoginRequest $request)
     {
         try {
             $request->authenticate();
             $user = Auth::user();
-
-            // Obtener el factory de tokens de acceso
+            
             $token = $user->createToken("API Token")->plainTextToken;
+
+            $role3 = Role::where('name', 'Reading')->first();
+            if ($role3) {
+                $user->assignRole($role3);
+            } else {
+                return response()->json(['error' => 'No se encontró el rol "Reading"'], 500);
+            }
 
             return response()->json([
                 'status' => true,

@@ -20,6 +20,8 @@ class User extends Authenticatable implements LdapAuthenticatable
    * @var array<int, string>
    */
 
+  protected $guard_name = 'web';
+
   protected $fillable = [
     'ci',
     'name',
@@ -88,4 +90,5 @@ class User extends Authenticatable implements LdapAuthenticatable
   {
     return $this->hasMany(Incorporacion::class, 'user_id', 'id');
   }
+ 
 }
