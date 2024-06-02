@@ -23,27 +23,37 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
-    */
+     */
     public function store(LoginRequest $request)
     {
         try {
             $request->authenticate();
             $user = Auth::user();
-            
             $token = $user->createToken("API Token")->plainTextToken;
 
-            $role3 = Role::where('name', 'Lectura')->first();
-            if ($role3) {
-                $user->assignRole($role3);
-            } else {
-                return response()->json(['error' => 'No se encontró el rol "Lectura"'], 500);
+            $role = $user->roles->first(); 
+
+            $roleName = $role ? $role->name : null;
+
+            if (!$role) {
+                $roleLectura = Role::where('name', 'Lectura')->first();
+                if (!$roleLectura) {
+                    return response()->json(['error' => 'No se encontró el rol "Lectura"'], 500);
+                }
+                $user->syncRoles($roleLectura);
+                $roleName = 'Lectura'; 
             }
 
             return response()->json([
                 'status' => true,
-                'message' => 'El usuario inició sesión correctamente',
-                'user' => $user,
-                'token' => $token
+                'token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $roleName
+                ],
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['error' => 'Credenciales incorrectas'], 401);

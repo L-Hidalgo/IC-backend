@@ -4,16 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Actions\Users\CreateUser;
-use App\Actions\Users\UpdateUser;
 use App\Datatables\UserDatatable;
 use App\DTOs\UserDTO;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -84,8 +82,16 @@ class UserController extends Controller
 
     public function listarUser(Request $request)
     {
-        $query = User::select(['id', 'name', 'username', 'email', 'cargo', 'gerencia'])->get();
-        $users = $query;
+        $query = User::select(['id', 'name', 'username', 'email', 'cargo'])
+            ->with('roles:name')
+            ->get();
+
+        $users = $query->map(function ($user) {
+            $user->rol = $user->roles->implode('name', ', ');
+            unset($user->roles);
+            return $user;
+        });
+
         return $this->sendList($users);
     }
 
@@ -100,5 +106,20 @@ class UserController extends Controller
         $users = $query->get();
 
         return $this->sendList($users);
+    }
+
+    public function obtenerRolUser($userId)
+    {
+        $rol = DB::table('model_has_roles')
+            ->where('model_id', $userId)
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->select('roles.name')
+            ->first();
+
+        if ($rol) {
+            return response()->json(['rol' => $rol->name], 200);
+        } else {
+            return response()->json(['error' => 'El usuario no tiene un rol asignado'], 404);
+        }
     }
 }

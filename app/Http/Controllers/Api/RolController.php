@@ -7,9 +7,9 @@ use App\Models\Rol;
 
 class RolController extends Controller
 {
-    public function listar()
+    public function listarRol()
     {
-        $rol = Rol::select(['name'])->get();
+        $rol = Rol::select(['id', 'name'])->get();
         return $this->sendList($rol);
     }
 

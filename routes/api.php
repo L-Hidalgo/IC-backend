@@ -89,8 +89,9 @@ Route::group(['prefix' => 'personas'], function () {
 /* ------------------------------------------ Usuarios y Roles ------------------------------------------ */
 Route::group(['prefix' => 'users'], function () {
   Route::get('/', [UserController::class, 'listar']);
-  Route::get('/listarUsuariosAdmin', [UserController::class, 'listarUser']);
-  Route::get('/listarRol', [RolController::class, 'listar']);
+  Route::get('/listarUsers', [UserController::class, 'listarUser']);
+  Route::get('/listarRol', [RolController::class, 'listarRol']);
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
+  Route::get('/{userId}/userRol', [UserController::class, 'obtenerRolUser']);
 });
 
