@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Log;
 
 class IncorporacionesController extends Controller
 {
-    public function crearActualizarIncorporacion(Request $request) 
+    public function crearActualizarIncorporacion(Request $request)
     {
         $validatedData = $request->validate([
             'userId' => 'nullable|integer',
@@ -63,7 +63,7 @@ class IncorporacionesController extends Controller
             $puesto = Puesto::find($validatedData['puestoNuevoId']);
 
             if ($puesto) {
-                
+
 
                 if (isset($validatedData['personaId']) && isset($validatedData['puestoActualId'])) {
                     $puestoActual = Puesto::find($validatedData['puestoActualId']);
@@ -259,53 +259,50 @@ class IncorporacionesController extends Controller
 
         return $this->sendPaginated($incorporaciones);
     }
-    
+
     public function darBajaIncorporacion($incorporacionId)
     {
         $incorporacion = Incorporacion::find($incorporacionId);
-    
+
         if (!$incorporacion) {
             return response()->json(['error' => 'Incorporación no encontrada'], 404);
         }
-    
+
         $puestoActualAnterior = $incorporacion->puesto_actual_id;
         $puestoNuevoAnterior = $incorporacion->puesto_nuevo_id;
-    
+
         $puestoActual = Puesto::find($puestoActualAnterior);
         if ($puestoActual) {
             if ($puestoActual->persona_anterior_id === null) {
-                $puestoActual->persona_actual_id = $puestoActual->persona_anterior_id; 
+                $puestoActual->persona_actual_id = $puestoActual->persona_anterior_id;
                 $puestoActual->estado_id = 1;
-
             } else {
-                $puestoActual->persona_actual_id = $puestoActual->persona_anterior_id; 
-                $puestoActual->persona_anterior_id= null;
+                $puestoActual->persona_actual_id = $puestoActual->persona_anterior_id;
+                $puestoActual->persona_anterior_id = null;
                 $puestoActual->estado_id = 2;
             }
             $puestoActual->save();
         }
-    
+
         $puestoNuevo = Puesto::find($puestoNuevoAnterior);
         if ($puestoNuevo) {
             if ($puestoNuevo->persona_anterior_id === null) {
-                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_anterior_id; 
+                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_anterior_id;
                 $puestoNuevo->estado_id = 1;
-
             } else {
-                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_anterior_id; 
-                $puestoNuevo->persona_anterior_id= null;
+                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_anterior_id;
+                $puestoNuevo->persona_anterior_id = null;
                 $puestoNuevo->estado_id = 2;
             }
             $puestoNuevo->save();
         }
-    
+
         $incorporacion->estado_incorporacion = 3;
-    
+
         $incorporacion->save();
-    
+
         return response()->json(['message' => 'Incorporación dada de baja exitosamente'], 200);
     }
-    
 
     public function listPaginateIncorporaciones(Request $request)
     {
@@ -362,7 +359,8 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.denominacion', mb_strtoupper($incorporacion->puesto_nuevo->denominacion_puesto));
 
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto, 0, '.', ',');
+        //$templateProcessor->setValue('puestoNuevo.salario', $incorporacion->puesto_nuevo->salario_puesto);
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
         $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
 
         foreach ($incorporacion->puesto_nuevo->requisitos as $requisito) {
@@ -412,7 +410,7 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
         $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
 
-        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia; //estoooooooo ver 
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
 
         switch ($nombreGerencia) {
             case 'El Alto':
@@ -573,7 +571,9 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoActual.denominacion', $incorporacion->puesto_actual->denominacion_puesto);
 
-        $templateProcessor->setValue('puestoActual.salario', $incorporacion->puesto_actual->salario_puesto);
+        //$templateProcessor->setValue('puestoActual.salario', $incorporacion->puesto_actual->salario_puesto);
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
+        $templateProcessor->setValue('puestoActual.salario', $salarioFormateado);
 
         $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
 
@@ -583,7 +583,9 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
 
-        $templateProcessor->setValue('puestoNuevo.salario', $incorporacion->puesto_nuevo->salario_puesto);
+        //$templateProcessor->setValue('puestoNuevo.salario', $incorporacion->puesto_nuevo->salario_puesto);
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
+        $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
 
         foreach ($incorporacion->puesto_nuevo->requisitos as $requisito) {
             if ($requisito) {
@@ -853,7 +855,7 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.departamento', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
 
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto, 0, '.', ',');
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
         $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
 
         $templateProcessor->setValue('puestoNuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
@@ -1151,7 +1153,7 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.departamento', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
 
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto, 0, '.', ',');
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
         $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
 
         $templateProcessor->setValue('puestoNuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
@@ -1368,10 +1370,8 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
 
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto, 0, '.', ',');
-
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
         $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
-
 
         $templateProcessor->setValue('puestoNuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
 
@@ -1578,8 +1578,7 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
 
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto, 0, '.', ',');
-
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
         $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
 
         $templateProcessor->setValue('puestoNuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
