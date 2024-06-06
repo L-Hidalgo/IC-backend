@@ -10,6 +10,7 @@ use App\Models\Persona;
 use App\Models\Puesto;
 use App\Models\Departamento;
 use App\Models\Gerencia;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -308,6 +309,7 @@ class IncorporacionesController extends Controller
     {
         $limit = $request->input('limit', 1000);
         $page = $request->input('page', 0);
+
         $query = Incorporacion::with([
             'persona',
             'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
@@ -317,8 +319,10 @@ class IncorporacionesController extends Controller
             'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
             'user',
-        ]);
+        ])->orderBy('id_incorporacion', 'desc'); 
+
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
+
         return $this->sendPaginated($incorporaciones);
     }
 
@@ -384,7 +388,9 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.experiencia', mb_strtoupper($mensajeExperiencia));
 
 
-        $fileName = 'R-0078 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona);
+        $fileName = 'R-0078 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++; 
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -464,8 +470,10 @@ class IncorporacionesController extends Controller
         $fechaincorporacionFormateada = $carbonFechaincorporacion->isoFormat('LL');
         $templateProcessor->setValue('fechaIncorporacion', $fechaincorporacionFormateada);
 
-        $fileName = 'R-1401 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona);
+        $fileName = 'R-1401 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
 
+        $incorporacion->descargas++; 
+        
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
@@ -531,9 +539,14 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
         $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
 
-        $fileName = 'R-0980-01 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona);
+        $fileName = 'R-0980-01 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
+        
+        $incorporacion->descargas++; 
+        
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        
         $templateProcessor->saveAs($savedPath);
+        
         return response()->download($savedPath)->deleteFileAfterSend(true);
     }
 
@@ -599,7 +612,9 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->observacion_incorporacion));
 
-        $fileName = 'R-1023-01 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona);
+        $fileName = 'R-1023-01 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++;
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -629,8 +644,10 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
 
-        $fileName = 'R-1129-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+        $fileName = 'R-1129-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
 
+        $incorporacion->descargas++;
+        
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
@@ -658,7 +675,7 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('incorporacion.nombreUsuario', $incorporacion->user->name);
 
-        $templateProcessor->setValue('incorporacion.cargoUsuario', $incorporacion->user->cargo);
+        $templateProcessor->setValue('incorporacion.cargoUsuario', mb_strtoupper($incorporacion->user->cargo, 'UTF-8'));
 
         $nombreCompleto = $incorporacion->user->name;
         $partesNombre = explode(' ', $nombreCompleto);
@@ -696,12 +713,13 @@ class IncorporacionesController extends Controller
         $fechaNotaMinutaFormateada = $carbonFechaNotaMinuta->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaNotaMinuta', $fechaNotaMinutaFormateada);
 
+        
         $carbonFechaRecepcion = Carbon::parse($incorporacion->fch_recepcion_nota_incorporacion);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaRecepcion->locale('es_UY');
         $fechaRecepcionFormateada = $carbonFechaRecepcion->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaRecepcion', $fechaRecepcionFormateada);
-
+ 
         $formacion = $incorporacion->persona->formacion->first();
         if ($formacion) {
             $respaldoFormacion = $formacion->pivot->con_respaldo_formacion ?? 'Valor predeterminado';
@@ -913,10 +931,12 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('puestoNuevo.gerenciaRef', $valorDepartamento);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'INF MINUTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto);
+            $fileName = 'INF MINUTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'INF MINUTA ' . strtoupper($nombreCompleto);
+            $fileName = 'INF MINUTA ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
         }
+
+        $incorporacion->descargas++; 
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -944,7 +964,7 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('incorporacion.nombreUsuario', $incorporacion->user->name);
 
-        $templateProcessor->setValue('incorporacion.cargoUsuario', $incorporacion->user->cargo);
+        $templateProcessor->setValue('incorporacion.cargoUsuario', mb_strtoupper($incorporacion->user->cargo, 'UTF-8'));
 
         $nombreCompleto = $incorporacion->user->name;
         $partesNombre = explode(' ', $nombreCompleto);
@@ -982,21 +1002,9 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaNotaMinuta', $fechaNotaMinutaFormateada);
 
         $carbonFechaRecepcion = Carbon::parse($incorporacion->fch_recepcion_nota_incorporacion);
-        $meses = [
-            'January' => 'enero',
-            'February' => 'febrero',
-            'March' => 'marzo',
-            'April' => 'abril',
-            'May' => 'mayo',
-            'June' => 'junio',
-            'July' => 'julio',
-            'August' => 'agosto',
-            'September' => 'septiembre',
-            'October' => 'octubre',
-            'November' => 'noviembre',
-            'December' => 'diciembre',
-        ];
-        $fechaRecepcionFormateada = $carbonFechaRecepcion->format('j \d\e ') . $meses[$carbonFechaRecepcion->format('F')];
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaRecepcion->locale('es_UY');
+        $fechaRecepcionFormateada = $carbonFechaRecepcion->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaRecepcion', $fechaRecepcionFormateada);
 
         $formacion = $incorporacion->persona->formacion->first();
@@ -1211,10 +1219,12 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('puestoNuevo.gerenciaRef', $valorDepartamento);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'INF NOTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto);
+            $fileName = 'INF NOTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'INF NOTA ' . strtoupper($nombreCompleto);
+            $fileName = 'INF NOTA ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
         }
+
+        $incorporacion->descargas++; 
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -1284,12 +1294,12 @@ class IncorporacionesController extends Controller
         if ($sexo === 'F') {
             //$templateProcessor->setValue('persona.deLa', 'de la servidora pública ' . $nombreCompleto);
             $templateProcessor->setValue('persona.reasignada', 'a la servidora pública interina ' . $nombreCompleto);
-            //$templateProcessor->setValue('persona.referencia', 'de la señora ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia', 'de la señora ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaInc', 'a la señora ' . $nombreCompleto);
         } else {
             //$templateProcessor->setValue('persona.deLa', 'del servidor publico ' . $nombreCompleto);
             $templateProcessor->setValue('persona.reasignada', 'al servidor publico interino ' . $nombreCompleto);
-            //$templateProcessor->setValue('persona.referencia', 'del señor ' . $nombreCompleto);
+            $templateProcessor->setValue('persona.referencia', 'del señor ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaInc', 'al señor ' . $nombreCompleto);
         }
 
@@ -1375,7 +1385,7 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.salarioLiteral', $incorporacion->puesto_nuevo->salario_literal_puesto);
 
-        /*$templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
+        $templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
 
         $carbonFechaInforme = Carbon::parse($incorporacion->fch_informe_incorporacion);
         setlocale(LC_TIME, 'es_UY');
@@ -1383,7 +1393,7 @@ class IncorporacionesController extends Controller
         $fechaInformeFormateada = $carbonFechaInforme->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaInforme', $fechaInformeFormateada);
 
-        if (isset($incorporacion->puesto_actual)) {
+        /*if (isset($incorporacion->puesto_actual)) {
             $descripcion = 'recomienda el cambio del Ítem N°' . $incorporacion->puesto_actual->item_puesto . ', al Ítem N°' . $incorporacion->puesto_nuevo->item_puesto;
         } else {
             $descripcion = 'recomienda la designación al Ítem N°' . $incorporacion->puesto_nuevo->item_puesto;
@@ -1393,10 +1403,12 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);*/
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'RAP CAMBIO DE ITEM ' . strtoupper($nombreCompleto);
+            $fileName = 'RAP CAMBIO DE ITEM ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'RAP ' . strtoupper($nombreCompleto);
+            $fileName = 'RAP ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
         }
+
+        $incorporacion->descargas++; 
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -1586,11 +1598,15 @@ class IncorporacionesController extends Controller
         //$templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'MEM CAMBIO DE ITEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+            $fileName = 'MEM CAMBIO DE ITEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona). ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'MEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+            $fileName = 'MEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona). ' ' . $incorporacion->descargas;
         }
+        
+        $incorporacion->descargas++; 
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -1727,12 +1743,15 @@ class IncorporacionesController extends Controller
         }
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'Acta de Posesion Cambio de Item ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+            $fileName = 'Acta de Posesion Cambio de Item ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'Acta de Posesion ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+            $fileName = 'Acta de Posesion ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
         }
 
+        $incorporacion->descargas++;
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -1817,11 +1836,15 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('puestoNuevo.gerenciaUbicacion', $ubicacion);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'Acta Entrega Cambio de item ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+            $fileName = 'Acta Entrega Cambio de item ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'Acta Entrega ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+            $fileName = 'Acta Entrega ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
         }
+        
+        $incorporacion->descargas++; 
+         
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -1898,8 +1921,12 @@ class IncorporacionesController extends Controller
         $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
-        $fileName = 'R-0976-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+        $fileName = 'R-0976-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
+        
+        $incorporacion->descargas++; 
+        
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -1998,8 +2025,12 @@ class IncorporacionesController extends Controller
         $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
-        $fileName = 'R-0921-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+        $fileName = 'R-0921-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
+        
+        $incorporacion->descargas++; 
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -2097,8 +2128,12 @@ class IncorporacionesController extends Controller
         $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
-        $fileName = 'R-0716-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+        $fileName = 'R-0716-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
+        
+        $incorporacion->descargas++; 
+        
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -2198,8 +2233,12 @@ class IncorporacionesController extends Controller
         $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
-        $fileName = 'R-SGC-0033-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona;
+        $fileName = 'R-SGC-0033-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
+        
+        $incorporacion->descargas++;
+        
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);

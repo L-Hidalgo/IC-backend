@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
         $user = User::find(1);
 
          if ($user) {
-            $role3 = Role::where('name', 'Lectura')->first();
+            $role3 = Role::where('name', 'Administrador')->first();
 
             if ($role3) {
                 $user->assignRole($role3);

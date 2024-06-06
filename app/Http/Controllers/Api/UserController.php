@@ -95,12 +95,15 @@ class UserController extends Controller
         return $this->sendList($users);
     }
 
-    public function ByNameUser($nombre = null)
+    public function ByNameUser(Request $request)
     {
+        
+        $name = $request->input('name');
+
         $query = User::select(['id', 'name', 'username', 'email', 'cargo']);
 
-        if ($nombre !== null) {
-            $query->where('name', 'LIKE', '%' . $nombre . '%');
+        if ($name !== null) {
+            $query->where('name', 'LIKE', '%' . $name . '%');
         }
 
         $users = $query->get();

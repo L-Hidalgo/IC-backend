@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration 
 {
@@ -15,15 +16,15 @@ return new class extends Migration
             $table->timestamp('fecha_inicio')->nullable()->default(null);
             $table->timestamp('fecha_fin')->nullable()->default(null);
         });
-/*
+
         DB::table('dde_grado_academicos')->insert([
-            ['nombre_grado_academico' => 'Bachiller'],
-            ['nombre_grado_academico' => 'Egresado'],
-            ['nombre_grado_academico' => 'Estudiante Universitario'],
-            ['nombre_grado_academico' => 'Licenci_personaatura'],
-            ['nombre_grado_academico' => 'Tecnico Medio'],
-            ['nombre_grado_academico' => 'Tecnico Superior'],
-        ]);*/
+            //['nombre_grado_academico' => 'Bachiller'],
+            //['nombre_grado_academico' => 'Egresado'],
+            //['nombre_grado_academico' => 'Estudiante Universitario'],
+            ['nombre_grado_academico' => 'Licenciatura'],
+            //['nombre_grado_academico' => 'Tecnico Medio'],
+            //['nombre_grado_academico' => 'Tecnico Superior'],
+        ]);
     }
 
     public function down(): void

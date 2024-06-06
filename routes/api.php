@@ -93,5 +93,6 @@ Route::group(['prefix' => 'users'], function () {
   Route::get('/listarRol', [RolController::class, 'listarRol']);
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
   Route::get('/{userId}/userRol', [UserController::class, 'obtenerRolUser']);
+  Route::get('/byNameUser', [UserController::class, 'byNameUser']);
 });
 
