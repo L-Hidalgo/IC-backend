@@ -71,8 +71,8 @@ class Persona extends Model
         return $this->belongsToMany(Institucion::class, 'formacion', 'persona_id', 'institucion_id')->withPivot('id', 'grado_academico_id', 'area_formacion_id', 'gestion_formacion', 'estado_formacion', 'con_respaldo_formacion', 'fecha_inicio', 'fecha_fin');
     }
 
-    public function imagen()
+    public function imagenes()
     {
-        return $this->hasMany(Imagen::class);
+        return $this->hasMany(Imagen::class, 'persona_id', 'id_persona');
     }
 }

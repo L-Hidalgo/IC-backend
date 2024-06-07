@@ -11,6 +11,7 @@ use App\Http\Controllers\ImportarExcelController;
 use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\ImportarImagesController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -19,10 +20,23 @@ Route::middleware('auth')->group(function () {
   Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
 
-//importacion de planilla
-Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
+// usuarios y roles
+Route::group(['prefix' => 'users'], function () {
+  Route::get('/', [UserController::class, 'listar']);
+  Route::get('/listarUsers', [UserController::class, 'listarUser']);
+  Route::get('/listarRol', [RolController::class, 'listarRol']);
+  Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
+  Route::get('/{userId}/userRol', [UserController::class, 'obtenerRolUser']);
+  Route::get('/byNameUser', [UserController::class, 'byNameUser']);
+});
 
-// Incorporaciones
+// administracion
+Route::group(['prefix' => 'administracion'], function () {
+  Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
+  Route::post('/importar-imagenes', [ImportarImagesController::class, 'importImagenes']);
+});
+
+// incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
   Route::post('/list', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
@@ -84,15 +98,4 @@ Route::group(['prefix' => 'personas'], function () {
   Route::put('/', [PersonasController::class, 'crearActualizarPersona']);
   Route::get('/{idPersona}', [PersonasController::class, 'getById']);
   Route::get('/{ciPersona}/by-ci', [PersonasController::class, 'getByCi']);
-
 });
-/* ------------------------------------------ Usuarios y Roles ------------------------------------------ */
-Route::group(['prefix' => 'users'], function () {
-  Route::get('/', [UserController::class, 'listar']);
-  Route::get('/listarUsers', [UserController::class, 'listarUser']);
-  Route::get('/listarRol', [RolController::class, 'listarRol']);
-  Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
-  Route::get('/{userId}/userRol', [UserController::class, 'obtenerRolUser']);
-  Route::get('/byNameUser', [UserController::class, 'byNameUser']);
-});
-

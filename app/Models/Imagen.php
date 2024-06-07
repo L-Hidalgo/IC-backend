@@ -14,45 +14,13 @@ class Imagen extends Model
 
     protected $fillable = [
         'imagen_imagen',
+        'tipo_mime_imagen',
+        'persona_id',
     ];
 
-    protected $casts = [
-        'fecha_inicio' => 'datetime',
-        'fecha_fin' => 'datetime',
-    ];
-
-    public function Funcionario()
+    public function persona()
     {
-        return $this->hasMany(Funcionario::class);
+        return $this->belongsTo(Persona::class, 'persona_id', 'id_persona');
     }
 
-    public function usuario()
-    {
-        return $this->hasOne(User::class, 'persona_id');
-    }
-
-    public function incorporacionFormulario()
-    {
-        return $this->hasMany(incorporacion::class);
-    }
-
-    public function puestos_actuales()
-    {
-        return $this->hasMany(Puesto::class, 'persona_actual_id', 'id');
-    }
-
-    public function grado_academico()
-    {
-        return $this->belongsTo(GradoAcademico::class, 'grado_academico_id', 'id');
-    }
-
-    public function area_formaci_personaon()
-    {
-        return $this->belongsTo(AreaFormaci_personaon::class, 'area_formacion_id', 'id');
-    }
-
-    public function instituci_personaon()
-    {
-        return $this->belongsTo(Instituci_personaon::class, 'institucion_id', 'id');
-    }
 }

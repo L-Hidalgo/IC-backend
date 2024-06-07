@@ -1337,39 +1337,39 @@ class IncorporacionesController extends Controller
         $valorGerencia = '';
 
         if ($nombreGerencia == 'Gerencia Distrital La Paz I') {
-            $valorGerencia = 'GDLPI';
-        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') {
-            $valorGerencia = 'GDLPII';
+            $valorGerencia = 'GDLPZ I';
+        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') { 
+            $valorGerencia = 'GDLPZ II';
         } elseif ($nombreGerencia == 'Gerencia GRACO La Paz') {
-            $valorGerencia = 'GGLP';
+            $valorGerencia = 'GGLPZ';
         } elseif ($nombreGerencia == 'Gerencia Distrital Cochabamba') {
             $valorGerencia = 'GDCBBA';
         } elseif ($nombreGerencia == 'Gerencia GRACO Cochabamba') {
             $valorGerencia = 'GGCBBA';
         } elseif ($nombreGerencia == 'Gerencia Distrital Quillacollo') {
-            $valorGerencia = 'GDQUI';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') {
-            $valorGerencia = 'GDSCZI';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') {
-            $valorGerencia = 'GDSCZII';
-        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') {
+            $valorGerencia = 'GDQLLO';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') { 
+            $valorGerencia = 'GDSCZ I';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') { 
+            $valorGerencia = 'GDSCZ II';
+        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') { 
             $valorGerencia = 'GGSCZ';
         } elseif ($nombreGerencia == 'Gerencia Distrital Montero') {
-            $valorGerencia = 'GDMO';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') {
+            $valorGerencia = 'GDMTR';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') { 
             $valorGerencia = 'GDCH';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') {
-            $valorGerencia = 'GDTJA';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') {
+        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') { 
+            $valorGerencia = 'GDTJ';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') { 
             $valorGerencia = 'GDYA';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') {
+        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') { 
             $valorGerencia = 'GDOR';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') {
+        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') { 
             $valorGerencia = 'GDPT';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') {
-            $valorGerencia = 'GDBE';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') { 
+            $valorGerencia = 'GDBN';
         } elseif ($nombreGerencia == 'Gerencia Distrital Pando') {
-            $valorGerencia = 'GDPD';
+            $valorGerencia = 'GDPN';
         } else {
             $valorGerencia = '';
         }
@@ -1505,11 +1505,11 @@ class IncorporacionesController extends Controller
 
         if ($genero === 'F') {
             $templateProcessor->setValue('persona.para', 'Señora ' . $primerApellido);
-            $templateProcessor->setValue('persona.asignada', 'asignada' . ' ');
+            $templateProcessor->setValue('persona.asignada', 'designada como personal interina' . ' ');
             $templateProcessor->setValue('persona.reasignada', 'reasignada' . ' ');
         } else {
             $templateProcessor->setValue('persona.para', 'Señor ' . $primerApellido);
-            $templateProcessor->setValue('persona.asignada', 'asignado' . ' ');
+            $templateProcessor->setValue('persona.asignada', 'designado como personal interino' . ' ');
             $templateProcessor->setValue('persona.reasignada', 'reasignado' . ' ');
         }
 
@@ -1549,39 +1549,39 @@ class IncorporacionesController extends Controller
         $valorGerencia = '';
 
         if ($nombreGerencia == 'Gerencia Distrital La Paz I') {
-            $valorGerencia = 'GDLPI';
-        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') {
-            $valorGerencia = 'GDLPII';
+            $valorGerencia = 'GDLPZ I';
+        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') { 
+            $valorGerencia = 'GDLPZ II';
         } elseif ($nombreGerencia == 'Gerencia GRACO La Paz') {
-            $valorGerencia = 'GGLP';
+            $valorGerencia = 'GGLPZ';
         } elseif ($nombreGerencia == 'Gerencia Distrital Cochabamba') {
             $valorGerencia = 'GDCBBA';
         } elseif ($nombreGerencia == 'Gerencia GRACO Cochabamba') {
             $valorGerencia = 'GGCBBA';
         } elseif ($nombreGerencia == 'Gerencia Distrital Quillacollo') {
-            $valorGerencia = 'GDQUI';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') {
-            $valorGerencia = 'GDSCZI';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') {
-            $valorGerencia = 'GDSCZII';
-        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') {
+            $valorGerencia = 'GDQLLO';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') { 
+            $valorGerencia = 'GDSCZ I';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') { 
+            $valorGerencia = 'GDSCZ II';
+        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') { 
             $valorGerencia = 'GGSCZ';
         } elseif ($nombreGerencia == 'Gerencia Distrital Montero') {
-            $valorGerencia = 'GDMO';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') {
+            $valorGerencia = 'GDMTR';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') { 
             $valorGerencia = 'GDCH';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') {
-            $valorGerencia = 'GDTJA';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') {
+        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') { 
+            $valorGerencia = 'GDTJ';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') { 
             $valorGerencia = 'GDYA';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') {
+        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') { 
             $valorGerencia = 'GDOR';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') {
+        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') { 
             $valorGerencia = 'GDPT';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') {
-            $valorGerencia = 'GDBE';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') { 
+            $valorGerencia = 'GDBN';
         } elseif ($nombreGerencia == 'Gerencia Distrital Pando') {
-            $valorGerencia = 'GDPD';
+            $valorGerencia = 'GDPN';
         } else {
             $valorGerencia = '';
         }
@@ -1782,11 +1782,11 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
 
-        $templateProcessor->setValue('puesto_nuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
+        $templateProcessor->setValue('puestoNuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
 
-        $templateProcessor->setValue('puesto_nuevo.departamento', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
+        $templateProcessor->setValue('puestoNuevo.departamento', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
 
-        $templateProcessor->setValue('puesto_nuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
+        $templateProcessor->setValue('puestoNuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
 
         $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
         switch ($nombreGerencia) {
