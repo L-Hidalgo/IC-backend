@@ -36,7 +36,7 @@ class AuthenticatedSessionController extends Controller
             $roleName = $role ? $role->name : null;
 
             if (!$role) {
-                $roleLectura = Role::where('name', 'Lectura')->first();
+                $roleLectura = Role::where('name', 'Lector')->first();
                 if (!$roleLectura) {
                     return response()->json(['error' => 'No se encontró el rol "Lectura"'], 500);
                 }
@@ -49,10 +49,11 @@ class AuthenticatedSessionController extends Controller
                 'token' => $token,
                 'user' => [
                     'id' => $user->id,
-                    'username' => $user->username,
                     'name' => $user->name,
+                    'username' => $user->username,
                     'email' => $user->email,
-                    'role' => $roleName
+                    'role' => $roleName,
+                    'ci' => $user->ci,
                 ],
             ], 200);
         } catch (\Illuminate\Validation\ValidationException $e) {

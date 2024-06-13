@@ -76,4 +76,20 @@ class PuestoController extends Controller
         $requisito = Requisito::where('puesto_id', $puestoId)->first();
         return $this->sendObject($requisito);
     }
+
+    public function getPuestoDetalle(){
+        $totalPuestos = Puesto::count();
+
+        // Obtener el número de puestos ocupados
+        $puestosOcupados = Puesto::where('estado_id', 2)->count();
+
+        // Obtener el número de puestos acefalos
+        $puestosAcefalos = Puesto::where('estado_id', 1)->count();
+
+        return [
+            'total_puestos' => $totalPuestos,
+            'puestos_ocupados' => $puestosOcupados,
+            'puestos_acefalos' => $puestosAcefalos
+        ];
+    }
 }

@@ -13,7 +13,7 @@ class Imagen extends Model
     protected $primaryKey = 'id_imagen';
 
     protected $fillable = [
-        'imagen_imagen',
+        'base64_imagen',
         'tipo_mime_imagen',
         'persona_id',
     ];

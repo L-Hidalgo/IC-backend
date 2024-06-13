@@ -795,7 +795,7 @@ class IncorporacionesController extends Controller
         }
 
         $denominacion_puesto = isset($incorporacion->puesto_actual->denominacion_puesto) ? $incorporacion->puesto_actual->denominacion_puesto : 'Valor predeterminado o mensaje de error';
-        $templateProcessor->setValue('puestoActual.denominacionMayuscula', mb_strtoupper($denominacion_puesto, 'UTF-8'));
+        $templateProcessor->setValue('puestoActual.denomicacionMayuscula', mb_strtoupper($denominacion_puesto, 'UTF-8'));
 
         if (isset($incorporacion->puesto_actual->departamento->nombre_departamento)) {
             $nombreDepartamento = mb_strtoupper($incorporacion->puesto_actual->departamento->nombre_departamento, 'UTF-8');
@@ -1082,7 +1082,7 @@ class IncorporacionesController extends Controller
         }
 
         $denominacion_puesto = isset($incorporacion->puesto_actual->denominacion_puesto) ? $incorporacion->puesto_actual->denominacion_puesto : 'Valor predeterminado o mensaje de error';
-        $templateProcessor->setValue('puestoActual.denominacionMayuscula', mb_strtoupper($denominacion_puesto, 'UTF-8'));
+        $templateProcessor->setValue('puestoActual.denomicacionMayuscula', mb_strtoupper($denominacion_puesto, 'UTF-8'));
 
         if (isset($incorporacion->puesto_actual->departamento) && isset($incorporacion->puesto_actual->departamento->nombre_departamento)) {
             $nombreDepartamento = mb_strtoupper($incorporacion->puesto_actual->departamento->nombre_departamento, 'UTF-8');
@@ -2313,5 +2313,17 @@ class IncorporacionesController extends Controller
             default:
                 return 'Valor no reconocido';
         }
+    }
+
+    //detalle de las incorporaciones
+    public function getIncorporacionDetalle($gestion)
+    {
+        $cantidadIncorporacionesCreadas = Incorporacion::whereYear('created_at', $gestion)
+        ->where('estado_incorporacion', 2)
+        ->count();
+
+        return [
+            'cantidad_incorporaciones_creadas' => $cantidadIncorporacionesCreadas
+        ];
     }
 }

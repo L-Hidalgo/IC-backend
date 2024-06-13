@@ -9,8 +9,8 @@ return new class extends Migration
     {
         Schema::create('dde_imagenes', function (Blueprint $table) {
             $table->integer('id_imagen')->unsigned()->autoIncrement();
-            $table->string('imagen_imagen');
-            //$table->string('tipo_mime_imagen'); 
+            $table->longText('base64_imagen')->nullable();
+            $table->string('tipo_mime_imagen'); 
             $table->integer('persona_id')->unsigned();
             $table->timestamps();
             $table->timestamp('fecha_inicio')->nullable()->default(null);

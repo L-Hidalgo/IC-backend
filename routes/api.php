@@ -25,6 +25,7 @@ Route::group(['prefix' => 'users'], function () {
   Route::get('/', [UserController::class, 'listar']);
   Route::get('/listarUsers', [UserController::class, 'listarUser']);
   Route::get('/listarRol', [RolController::class, 'listarRol']);
+  Route::get('/{userId}/listarUserRol', [RolController::class, 'listarUserRol']);
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
   Route::get('/{userId}/userRol', [UserController::class, 'obtenerRolUser']);
   Route::get('/byNameUser', [UserController::class, 'byNameUser']);
@@ -32,8 +33,11 @@ Route::group(['prefix' => 'users'], function () {
 
 // administracion
 Route::group(['prefix' => 'administracion'], function () {
-  Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
   Route::post('/importar-imagenes', [ImportarImagesController::class, 'importImagenes']);
+  Route::get('/imagen-user-persona/{personaCi}', [ImportarImagesController::class, 'getImagenUserPersona']);
+  Route::get('/puestoDetalle', [PuestoController::class, 'getPuestoDetalle']);
+  Route::get('/incorporacionDetalle/{gestion}', [IncorporacionesController::class, 'getIncorporacionDetalle']);
+  Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
 });
 
 // incorporaciones
@@ -62,6 +66,8 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-form-declaracion-incompatibilidad', [IncorporacionesController::class, 'genFormDeclaracionIncompatibilidad']);
   Route::get('/{incorporacionId}/gen-form-etica', [IncorporacionesController::class, 'genFormEtica']);
   Route::get('/{incorporacionId}/gen-form-confidencialidad', [IncorporacionesController::class, 'genFormConfidencialidad']);
+  //imagenes de las personas
+  Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenPersona']);
 });
 
 /* ------------------------------------------ Formacion ------------------------------------------ */

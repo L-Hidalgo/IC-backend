@@ -5,54 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Imagen;
 use Illuminate\Http\Request;
 use App\Models\Persona;
-use Illuminate\Support\Facades\Storage;
 use ZipArchive;
-use Illuminate\Support\Facades\File;
 
 class ImportarImagesController extends Controller
 {
-    /*public function importImagenes(Request $request)
-    {
-        try {
-            if ($request->hasFile('file')) {
-                $archivo = $request->file('file');
-                $nombreArchivo = $archivo->getClientOriginalName();
-                $directorioDestino = public_path('imagenes_personas');
-
-                $archivo->move($directorioDestino, $nombreArchivo);
-
-                $rutaArchivo = $directorioDestino . '/' . $nombreArchivo;
-                if (pathinfo($rutaArchivo, PATHINFO_EXTENSION) === 'zip') {
-                    $zip = new ZipArchive;
-                    if ($zip->open($rutaArchivo) === true) {
-                        for ($i = 0; $i < $zip->numFiles; $i++) {
-                            $nombreArchivo = $zip->getNameIndex($i);
-                            $partesNombre = pathinfo($nombreArchivo);
-                            $ci_persona = $partesNombre['filename'];
-                            $extension = $partesNombre['extension'];
-                            $persona = Persona::where('ci_persona', $ci_persona)->first();
-                            if ($persona) {
-                                $nombreImagen = $ci_persona . '.' . $extension;
-                                $zip->extractTo(Storage::disk('img_personas')->path('/'), $nombreArchivo);
-                                $persona->imagen = $nombreImagen;
-                                $persona->save();
-                            }
-                        }
-                        $zip->close();
-                    }
-                    unlink($rutaArchivo);
-                    return $this->sendSuccess(['msn' => 'Imágenes importadas correctamente.']);
-                } else {
-                    return $this->sendError('El archivo no es un archivo ZIP.');
-                }
-            } else {
-                return $this->sendError('No se ha proporci_personaonado un archivo.');
-            }
-            return $this->sendSuccess(['msn' => 'Imágenes importadas correctamente.']);
-        } catch (\Exception $e) {
-            return $this->sendError('Error: ' . $e->getMessage());
-        }
-    }*/
     public function importImagenes(Request $request)
     {
         try {
@@ -77,19 +33,23 @@ class ImportarImagesController extends Controller
                             $persona = Persona::where('ci_persona', $ci_persona)->first();
 
                             if ($persona) {
-                                $imagen = new Imagen();
-                                $imagen->imagen_imagen = $nombreArchivo;
-                                $imagen->persona_id = $persona->id; 
-                                $imagen->save();
-                            } else {
-                                return response()->json(["No se encontró una persona con CI: $ci_persona"], 500);
+                                if ($persona->id_persona !== null) {
+                                    $imagen = new Imagen();
+                                    $imagen->persona_id = $persona->id_persona;
+                                    $imagenData = $zip->getFromName($nombreArchivo);
+                                    $imagenData = base64_encode($imagenData);
+                                    $imagen->base64_imagen = $imagenData;
+                                    $imagen->tipo_mime_imagen = $extension;
+                                    $imagen->save();
+                                } else {
+                                    return response()->json(["El ID de persona no es válido para CI: $ci_persona"], 500);
+                                }
                             }
                         }
                         $zip->close();
                     } else {
                         return response()->json(['error' => 'No se pudo abrir el archivo ZIP.'], 500);
                     }
-
                     unlink($rutaArchivo);
 
                     return response()->json(['message' => 'Imágenes importadas correctamente.']);
@@ -104,18 +64,51 @@ class ImportarImagesController extends Controller
         }
     }
 
-
-
     public function getImagenPersona($personaId)
     {
-        $persona = Persona::where('id', $personaId)->first();
-        if (isset($persona)) {
-            $disk = Storage::disk('img_personas');
-            $content = $disk->get($persona->imagen);
-            $mime = File::mimeType($disk->path($persona->imagen));
-            return response($content)->header('Content-Type', $mime);
+        $persona = Persona::find($personaId);
+
+        if ($persona) {
+            $imagen = $persona->imagenes()->latest()->first();
+
+            if ($imagen) {
+                $base64_imagen = $imagen->base64_imagen;
+                $tipo_mime_imagen = $imagen->tipo_mime_imagen;
+                $imagen_data = base64_decode($base64_imagen);
+
+                return response($imagen_data)
+                    ->header('Content-Type', 'image/jpeg')
+                    ->header('Content-Disposition', 'inline')
+                    ->header('Content-Length', strlen($imagen_data));
+            } else {
+                return response()->json(['message' => 'La persona no tiene una imagen asociada.'], 404);
+            }
         } else {
-            return $this->sendError(['msn' => 'No se encontro a la persona'], 404);
+            return response()->json(['message' => 'No se encontró a la persona.'], 404);
+        }
+    }
+
+    public function getImagenUserPersona($personaCi)
+    {
+        $persona = Persona::where('ci_persona', $personaCi)->first();
+
+        if ($persona) {
+            $imagen = $persona->imagenes()->latest()->first();
+
+            if ($imagen) {
+                $base64_imagen = $imagen->base64_imagen;
+                $tipo_mime_imagen = $imagen->tipo_mime_imagen;
+                $imagen_data = base64_decode($base64_imagen);
+
+                return response($imagen_data)
+                    ->header('Content-Type', 'image/jpeg')
+                    ->header('Content-Disposition', 'inline')
+                    ->header('Content-Length', strlen($imagen_data));
+            } else {
+                return response()->json(['message' => 'La persona no tiene una imagen asociada.'], 404);
+            }
+        } else {
+            return response()->json(['message' => 'No se encontró a la persona.'], 404);
         }
     }
 }
