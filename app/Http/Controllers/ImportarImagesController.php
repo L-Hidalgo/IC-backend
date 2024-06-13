@@ -81,7 +81,14 @@ class ImportarImagesController extends Controller
                     ->header('Content-Disposition', 'inline')
                     ->header('Content-Length', strlen($imagen_data));
             } else {
-                return response()->json(['message' => 'La persona no tiene una imagen asociada.'], 404);
+                $imagenPorDefecto = public_path('img/user.png');
+                $imagen_data = file_get_contents($imagenPorDefecto);
+                $tipo_mime_imagen = mime_content_type($imagenPorDefecto);
+
+                return response($imagen_data)
+                    ->header('Content-Type', $tipo_mime_imagen)
+                    ->header('Content-Disposition', 'inline')
+                    ->header('Content-Length', filesize($imagenPorDefecto));
             }
         } else {
             return response()->json(['message' => 'No se encontró a la persona.'], 404);
