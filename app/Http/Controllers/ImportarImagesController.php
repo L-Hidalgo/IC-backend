@@ -28,7 +28,7 @@ class ImportarImagesController extends Controller
                             $nombreArchivo = $zip->getNameIndex($i);
                             $partesNombre = pathinfo($nombreArchivo);
                             $ci_persona = $partesNombre['filename'];
-                            $extension = $partesNombre['extension'];
+                            $extension = isset($partesNombre['extension']) ? $partesNombre['extension'] : 'txt'; 
 
                             $persona = Persona::where('ci_persona', $ci_persona)->first();
 

@@ -28,13 +28,12 @@ return new class extends Migration
             $table->date('fch_informe_incorporacion')->nullable();
             $table->string('cite_memorandum_incorporacion', 10)->nullable();
             $table->string('codigo_memorandum_incorporacion', 13)->nullable();
-            //$table->string('codigo_memorandum_incorporacion', 13)->nullable()->default('08240000');
             $table->date('fch_memorandum_incorporacion')->nullable();
             $table->string('cite_rap_incorporacion', 10)->nullable()->unique();
-            //$table->string('codigo_rap_incorporacion', 12)->nullable()->default('032400000');
             $table->string('codigo_rap_incorporacion', 12)->nullable();
             $table->date('fch_rap_incorporacion')->nullable();
             $table->string('observacion_incorporacion', 10)->nullable();
+            $table->string('observacion_detalle_incorporacion', 100)->nullable();
             $table->string('experiencia_incorporacion', 25)->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             // !SECTION
