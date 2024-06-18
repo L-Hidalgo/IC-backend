@@ -66,6 +66,7 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-form-declaracion-incompatibilidad', [IncorporacionesController::class, 'genFormDeclaracionIncompatibilidad']);
   Route::get('/{incorporacionId}/gen-form-etica', [IncorporacionesController::class, 'genFormEtica']);
   Route::get('/{incorporacionId}/gen-form-confidencialidad', [IncorporacionesController::class, 'genFormConfidencialidad']);
+  Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenPersona']);
 });

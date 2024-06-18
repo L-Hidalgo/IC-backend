@@ -2,23 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AreaFormaci_personaon;
-use App\Models\GradoAcademico;
 use App\Models\Incorporacion;
-use App\Models\Institucion;
-use App\Models\Persona;
 use App\Models\Puesto;
-use App\Models\Departamento;
-use App\Models\Gerencia;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use RealRashid\SweetAlert\Facades\Alert;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\IncorporacionesExport;
 
 class IncorporacionesController extends Controller
 {
@@ -31,6 +22,7 @@ class IncorporacionesController extends Controller
             'puestoActualId' => 'nullable|integer',
             'personaId' => 'nullable|integer',
             'observacionIncorporacion' => 'nullable|string',
+            'observacionDetalleIncorporacion' => 'nullable|string',
             'experienciaIncorporacion' => 'nullable|string',
             'fchIncorporacion' => 'nullable|string',
             'hpIncorporacion' => 'nullable|string',
@@ -107,6 +99,10 @@ class IncorporacionesController extends Controller
 
                 if (isset($validatedData['observacionIncorporacion'])) {
                     $incorporacion->observacion_incorporacion = $validatedData['observacionIncorporacion'];
+                }
+
+                if (isset($validatedData['observacionDetalleIncorporacion'])) {
+                    $incorporacion->observacion_detalle_incorporacion = $validatedData['observacionDetalleIncorporacion'];
                 }
 
                 if (isset($validatedData['experienciaIncorporacion'])) {
@@ -319,7 +315,7 @@ class IncorporacionesController extends Controller
             'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
             'user',
-        ])->orderBy('id_incorporacion', 'desc'); 
+        ])->orderBy('id_incorporacion', 'desc');
 
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
 
@@ -390,7 +386,7 @@ class IncorporacionesController extends Controller
 
         $fileName = 'R-0078 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
 
-        $incorporacion->descargas++; 
+        $incorporacion->descargas++;
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -472,8 +468,8 @@ class IncorporacionesController extends Controller
 
         $fileName = 'R-1401 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
 
-        $incorporacion->descargas++; 
-        
+        $incorporacion->descargas++;
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
@@ -540,13 +536,13 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
 
         $fileName = 'R-0980-01 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
-        
-        $incorporacion->descargas++; 
-        
+
+        $incorporacion->descargas++;
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        
+
         $templateProcessor->saveAs($savedPath);
-        
+
         return response()->download($savedPath)->deleteFileAfterSend(true);
     }
 
@@ -647,7 +643,7 @@ class IncorporacionesController extends Controller
         $fileName = 'R-1129-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
 
         $incorporacion->descargas++;
-        
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
@@ -713,13 +709,13 @@ class IncorporacionesController extends Controller
         $fechaNotaMinutaFormateada = $carbonFechaNotaMinuta->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaNotaMinuta', $fechaNotaMinutaFormateada);
 
-        
+
         $carbonFechaRecepcion = Carbon::parse($incorporacion->fch_recepcion_nota_incorporacion);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaRecepcion->locale('es_UY');
         $fechaRecepcionFormateada = $carbonFechaRecepcion->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaRecepcion', $fechaRecepcionFormateada);
- 
+
         $formacion = $incorporacion->persona->formacion->first();
         if ($formacion) {
             $respaldoFormacion = $formacion->pivot->con_respaldo_formacion ?? 'Valor predeterminado';
@@ -931,12 +927,12 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('puestoNuevo.gerenciaRef', $valorDepartamento);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'INF MINUTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
+            $fileName = 'INF MINUTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto) . ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'INF MINUTA ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
+            $fileName = 'INF MINUTA ' . strtoupper($nombreCompleto) . ' ' . $incorporacion->descargas;
         }
 
-        $incorporacion->descargas++; 
+        $incorporacion->descargas++;
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -1219,12 +1215,12 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('puestoNuevo.gerenciaRef', $valorDepartamento);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'INF NOTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
+            $fileName = 'INF NOTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto) . ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'INF NOTA ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
+            $fileName = 'INF NOTA ' . strtoupper($nombreCompleto) . ' ' . $incorporacion->descargas;
         }
 
-        $incorporacion->descargas++; 
+        $incorporacion->descargas++;
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -1338,7 +1334,7 @@ class IncorporacionesController extends Controller
 
         if ($nombreGerencia == 'Gerencia Distrital La Paz I') {
             $valorGerencia = 'GDLPZ I';
-        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') {
             $valorGerencia = 'GDLPZ II';
         } elseif ($nombreGerencia == 'Gerencia GRACO La Paz') {
             $valorGerencia = 'GGLPZ';
@@ -1348,25 +1344,25 @@ class IncorporacionesController extends Controller
             $valorGerencia = 'GGCBBA';
         } elseif ($nombreGerencia == 'Gerencia Distrital Quillacollo') {
             $valorGerencia = 'GDQLLO';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') {
             $valorGerencia = 'GDSCZ I';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') {
             $valorGerencia = 'GDSCZ II';
-        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') { 
+        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') {
             $valorGerencia = 'GGSCZ';
         } elseif ($nombreGerencia == 'Gerencia Distrital Montero') {
             $valorGerencia = 'GDMTR';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') {
             $valorGerencia = 'GDCH';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') {
             $valorGerencia = 'GDTJ';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') {
             $valorGerencia = 'GDYA';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') {
             $valorGerencia = 'GDOR';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') {
             $valorGerencia = 'GDPT';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') {
             $valorGerencia = 'GDBN';
         } elseif ($nombreGerencia == 'Gerencia Distrital Pando') {
             $valorGerencia = 'GDPN';
@@ -1403,12 +1399,12 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);*/
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'RAP CAMBIO DE ITEM ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
+            $fileName = 'RAP CAMBIO DE ITEM ' . strtoupper($nombreCompleto) . ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'RAP ' . strtoupper($nombreCompleto). ' ' . $incorporacion->descargas;
+            $fileName = 'RAP ' . strtoupper($nombreCompleto) . ' ' . $incorporacion->descargas;
         }
 
-        $incorporacion->descargas++; 
+        $incorporacion->descargas++;
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
@@ -1550,7 +1546,7 @@ class IncorporacionesController extends Controller
 
         if ($nombreGerencia == 'Gerencia Distrital La Paz I') {
             $valorGerencia = 'GDLPZ I';
-        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') {
             $valorGerencia = 'GDLPZ II';
         } elseif ($nombreGerencia == 'Gerencia GRACO La Paz') {
             $valorGerencia = 'GGLPZ';
@@ -1560,25 +1556,25 @@ class IncorporacionesController extends Controller
             $valorGerencia = 'GGCBBA';
         } elseif ($nombreGerencia == 'Gerencia Distrital Quillacollo') {
             $valorGerencia = 'GDQLLO';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') {
             $valorGerencia = 'GDSCZ I';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') {
             $valorGerencia = 'GDSCZ II';
-        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') { 
+        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') {
             $valorGerencia = 'GGSCZ';
         } elseif ($nombreGerencia == 'Gerencia Distrital Montero') {
             $valorGerencia = 'GDMTR';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') {
             $valorGerencia = 'GDCH';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') {
             $valorGerencia = 'GDTJ';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') {
             $valorGerencia = 'GDYA';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') {
             $valorGerencia = 'GDOR';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') {
             $valorGerencia = 'GDPT';
-        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') { 
+        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') {
             $valorGerencia = 'GDBN';
         } elseif ($nombreGerencia == 'Gerencia Distrital Pando') {
             $valorGerencia = 'GDPN';
@@ -1598,15 +1594,15 @@ class IncorporacionesController extends Controller
         //$templateProcessor->setValue('incorporacion.hp', $incorporacion->hp_incorporacion);
 
         if (isset($incorporacion->puesto_actual)) {
-            $fileName = 'MEM CAMBIO DE ITEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona). ' ' . $incorporacion->descargas;
+            $fileName = 'MEM CAMBIO DE ITEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
         } else {
-            $fileName = 'MEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona). ' ' . $incorporacion->descargas;
+            $fileName = 'MEM ' . strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
         }
-        
-        $incorporacion->descargas++; 
+
+        $incorporacion->descargas++;
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        
+
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -1751,7 +1747,7 @@ class IncorporacionesController extends Controller
         $incorporacion->descargas++;
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        
+
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -1840,11 +1836,11 @@ class IncorporacionesController extends Controller
         } else {
             $fileName = 'Acta Entrega ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
         }
-        
-        $incorporacion->descargas++; 
-         
+
+        $incorporacion->descargas++;
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        
+
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -1922,11 +1918,11 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
         $fileName = 'R-0976-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
-        
-        $incorporacion->descargas++; 
-        
+
+        $incorporacion->descargas++;
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        
+
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -2026,11 +2022,11 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
         $fileName = 'R-0921-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
-        
-        $incorporacion->descargas++; 
+
+        $incorporacion->descargas++;
 
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        
+
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -2129,11 +2125,11 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
         $fileName = 'R-0716-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
-        
-        $incorporacion->descargas++; 
-        
+
+        $incorporacion->descargas++;
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        
+
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -2234,11 +2230,11 @@ class IncorporacionesController extends Controller
         $templateProcessor->setValue('incorporacion.fechaIncorporacion', $fechaIncorporacionFormateada);
 
         $fileName = 'R-SGC-0033-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
-        
+
         $incorporacion->descargas++;
-        
+
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
-        
+
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
@@ -2283,6 +2279,54 @@ class IncorporacionesController extends Controller
             //return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
         }*/
 
+    /*public function genReportEvaluacion(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required',
+            'fechaInicio' => 'required|date',
+            'fechaFin' => 'required|date',
+        ]);
+
+        $name = $validatedData['name'];
+        $fechaInicio = $validatedData['fechaInicio'];
+        $fechaFin = $validatedData['fechaFin'];
+
+        $incorporaciones = Incorporacion::whereHas('user', function ($query) use ($name) {
+            $query->where('name', $name);
+        })
+        ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+        ->get();
+
+        return Excel::download(new IncorporacionesExport($incorporaciones), 'Reporte de Evaluacion de {$name}.xlsx');
+    }*/
+    public function genReportEvaluacion(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'nullable',
+            'fechaInicio' => 'required|date',
+            'fechaFin' => 'required|date',
+        ]);
+
+        $name = $request->input('name');
+        $fechaInicio = $validatedData['fechaInicio'];
+        $fechaFin = $validatedData['fechaFin'];
+
+        $incorporaciones = Incorporacion::with([
+            'persona',
+            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'user',
+        ])
+            ->whereHas('user', function ($query) use ($name) {
+                $query->where('name', $name);
+            })
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+            ->get();
+
+        return Excel::download(new IncorporacionesExport($incorporaciones), "Reporte de Evaluacion de {$name}.xlsx");
+    }
+
     public function downloadEvalForm($fileName)
     {
         $disk = Storage::disk('form_templates');
@@ -2319,8 +2363,8 @@ class IncorporacionesController extends Controller
     public function getIncorporacionDetalle($gestion)
     {
         $cantidadIncorporacionesCreadas = Incorporacion::whereYear('created_at', $gestion)
-        ->where('estado_incorporacion', 2)
-        ->count();
+            ->where('estado_incorporacion', 2)
+            ->count();
 
         return [
             'cantidad_incorporaciones_creadas' => $cantidadIncorporacionesCreadas
