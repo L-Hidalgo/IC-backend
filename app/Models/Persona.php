@@ -38,7 +38,7 @@ class Persona extends Model
 
     public function funcionario()
     {
-        return $this->hasMany(Funcionario::class);
+        return $this->hasMany(Funcionario::class, 'persona_id', 'id_persona');
     }
 
     public function incorporacionFormulario()
@@ -46,7 +46,7 @@ class Persona extends Model
         return $this->hasMany(Incorporacion::class, 'persona_id', 'id_persona');
     }
 
-    public function puestos_actuales()
+    public function puestos_actual()
     {
         return $this->hasMany(Puesto::class, 'persona_actual_id', 'id_persona');
     }

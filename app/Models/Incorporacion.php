@@ -37,9 +37,10 @@ class Incorporacion extends Model
         'cite_rap_incorporacion',
         'codigo_rap_incorporacion',
         'fch_rap_incorporacion',
-        'observacion_incorporacion',
+        'observacion_incorporacion', //desde aqui son datos de evaluacion
         'observacion_detalle_incorporacion',
         'experiencia_incorporacion',
+        'fch_observacion_incorporacion',
         'user_id',
     ];
 

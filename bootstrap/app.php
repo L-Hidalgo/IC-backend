@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('America/La_Paz');
+
 use App\Http\Middleware\ConvertResponseFieldsToCamelCase;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;

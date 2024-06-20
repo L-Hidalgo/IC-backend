@@ -32,9 +32,10 @@ return new class extends Migration
             $table->string('cite_rap_incorporacion', 10)->nullable()->unique();
             $table->string('codigo_rap_incorporacion', 12)->nullable();
             $table->date('fch_rap_incorporacion')->nullable();
-            $table->string('observacion_incorporacion', 10)->nullable();
-            $table->string('observacion_detalle_incorporacion', 100)->nullable();
+            $table->string('observacion_incorporacion', 10)->nullable(); //desde aqui es evluacion
+            $table->string('observacion_detalle_incorporacion', 100)->nullable(); 
             $table->string('experiencia_incorporacion', 25)->nullable();
+            $table->date('fch_observacion_incorporacion')->nullable(); //hasta aqui es evaluacion
             $table->unsignedBigInteger('user_id')->nullable();
             // !SECTION
             $table->foreign('persona_id')->references('id_persona')->on('dde_personas');
