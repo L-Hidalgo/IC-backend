@@ -36,7 +36,7 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::post('/importar-imagenes', [ImportarImagesController::class, 'importImagenes']);
   Route::get('/imagen-user-persona/{personaCi}', [ImportarImagesController::class, 'getImagenUserPersona']);
   Route::get('/puestoDetalle', [PuestoController::class, 'getPuestoDetalle']);
-  Route::get('/incorporacionDetalle/{gestion}', [IncorporacionesController::class, 'getIncorporacionDetalle']);
+  Route::get('/incorporacionDetalle', [IncorporacionesController::class, 'getIncorporacionDetalle']);
   Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
 });
 
@@ -52,29 +52,23 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-inf-nota', [IncorporacionesController::class, 'generarInfNota']);
   Route::get('/{incorporacionId}/gen-rap', [IncorporacionesController::class, 'generarRap']);
   Route::get('/{incorporacionId}/gen-memo', [IncorporacionesController::class, 'generarMemorandum']);
+  Route::get('/{incorporacionId}/gen-acta-entrega', [IncorporacionesController::class, 'generarActaEntrega']); 
+  Route::get('/{incorporacionId}/gen-acta-posesion', [IncorporacionesController::class, 'generarActaPosesion']);
+  Route::get('/{incorporacionId}/gen-form-R0980', [IncorporacionesController::class, 'generarFormR0980']);
+  //formularios para incorporacion
+  Route::get('/{incorporacionId}/gen-form-R0078', [IncorporacionesController::class, 'generarFormR0078']);
+  Route::get('/{incorporacionId}/gen-form-R1401', [IncorporacionesController::class, 'generarFormR1401']);
+  //formularios de cambio item
+  Route::get('/{incorporacionId}/gen-form-R1023', [IncorporacionesController::class, 'generarFormR1023']);
+  Route::get('/{incorporacionId}/gen-form-R1129', [IncorporacionesController::class, 'generarFormR1129']);
+  // otros formularios de incorporacion
+  Route::get('/{incorporacionId}/gen-R0716', [IncorporacionesController::class, 'generarR0716']);
+  Route::get('/{incorporacionId}/gen-R0921', [IncorporacionesController::class, 'generarR0921']);
+  Route::get('/{incorporacionId}/gen-R0976', [IncorporacionesController::class, 'generarR0976']);
+  Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);
+  
+  //Route::get('/{incorporacionId}/gen-form-RemisionDeDocumentos', [IncorporacionesController::class, 'genFormRemisionDeDocumentos']);
 
-
-
-  Route::get('/{incorporacionId}/gen-form-R-0980', [IncorporacionesController::class, 'generarR0980']);
-  Route::get('/{incorporacionId}/gen-form-R-1023', [IncorporacionesController::class, 'generarR1023']);
-  Route::get('/{incorporacionId}/gen-form-R-1129', [IncorporacionesController::class, 'generarR1129']);
-  Route::get('/{incorporacionId}/gen-form-R-1401', [IncorporacionesController::class, 'generarR1401']);
-  Route::get('/{incorporacionId}/gen-form-evalR0078', [IncorporacionesController::class, 'generarFormularioEvalR0078']);
-  Route::get('/{incorporacionId}/gen-form-evalR1401', [IncorporacionesController::class, 'genFormEvalR1401']);
-  
-  
-  Route::get('/{incorporacionId}/gen-form-evalR0078', [IncorporacionesController::class, 'generarFormularioEvalR0078']);
-  Route::get('/{incorporacionId}/gen-form-evalR1401', [IncorporacionesController::class, 'genFormEvalR1401']);
-  
-  
-  Route::get('/{incorporacionId}/gen-form-RemisionDeDocumentos', [IncorporacionesController::class, 'genFormRemisionDeDocumentos']);
-  Route::get('/{incorporacionId}/gen-form-acta-de-posesion', [IncorporacionesController::class, 'genFormActaDePosesion']);
-  Route::get('/{incorporacionId}/gen-form-acta-de-entrega', [IncorporacionesController::class, 'genFormActaDeEntrega']);
-  Route::get('/{incorporacionId}/gen-form-informe-con-minuta', [IncorporacionesController::class, 'generarInfMinuta']);
-  Route::get('/{incorporacionId}/gen-form-compromiso', [IncorporacionesController::class, 'genFormCompromiso']);
-  Route::get('/{incorporacionId}/gen-form-declaracion-incompatibilidad', [IncorporacionesController::class, 'genFormDeclaracionIncompatibilidad']);
-  Route::get('/{incorporacionId}/gen-form-etica', [IncorporacionesController::class, 'genFormEtica']);
-  Route::get('/{incorporacionId}/gen-form-confidencialidad', [IncorporacionesController::class, 'genFormConfidencialidad']);
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenPersona']);
 });

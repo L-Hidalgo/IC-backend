@@ -80,10 +80,8 @@ class PuestoController extends Controller
     public function getPuestoDetalle(){
         $totalPuestos = Puesto::count();
 
-        // Obtener el número de puestos ocupados
         $puestosOcupados = Puesto::where('estado_id', 2)->count();
 
-        // Obtener el número de puestos acefalos
         $puestosAcefalos = Puesto::where('estado_id', 1)->count();
 
         return [
