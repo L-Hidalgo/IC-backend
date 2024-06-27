@@ -36,12 +36,12 @@ class AuthenticatedSessionController extends Controller
             $roleName = $role ? $role->name : null;
 
             if (!$role) {
-                $roleLectura = Role::where('name', 'Lector')->first();
-                if (!$roleLectura) {
-                    return response()->json(['error' => 'No se encontró el rol "Lectura"'], 500);
+                $roleLector = Role::where('name', 'Lector')->first();
+                if (!$roleLector) {
+                    return response()->json(['error' => 'No se encontró el rol "Lector"'], 500);
                 }
-                $user->syncRoles($roleLectura);
-                $roleName = 'Lectura'; 
+                $user->syncRoles($roleLector);
+                $roleName = 'Lector'; 
             }
 
             return response()->json([
