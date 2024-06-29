@@ -313,8 +313,8 @@ class IncorporacionesController extends Controller
 
     public function listPaginateIncorporaciones(Request $request)
     {
-        $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0);
+        $limit = $request->input('limit');
+        $page = $request->input('page');
 
         $query = Incorporacion::with([
             'persona',

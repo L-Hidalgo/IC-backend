@@ -24,7 +24,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request)
+    /*public function store(LoginRequest $request)
     {
         try {
             $request->authenticate();
@@ -64,7 +64,67 @@ class AuthenticatedSessionController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }*/
+    public function store(LoginRequest $request)
+{
+    try {
+        // Obtener las credenciales del request
+        $credentials = $request->only('username', 'password');
+
+        // Verificar si las credenciales son válidas y autenticar al usuario
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['error' => 'Credenciales incorrectas'], 401);
+        }
+
+        // Obtener el usuario autenticado
+        $user = Auth::user();
+
+        // Verificar si el usuario tiene un rol asignado
+        if (!$user->hasRole()) {
+            // Si no tiene un rol asignado, asignar el rol "Lector" por defecto si existe
+            $roleLector = Role::where('name', 'Lector')->first();
+            if (!$roleLector) {
+                return response()->json(['error' => 'No se encontró el rol "Lector"'], 500);
+            }
+            $user->syncRoles($roleLector);
+        }
+
+        // Crear un nuevo token para el usuario
+        $token = $user->createToken("API Token")->plainTextToken;
+
+        // Obtener el rol del usuario
+        $role = $user->roles->first();
+        $roleName = $role ? $role->name : null;
+
+        // Construir la respuesta JSON
+        $response = [
+            'status' => true,
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'username' => $user->username,
+                'email' => $user->email,
+                'role' => $roleName,
+                'ci' => $user->ci,
+            ],
+        ];
+
+        return response()->json($response, 200);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Capturar excepción de validación
+        return response()->json(['error' => 'Error de validación: ' . $e->getMessage()], 400);
+    } catch (\Illuminate\Auth\AuthenticationException $e) {
+        // Capturar excepción de autenticación
+        return response()->json(['error' => 'Error de autenticación: ' . $e->getMessage()], 401);
+    } catch (\Throwable $th) {
+        // Capturar otras excepciones
+        return response()->json(['error' => 'Error interno del servidor: ' . $th->getMessage()], 500);
     }
+}
+
+
+
 
     /**
      * Destruye una sesión autenticada.
