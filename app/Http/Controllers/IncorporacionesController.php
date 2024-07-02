@@ -214,59 +214,6 @@ class IncorporacionesController extends Controller
         }
     }
 
-    public function byFiltrosIncorporacion(Request $request)
-    {
-        $params = $request->all();
-
-        $limit = $params['limit'] ?? 1000;
-        $page = $params['page'] ?? 0;
-        $name = $params['name'] ?? null;
-        $nombre_completo_persona = $params['nombreCompletoPersona'] ?? null;
-        $tipo = $params['tipo'] ?? null;
-        $fecha_inicio = $params['fechaInicio'] ?? null;
-        $fecha_fin = $params['fechaFin'] ?? null;
-
-        $query = Incorporacion::with([
-            'persona',
-            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'user',
-        ]);
-
-        if ($name) {
-            $query->whereHas('user', function ($q) use ($name) {
-                $q->whereRaw("name LIKE ?", ['%' . $name . '%']);
-            });
-        }
-
-        if ($nombre_completo_persona) {
-            $query->whereHas('persona', function ($q) use ($nombre_completo_persona) {
-                $q->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $nombre_completo_persona . '%']);
-            });
-        }
-
-        if ($tipo == 1) {
-            $query->whereNotNull('puesto_nuevo_id')->whereNull('puesto_actual_id');
-        } elseif ($tipo == 2) {
-            $query->whereNotNull('puesto_nuevo_id')->whereNotNull('puesto_actual_id');
-        }
-
-        if ($fecha_inicio) {
-            $query->whereDate('created_at', '>=', $fecha_inicio);
-        }
-        if ($fecha_fin) {
-            $query->whereDate('created_at', '<=', $fecha_fin);
-        }
-
-        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
-
-        return $this->sendPaginated($incorporaciones);
-    }
-
     public function darBajaIncorporacion($incorporacionId)
     {
         $incorporacion = Incorporacion::find($incorporacionId);
@@ -314,7 +261,7 @@ class IncorporacionesController extends Controller
     public function listPaginateIncorporaciones(Request $request)
     {
         $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0);
+        $page = $request->input('page', 0); 
 
         $query = Incorporacion::with([
             'persona',
@@ -325,7 +272,62 @@ class IncorporacionesController extends Controller
             'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
             'user',
-        ])->orderBy('id_incorporacion', 'desc');
+        ])->where('estado_incorporacion', '!=', 3)
+            ->orderBy('id_incorporacion', 'desc');
+
+        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
+
+        return $this->sendPaginated($incorporaciones);
+    }
+
+    public function byFiltrosIncorporacion(Request $request)
+    {
+        $params = $request->all();
+
+        $limit = $params['limit'] ?? 1000;
+        $page = $params['page'] ?? 0;
+        $name = $params['name'] ?? null;
+        $nombre_completo_persona = $params['nombreCompletoPersona'] ?? null;
+        $tipo = $params['tipo'] ?? null;
+        $fecha_inicio = $params['fechaInicio'] ?? null;
+        $fecha_fin = $params['fechaFin'] ?? null;
+
+        $query = Incorporacion::with([
+            'persona',
+            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'user',
+        ])->where('estado_incorporacion', '!=', 3)
+        ->orderBy('id_incorporacion', 'desc');
+
+        if ($name) {
+            $query->whereHas('user', function ($q) use ($name) {
+                $q->whereRaw("name LIKE ?", ['%' . $name . '%']);
+            });
+        }
+
+        if ($nombre_completo_persona) {
+            $query->whereHas('persona', function ($q) use ($nombre_completo_persona) {
+                $q->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $nombre_completo_persona . '%']);
+            });
+        }
+
+        if ($tipo == 1) {
+            $query->whereNotNull('puesto_nuevo_id')->whereNull('puesto_actual_id');
+        } elseif ($tipo == 2) {
+            $query->whereNotNull('puesto_nuevo_id')->whereNotNull('puesto_actual_id');
+        }
+
+        if ($fecha_inicio) {
+            $query->whereDate('created_at', '>=', $fecha_inicio);
+        }
+        if ($fecha_fin) {
+            $query->whereDate('created_at', '<=', $fecha_fin);
+        }
 
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
 
@@ -2415,5 +2417,3 @@ class IncorporacionesController extends Controller
         ];
     }
 }
-
-

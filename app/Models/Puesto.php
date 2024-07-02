@@ -64,5 +64,4 @@ class Puesto extends Model
     {
         $this->attributes['estado_id'] = $this->persona_actual_id ? 2 : $value;
     }
-
 }

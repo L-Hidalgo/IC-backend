@@ -80,19 +80,47 @@ class UserController extends Controller
         return $this->sendList($user);
     }
 
+    /*public function listPaginateIncorporaciones(Request $request)
+    {
+        $limit = $request->input('limit', 1000);
+        $page = $request->input('page', 0); 
+
+        $query = Incorporacion::with([
+            'persona',
+            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
+            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
+            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
+            'user',
+        ])->where('estado_incorporacion', '!=', 3)
+            ->orderBy('id_incorporacion', 'desc');
+
+        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
+
+        return $this->sendPaginated($incorporaciones);
+    }*/
+
+
     public function listarUser(Request $request)
     {
-        $query = User::select(['id', 'name', 'username', 'email', 'cargo'])
-            ->with('roles:name')
-            ->get();
+        $limit = $request->input('limit', 1000);
+        $page = $request->input('page', 0); 
 
-        $users = $query->map(function ($user) {
+        $query = User::select(['id', 'name', 'username', 'email', 'cargo'])
+        ->with('roles:name')
+        ->orderBy('id', 'asc');
+
+        $users = $query->paginate($limit, ['*'], 'page', $page);
+
+        $users->getCollection()->transform(function ($user) {
             $user->rol = $user->roles->implode('name', ', ');
             unset($user->roles);
             return $user;
         });
 
-        return $this->sendList($users);
+        return $this->sendPaginated($users);
     }
 
     public function ByNameUser(Request $request)

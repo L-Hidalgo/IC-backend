@@ -12,6 +12,7 @@ use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\ImportarImagesController;
+use App\Http\Controllers\PlanillaController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -23,7 +24,7 @@ Route::middleware('auth')->group(function () {
 // usuarios y roles
 Route::group(['prefix' => 'users'], function () {
   Route::get('/', [UserController::class, 'listar']);
-  Route::get('/listarUsers', [UserController::class, 'listarUser']);
+  Route::post('/listarUsers', [UserController::class, 'listarUser']);
   Route::get('/listarRol', [RolController::class, 'listarRol']);
   Route::get('/{userId}/listarUserRol', [RolController::class, 'listarUserRol']);
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
@@ -40,6 +41,13 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
 });
 
+//planilla
+Route::group(['prefix' => 'planilla'], function () {
+  Route::post('/listarPuestosPersonas', [PlanillaController::class, 'listarPuestosPersonas'])->name('importaciones.buscar');
+  Route::post('/filtrar', [PlanillaController::class, 'filtrarAutoComplete'])->name('importaciones.filtrar-autocomplete');
+  Route::get('/{personaPuestoId}', [PlanillaController::class, 'InformacionPersonaPuesto'])->name('persona.puest.byid');
+});
+
 // incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
@@ -52,7 +60,7 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-inf-nota', [IncorporacionesController::class, 'generarInfNota']);
   Route::get('/{incorporacionId}/gen-rap', [IncorporacionesController::class, 'generarRap']);
   Route::get('/{incorporacionId}/gen-memo', [IncorporacionesController::class, 'generarMemorandum']);
-  Route::get('/{incorporacionId}/gen-acta-entrega', [IncorporacionesController::class, 'generarActaEntrega']); 
+  Route::get('/{incorporacionId}/gen-acta-entrega', [IncorporacionesController::class, 'generarActaEntrega']);
   Route::get('/{incorporacionId}/gen-acta-posesion', [IncorporacionesController::class, 'generarActaPosesion']);
   Route::get('/{incorporacionId}/gen-form-R0980', [IncorporacionesController::class, 'generarFormR0980']);
   //formularios para incorporacion
@@ -66,7 +74,7 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-R0921', [IncorporacionesController::class, 'generarR0921']);
   Route::get('/{incorporacionId}/gen-R0976', [IncorporacionesController::class, 'generarR0976']);
   Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);
-  
+
   //Route::get('/{incorporacionId}/gen-form-RemisionDeDocumentos', [IncorporacionesController::class, 'genFormRemisionDeDocumentos']);
 
   //imagenes de las personas
