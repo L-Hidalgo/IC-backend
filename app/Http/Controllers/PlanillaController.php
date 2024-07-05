@@ -79,8 +79,8 @@ class PlanillaController extends Controller
         $page = $request->input('page', 0);
 
         $itemNombre = $request->input('query.itemNombre'); 
-        $gerenciasIds = $request->input('gerenciasIds');
-        $departamentosIds = $request->input('departamentosIds');
+        $gerenciasIds = $request->input('query.gerenciasIds');
+        $departamentosIds = $request->input('query.departamentosIds');
         $estadoId = $request->input('query.estadoPuesto');
 
         $query = Puesto::query()
