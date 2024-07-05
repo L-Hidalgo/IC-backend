@@ -8,4 +8,4 @@ use App\Http\Controllers\ImportarExcelController;
     return view('welcome');
 });*/
  
-// Route::post('/planilla', [ImportarExcelController::class, 'importExcel']); 
+// Route::post('/planilla', [ImportarExcelController::class, 'importPlanilla']); 

@@ -2,61 +2,143 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Persona;
 use App\Models\Puesto;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class PlanillaController extends Controller
 {
-    public function listarPuestosPersonas(Request $request)
-    {
-        $limit = 9;
-        $page = $request->input('page', 1);
 
-        // Filtros
-        $item = $request->input('item');
-        $gerenciasIds = $request->input('gerenciasIds');
-        $departamentosIds = $request->input('departamentosIds');
-        $estado = $request->input('estado');
+    public function listarPuestos(Request $request)
+    {
+        $limit = $request->input('limit');
+        $page = $request->input('page', 0);
 
         $query = Puesto::query()
-            ->with(['departamento.gerencia', 'requisitos', 'persona_actual', 'funcionario.persona'])
-            ->select([
-                'dde_puestos.id_puesto as id',
-                'dde_puestos.item_puesto as item',
-                'dde_puestos.denominacion_puesto as denominacion',
-                'dde_puestos.estado_id as estado',
-                'dde_puestos.salario_puesto as salario',
-                'departamentos.nombre_departamento as departamento',
-                'dde_puestos.objetivo_puesto as objetivo',
-                //'requisitos.formacion_requerida as formacion_requerida',
-                'requisitos.experiencia_profesional_segun_cargo as experiencia_profesional_segun_cargo',
-                'requisitos.experiencia_relacionado_al_area as experiencia_relacionado_al_area',
-                'requisitos.experiencia_en_funciones_de_mando as experiencia_en_funciones_de_mando',
-                'dde_puestos.persona_actual_id'
-            ])
-            ->leftJoin('dde_departamentos as departamentos', 'departamentos.id_departamento', '=', 'dde_puestos.departamento_id')
-            ->leftJoin('dde_requisitos as requisitos', 'requisitos.puesto_id', '=', 'dde_puestos.id_puesto');
+            ->leftJoin('dde_estados as estado', 'dde_puestos.estado_id', '=', 'estado.id_estado')
+            ->leftJoin('dde_departamentos as departamento', 'dde_puestos.departamento_id', '=', 'departamento.id_departamento')
+            ->leftJoin('dde_personas as persona', 'dde_puestos.persona_actual_id', '=', 'persona.id_persona')
+            ->leftJoin('dde_gerencias as gerencia', 'departamento.gerencia_id', '=', 'gerencia.id_gerencia');
 
-        if (isset($item)) {
-            $query->where('dde_puestos.item_puesto', $item);
-        }
-        if (isset($departamentosIds) && count($departamentosIds) > 0) {
-            $query->whereIn('dde_puestos.departamento_id', $departamentosIds);
-        }
-        if (isset($gerenciasIds) && count($gerenciasIds) > 0) {
-            $query->whereIn('departamentos.gerencia_id', $gerenciasIds);
-        }
-        if (isset($estado)) {
-            $query->where('dde_puestos.estado_id', $estado);
-        }
+        $query = $query->select([
+            'dde_puestos.id_puesto as idPuesto',
+            'dde_puestos.item_puesto as item',
+            'dde_puestos.denominacion_puesto as denominacionPuesto',
+            'dde_puestos.estado_id as estadoId',
+            'estado.nombre_estado as estado',
+            'gerencia.nombre_gerencia as gerencia',
+            'dde_puestos.departamento_id as departamentoId',
+            'departamento.nombre_departamento as departamento',
+            'dde_puestos.persona_actual_id as personaId',
+            'persona.nombre_persona as nombrePersona',
+            'persona.primer_apellido_persona as primerApellidoPersona',
+            'persona.segundo_apellido_persona as segundoApellidoPersona'
+        ]);
 
-        $query->orderBy('dde_puestos.item_puesto');
+        $query = $query->orderBy('dde_puestos.id_puesto');
 
-        // Pagination
         $personaPuestos = $query->paginate($limit, ['*'], 'page', $page);
 
         return response()->json($personaPuestos);
     }
 
+    public function getImagenFuncionario($personaId)
+    {
+        $persona = Persona::find($personaId);
+
+        if ($persona) {
+            $imagen = $persona->imagenes()->latest()->first();
+
+            if ($imagen) {
+                $base64_imagen = $imagen->base64_imagen;
+                $tipo_mime_imagen = $imagen->tipo_mime_imagen;
+                $imagen_data = base64_decode($base64_imagen);
+
+                return response($imagen_data)
+                    ->header('Content-Type', 'image/jpeg')
+                    ->header('Content-Disposition', 'inline')
+                    ->header('Content-Length', strlen($imagen_data));
+            } else {
+                $imagenPorDefecto = public_path('img/funcionario.png');
+                $imagen_data = file_get_contents($imagenPorDefecto);
+                $tipo_mime_imagen = mime_content_type($imagenPorDefecto);
+
+                return response($imagen_data)
+                    ->header('Content-Type', $tipo_mime_imagen)
+                    ->header('Content-Disposition', 'inline')
+                    ->header('Content-Length', filesize($imagenPorDefecto));
+            }
+        } else {
+            return response()->json(['message' => 'No se encontró a la persona.'], 404);
+        }
+    }
+
+    public function byFiltrosPlanilla(Request $request)
+    {
+        $limit = $request->input('limit');
+        $page = $request->input('page', 0);
+
+        $itemNombre = $request->input('query.itemNombre'); 
+        $gerenciasIds = $request->input('gerenciasIds');
+        $departamentosIds = $request->input('departamentosIds');
+        $estadoId = $request->input('query.estadoPuesto');
+
+        $query = Puesto::query()
+            ->leftJoin('dde_estados as estado', 'dde_puestos.estado_id', '=', 'estado.id_estado')
+            ->leftJoin('dde_departamentos as departamento', 'dde_puestos.departamento_id', '=', 'departamento.id_departamento')
+            ->leftJoin('dde_personas as persona', 'dde_puestos.persona_actual_id', '=', 'persona.id_persona')
+            ->leftJoin('dde_gerencias as gerencia', 'departamento.gerencia_id', '=', 'gerencia.id_gerencia');
+
+        if (isset($itemNombre)) {
+            $query = $query->where(function ($query) use ($itemNombre) {
+                $query->where('dde_puestos.item_puesto', $itemNombre);
+
+                $query->orWhere('persona.nombre_persona', 'LIKE', "%{$itemNombre}%")
+                    ->orWhere('persona.primer_apellido_persona', 'LIKE', "%{$itemNombre}%")
+                    ->orWhere('persona.segundo_apellido_persona', 'LIKE', "%{$itemNombre}%");
+            });
+        }
+
+        if (isset($gerenciasIds)) {
+            $query = $query->where('departamento.gerencia_id', $gerenciasIds);
+        }
+
+        if (isset($departamentosIds)) {
+            $query = $query->where('departamento.id_departamento', $departamentosIds);
+        }
+
+        if (isset($estadoId)) {
+            $query = $query->where('estado.id_estado', $estadoId);
+        }
+
+        $query = $query->select([
+            'dde_puestos.id_puesto as idPuesto',
+            'dde_puestos.item_puesto as item',
+            'dde_puestos.denominacion_puesto as denominacionPuesto',
+            'dde_puestos.estado_id as estadoId',
+            'estado.nombre_estado as estado',
+            'gerencia.nombre_gerencia as gerencia',
+            'dde_puestos.departamento_id as departamentoId',
+            'departamento.nombre_departamento as departamento',
+            'dde_puestos.persona_actual_id as personaId',
+            'persona.nombre_persona as nombrePersona',
+            'persona.primer_apellido_persona as primerApellidoPersona',
+            'persona.segundo_apellido_persona as segundoApellidoPersona'
+        ]);
+
+        $query = $query->orderBy('dde_puestos.id_puesto');
+
+        $personaPuestos = $query->paginate($limit, ['*'], 'page', $page);
+
+        return response()->json($personaPuestos);
+    }
+
+
+
+    public function obtenerInfoDePersonapuesto($puestoId)
+    {
+        $personaPuesto = Puesto::with(['persona_actual', 'departamento.gerencia', 'requisitos', 'personaPuesto'])->find($puestoId);
+
+        return response()->json($personaPuesto);
+    }
 }

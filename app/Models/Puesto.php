@@ -54,7 +54,7 @@ class Puesto extends Model
     {
         return $this->belongsTo(Persona::class, 'persona_actual_id', 'id_persona');
     }
-    
+
     public function incorporacion()
     {
         return $this->hasMany(Incorporacion::class);

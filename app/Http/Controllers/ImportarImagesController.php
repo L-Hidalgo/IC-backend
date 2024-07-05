@@ -64,7 +64,7 @@ class ImportarImagesController extends Controller
         }
     }
 
-    public function getImagenPersona($personaId)
+    public function getImagenFuncionario($personaId)
     {
         $persona = Persona::find($personaId);
 

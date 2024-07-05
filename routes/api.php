@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\GradoAcademicoController;
 use App\Http\Controllers\Api\AreaFormacionController;
 use App\Http\Controllers\Api\InstitucionController;
 use App\Http\Controllers\Api\FormacionController;
+use App\Http\Controllers\Api\GerenciaDepartamentoController;
 use App\Http\Controllers\Api\PuestoController;
 use App\Http\Controllers\Api\RolController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -34,17 +35,21 @@ Route::group(['prefix' => 'users'], function () {
 
 // administracion
 Route::group(['prefix' => 'administracion'], function () {
-  Route::post('/importar-imagenes', [ImportarImagesController::class, 'importImagenes']);
-  Route::get('/imagen-user-persona/{personaCi}', [ImportarImagesController::class, 'getImagenUserPersona']);
-  Route::get('/puestoDetalle', [PuestoController::class, 'getPuestoDetalle']);
+  Route::post('/import-planilla', [ImportarExcelController::class, 'importPlanilla']);
+  Route::post('/import-imagenes', [ImportarImagesController::class, 'importImagenes']);
+  Route::get('/imagen-user/{personaCi}', [ImportarImagesController::class, 'getImagenUserPersona']);
   Route::get('/incorporacionDetalle', [IncorporacionesController::class, 'getIncorporacionDetalle']);
-  Route::post('/planilla', [ImportarExcelController::class, 'importExcel']);
+  Route::get('/puestoDetalle', [PuestoController::class, 'getPuestoDetalle']);
 });
 
 //planilla
 Route::group(['prefix' => 'planilla'], function () {
-  Route::post('/listarPuestosPersonas', [PlanillaController::class, 'listarPuestosPersonas'])->name('importaciones.buscar');
-  Route::post('/filtrar', [PlanillaController::class, 'filtrarAutoComplete'])->name('importaciones.filtrar-autocomplete');
+  Route::post('/listar-puestos', [PlanillaController::class, 'listarPuestos']); //asi es recomendable
+  Route::get('/imagen-funcionario/{personaId}', [PlanillaController::class, 'getImagenFuncionario']);
+  Route::post('/filtrar-puesto', [PlanillaController::class, 'byFiltrosPlanilla']); 
+  Route::get('/listar-gerencia', [GerenciaDepartamentoController::class, 'GerenciaDepartamento']);
+
+  
   Route::get('/{personaPuestoId}', [PlanillaController::class, 'InformacionPersonaPuesto'])->name('persona.puest.byid');
 });
 
@@ -78,7 +83,7 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   //Route::get('/{incorporacionId}/gen-form-RemisionDeDocumentos', [IncorporacionesController::class, 'genFormRemisionDeDocumentos']);
 
   //imagenes de las personas
-  Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenPersona']);
+  Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
 });
 
 /* ------------------------------------------ Formacion ------------------------------------------ */

@@ -1093,8 +1093,8 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.gerencia', $valorGerencia . ' ');
 
-        $itemPuesto = $incorporacion->puesto_actual->item_puesto ?? 'Valor por defecto o mensaje de error';
-        $templateProcessor->setValue('puestoActual.item', $itemPuesto);
+        $itemNombre = $incorporacion->puesto_actual->item_puesto ?? 'Valor por defecto o mensaje de error';
+        $templateProcessor->setValue('puestoActual.item', $itemNombre);
 
         $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
 

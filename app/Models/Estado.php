@@ -21,8 +21,8 @@ class Estado extends Model
         'fecha_fin' => 'datetime',
     ];
 
-    public function puesto() {
-        return $this->belongsTo(Puesto::class);
+    public function puesto()
+    {
+        return $this->belongsTo(Puesto::class, 'estado_id', 'id_estado');
     }
-
 }
