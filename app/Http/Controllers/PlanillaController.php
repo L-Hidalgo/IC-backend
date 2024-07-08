@@ -133,11 +133,9 @@ class PlanillaController extends Controller
         return response()->json($personaPuestos);
     }
 
-
-
-    public function obtenerInfoDePersonapuesto($puestoId)
+    public function infPersonaPuesto($puestoId)
     {
-        $personaPuesto = Puesto::with(['persona_actual', 'departamento.gerencia', 'requisitos', 'personaPuesto'])->find($puestoId);
+        $personaPuesto = Puesto::with(['persona_actual', 'departamento.gerencia', 'requisitos', 'funcionario'])->find($puestoId);
 
         return response()->json($personaPuesto);
     }

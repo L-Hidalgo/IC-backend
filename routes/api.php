@@ -48,9 +48,7 @@ Route::group(['prefix' => 'planilla'], function () {
   Route::get('/imagen-funcionario/{personaId}', [PlanillaController::class, 'getImagenFuncionario']);
   Route::post('/filtrar-puesto', [PlanillaController::class, 'byFiltrosPlanilla']); 
   Route::get('/listar-gerencia', [GerenciaDepartamentoController::class, 'GerenciaDepartamento']);
-
-  
-  Route::get('/{personaPuestoId}', [PlanillaController::class, 'InformacionPersonaPuesto'])->name('persona.puest.byid');
+  Route::get('/{puestoId}', [PlanillaController::class, 'infPersonaPuesto']);
 });
 
 // incorporaciones
