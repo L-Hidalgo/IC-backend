@@ -75,12 +75,12 @@ class PlanillaController extends Controller
 
     public function byFiltrosPlanilla(Request $request)
     {
-        $limit = $request->input('limit');
-        $page = $request->input('page', 0);
+        $limit = $request->input('limit', 10);
+        $page = $request->input('page', 1);
 
-        $itemNombre = $request->input('query.itemNombre'); 
-        $gerenciasIds = $request->input('query.gerenciasIds');
-        $departamentosIds = $request->input('query.departamentosIds');
+        $itemNombre = $request->input('query.itemNombre');
+        $gerenciasIds = $request->input('query.gerenciasIds', []);
+        $departamentosIds = $request->input('query.departamentosIds', []);
         $estadoId = $request->input('query.estadoPuesto');
 
         $query = Puesto::query()
@@ -89,29 +89,28 @@ class PlanillaController extends Controller
             ->leftJoin('dde_personas as persona', 'dde_puestos.persona_actual_id', '=', 'persona.id_persona')
             ->leftJoin('dde_gerencias as gerencia', 'departamento.gerencia_id', '=', 'gerencia.id_gerencia');
 
-        if (isset($itemNombre)) {
-            $query = $query->where(function ($query) use ($itemNombre) {
-                $query->where('dde_puestos.item_puesto', $itemNombre);
-
-                $query->orWhere('persona.nombre_persona', 'LIKE', "%{$itemNombre}%")
+        if (!empty($itemNombre)) {
+            $query->where(function ($query) use ($itemNombre) {
+                $query->where('dde_puestos.item_puesto', $itemNombre)
+                    ->orWhere('persona.nombre_persona', 'LIKE', "%{$itemNombre}%")
                     ->orWhere('persona.primer_apellido_persona', 'LIKE', "%{$itemNombre}%")
                     ->orWhere('persona.segundo_apellido_persona', 'LIKE', "%{$itemNombre}%");
             });
         }
 
-        if (isset($gerenciasIds)) {
-            $query = $query->where('departamento.gerencia_id', $gerenciasIds);
+        if (!empty($gerenciasIds)) {
+            $query->whereIn('departamento.gerencia_id', $gerenciasIds);
         }
 
-        if (isset($departamentosIds)) {
-            $query = $query->where('departamento.id_departamento', $departamentosIds);
+        if (!empty($departamentosIds)) {
+            $query->whereIn('departamento.id_departamento', $departamentosIds);
         }
 
-        if (isset($estadoId)) {
-            $query = $query->where('estado.id_estado', $estadoId);
+        if (!empty($estadoId)) {
+            $query->where('estado.id_estado', $estadoId);
         }
 
-        $query = $query->select([
+        $query->select([
             'dde_puestos.id_puesto as idPuesto',
             'dde_puestos.item_puesto as item',
             'dde_puestos.denominacion_puesto as denominacionPuesto',
@@ -126,7 +125,7 @@ class PlanillaController extends Controller
             'persona.segundo_apellido_persona as segundoApellidoPersona'
         ]);
 
-        $query = $query->orderBy('dde_puestos.id_puesto');
+        $query->orderBy('dde_puestos.id_puesto');
 
         $personaPuestos = $query->paginate($limit, ['*'], 'page', $page);
 
@@ -135,7 +134,7 @@ class PlanillaController extends Controller
 
     public function infPersonaPuesto($puestoId)
     {
-        $personaPuesto = Puesto::with(['persona_actual', 'departamento.gerencia', 'requisitos', 'funcionario'])->find($puestoId);
+        $personaPuesto = Puesto::with(['persona_actual', 'departamento.gerencia', 'requisitos', 'funcionario', 'estado'])->find($puestoId);
 
         return response()->json($personaPuesto);
     }
