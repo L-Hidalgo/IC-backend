@@ -75,8 +75,8 @@ class PlanillaController extends Controller
 
     public function byFiltrosPlanilla(Request $request)
     {
-        $limit = $request->input('limit', 10);
-        $page = $request->input('page', 1);
+        $limit = $request->input('limit');
+        $page = $request->input('page', 0);
 
         $itemNombre = $request->input('query.itemNombre');
         $gerenciasIds = $request->input('query.gerenciasIds', []);

@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\IncorporacionesExport;
 use App\Exports\ReportEvaluacionExport;
 use App\Exports\ReportTrimestralExport;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class IncorporacionesController extends Controller
 {
@@ -261,7 +263,7 @@ class IncorporacionesController extends Controller
     public function listPaginateIncorporaciones(Request $request)
     {
         $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0); 
+        $page = $request->input('page', 0);
 
         $query = Incorporacion::with([
             'persona',
@@ -302,7 +304,7 @@ class IncorporacionesController extends Controller
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
             'user',
         ])->where('estado_incorporacion', '!=', 3)
-        ->orderBy('id_incorporacion', 'desc');
+            ->orderBy('id_incorporacion', 'desc');
 
         if ($name) {
             $query->whereHas('user', function ($q) use ($name) {
@@ -674,6 +676,79 @@ class IncorporacionesController extends Controller
             $iniciales .= substr($parte, 0, 1);
         }
         $templateProcessor->setValue('incorporacion.abrevNombreUsuario', $iniciales);
+
+
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $valorGerencia = '';
+
+        if ($nombreGerencia == 'Gerencia Distrital La Paz I') {
+            $valorGerencia = 'GDLPZ I';
+        } elseif ($nombreGerencia == 'Gerencia Distrital La Paz II') {
+            $valorGerencia = 'GDLPZ II';
+        } elseif ($nombreGerencia == 'Gerencia GRACO La Paz') {
+            $valorGerencia = 'GGLPZ';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Cochabamba') {
+            $valorGerencia = 'GDCBBA';
+        } elseif ($nombreGerencia == 'Gerencia GRACO Cochabamba') {
+            $valorGerencia = 'GGCBBA';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Quillacollo') {
+            $valorGerencia = 'GDQLLO';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz I') {
+            $valorGerencia = 'GDSCZ I';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Santa Cruz II') {
+            $valorGerencia = 'GDSCZ II';
+        } elseif ($nombreGerencia == 'Gerencia GRACO Santa Cruz') {
+            $valorGerencia = 'GGSCZ';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Montero') {
+            $valorGerencia = 'GDMTR';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Chuquisaca') {
+            $valorGerencia = 'GDCH';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Tarija') {
+            $valorGerencia = 'GDTJ';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Yacuiba') {
+            $valorGerencia = 'GDYA';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Oruro') {
+            $valorGerencia = 'GDOR';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Potosí') {
+            $valorGerencia = 'GDPT';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Beni') {
+            $valorGerencia = 'GDBN';
+        } elseif ($nombreGerencia == 'Gerencia Distrital Pando') {
+            $valorGerencia = 'GDPN';
+        } else {
+            $valorGerencia = 'GG';
+        }
+        $templateProcessor->setValue('incorporacion.gerenciaAbreviatura', $valorGerencia);
+
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $valorDepartamento = '';
+
+        if (
+            $nombreGerencia === 'Gerencia Distrital La Paz I' ||
+            $nombreGerencia === 'Gerencia GRACO La Paz' ||
+            $nombreGerencia === 'Gerencia Distrital Cochabamba' ||
+            $nombreGerencia === 'Gerencia Distrital Santa Cruz I' ||
+            $nombreGerencia === 'Gerencia GRACO Santa Cruz'
+        ) {
+            $valorDepartamento = 'DARH';
+        } elseif (
+            $nombreGerencia === 'Gerencia Distrital La Paz II' ||
+            $nombreGerencia === 'Gerencia Distrital Quillacollo' ||
+            $nombreGerencia === 'Gerencia Distrital Santa Cruz II' ||
+            $nombreGerencia === 'Gerencia Distrital Montero' ||
+            $nombreGerencia === 'Gerencia Distrital Chuquisaca' ||
+            $nombreGerencia === 'Gerencia Distrital Tarija' ||
+            $nombreGerencia === 'Gerencia Distrital Yacuiba' ||
+            $nombreGerencia === 'Gerencia Distrital Oruro' ||
+            $nombreGerencia === 'Gerencia Distrital Potosí' ||
+            $nombreGerencia === 'Gerencia Distrital Beni' ||
+            $nombreGerencia === 'Gerencia Distrital Pando'
+        ) {
+            $valorDepartamento = 'ARH';
+        } else {
+            $valorDepartamento = 'GRH';
+        }
+        $templateProcessor->setValue('incorporacion.departamentoAbreviatura', $valorDepartamento);
 
         $templateProcessor->setValue('incorporacion.citeInforme', $incorporacion->cite_informe_incorporacion);
 
@@ -1313,7 +1388,6 @@ class IncorporacionesController extends Controller
         return response()->download($savedPath)->deleteFileAfterSend(true);
     }
 
-    //para acta de posesion 
     public function generarActaPosesion($incorporacionId)
     {
         $incorporacion = Incorporacion::find($incorporacionId);
@@ -1460,7 +1534,6 @@ class IncorporacionesController extends Controller
         return response()->download($savedPath)->deleteFileAfterSend(true);
     }
 
-    //para acta de entrega
     public function generarActaEntrega($incorporacionId)
     {
         $incorporacion = Incorporacion::find($incorporacionId);
@@ -1549,6 +1622,102 @@ class IncorporacionesController extends Controller
         $savedPath = $disk->path('generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
+
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
+    public function generarFormR1418($incorporacionId)
+    {
+        $incorporacion = Incorporacion::find($incorporacionId);
+
+        if (!isset($incorporacion)) {
+            return response('', 404);
+        }
+
+        $disk = Storage::disk('form_templates');
+        $pathTemplate = $disk->path('R-1418-01.xlsx');
+
+        $spreadsheet = IOFactory::load($pathTemplate);
+
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('D8', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
+
+        $sheet->setCellValue('S8', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
+
+        $sheet->setCellValue('AG8', $incorporacion->puesto_nuevo->item_puesto);
+
+        $sheet->setCellValue('AK8', $incorporacion->puesto_nuevo->denominacion_puesto);
+
+        $sheet->setCellValue('J10', $incorporacion->persona->ci_persona);
+
+        $sheet->setCellValue('S10', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+
+        $sheet->setCellValue('AQ10', $incorporacion->fch_incorporacion);
+
+        $fileName = 'R-1418-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++;
+
+        $savedPath = $disk->path('generados/') . $fileName . '.xlsx';
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save($savedPath);
+
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
+    public function generarFormR1419($incorporacionId)
+    {
+        $incorporacion = Incorporacion::find($incorporacionId);
+
+        if (!$incorporacion) {
+            return response('', 404);
+        }
+
+        $imagen_persona = $incorporacion->persona->imagenes->first();
+
+        $disk = Storage::disk('form_templates');
+        $pathTemplate = $disk->path('R-1419-01.xlsx');
+        $spreadsheet = IOFactory::load($pathTemplate);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        if ($imagen_persona) {
+            $base64_imagen = $imagen_persona->base64_imagen;
+            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing();
+            $drawing->setName('Imagen');
+            $drawing->setDescription('Imagen de Persona');
+            $drawing->setImageResource(imagecreatefromstring(base64_decode($base64_imagen)));
+            $drawing->setRenderingFunction(\PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing::RENDERING_JPEG);
+            $drawing->setMimeType(\PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing::MIMETYPE_DEFAULT);
+            $sheet->mergeCells('D7:E18');
+            $drawing->setCoordinates('D7');
+            $drawing->setHeight(300); 
+            $drawing->setWidth(180); 
+            $drawing->setWorksheet($sheet);
+        } else {
+            $sheet->setCellValue('D7', 'FOTO');
+            $sheet->mergeCells('D7:E18');
+        }        
+
+        $sheet->setCellValue('H7', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
+        $sheet->setCellValue('H9', $incorporacion->puesto_nuevo->denominacion_puesto);
+        $sheet->setCellValue('H11', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
+        $sheet->setCellValue('H13', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
+
+        $carbonFechaIncorporacion = Carbon::parse($incorporacion->fch_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaIncorporacion->locale('es_UY');
+        $fechaIncorporacionFormateada = $carbonFechaIncorporacion->isoFormat('LL');
+        $sheet->setCellValue('H15', $fechaIncorporacionFormateada);
+
+        $fileName = 'R-1419-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++;
+
+        $savedPath = $disk->path('generados/') . $fileName . '.xlsx';
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
     }

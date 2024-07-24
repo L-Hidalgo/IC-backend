@@ -14,7 +14,7 @@ class RolController extends Controller
         return $this->sendList($rol);
     }
 
-    public function listarUserRol($userId){
+    public function listarUsuariosRol($userId){
         $usuario = User::find($userId);
         
         if($usuario){

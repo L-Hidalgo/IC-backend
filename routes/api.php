@@ -25,12 +25,10 @@ Route::middleware('auth')->group(function () {
 // usuarios y roles
 Route::group(['prefix' => 'users'], function () {
   Route::get('/', [UserController::class, 'listar']);
-  Route::post('/listarUsers', [UserController::class, 'listarUser']);
   Route::get('/listarRol', [RolController::class, 'listarRol']);
-  Route::get('/{userId}/listarUserRol', [RolController::class, 'listarUserRol']);
+  Route::get('/{userId}/listarUsuariosRol', [RolController::class, 'listarUsuariosRol']);
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
   Route::get('/{userId}/userRol', [UserController::class, 'obtenerRolUser']);
-  Route::get('/byNameUser', [UserController::class, 'byNameUser']);
 });
 
 // administracion
@@ -40,6 +38,10 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::get('/imagen-user/{personaCi}', [ImportarImagesController::class, 'getImagenUserPersona']);
   Route::get('/incorporacionDetalle', [IncorporacionesController::class, 'getIncorporacionDetalle']);
   Route::get('/puestoDetalle', [PuestoController::class, 'getPuestoDetalle']);
+
+  //--------------------------------------
+  Route::post('/listar-usuarios', [UserController::class, 'listarUsuarios']);
+  Route::post('/filtrar-nombre-usuario', [UserController::class, 'byNombreUsuarios']);
 });
 
 //planilla
@@ -54,8 +56,8 @@ Route::group(['prefix' => 'planilla'], function () {
 // incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
-  Route::post('/list', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
-  Route::post('/byFiltrosIncorporacion', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
+  Route::post('/list-incorporaciones', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
+  Route::post('/filtrar-incorporaciones', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
   Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
   Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
@@ -65,6 +67,8 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-memo', [IncorporacionesController::class, 'generarMemorandum']);
   Route::get('/{incorporacionId}/gen-acta-entrega', [IncorporacionesController::class, 'generarActaEntrega']);
   Route::get('/{incorporacionId}/gen-acta-posesion', [IncorporacionesController::class, 'generarActaPosesion']);
+  Route::get('/{incorporacionId}/gen-form-R1418', [IncorporacionesController::class, 'generarFormR1418']);
+  Route::get('/{incorporacionId}/gen-form-R1419', [IncorporacionesController::class, 'generarFormR1419']);
   Route::get('/{incorporacionId}/gen-form-R0980', [IncorporacionesController::class, 'generarFormR0980']);
   //formularios para incorporacion
   Route::get('/{incorporacionId}/gen-form-R0078', [IncorporacionesController::class, 'generarFormR0078']);
