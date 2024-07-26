@@ -13,6 +13,7 @@ use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\ImportarImagesController;
+use App\Http\Controllers\InterinatoController;
 use App\Http\Controllers\PlanillaController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,7 +39,6 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::get('/imagen-user/{personaCi}', [ImportarImagesController::class, 'getImagenUserPersona']);
   Route::get('/incorporacionDetalle', [IncorporacionesController::class, 'getIncorporacionDetalle']);
   Route::get('/puestoDetalle', [PuestoController::class, 'getPuestoDetalle']);
-
   //--------------------------------------
   Route::post('/listar-usuarios', [UserController::class, 'listarUsuarios']);
   Route::post('/filtrar-nombre-usuario', [UserController::class, 'byNombreUsuarios']);
@@ -51,6 +51,10 @@ Route::group(['prefix' => 'planilla'], function () {
   Route::post('/filtrar-puesto', [PlanillaController::class, 'byFiltrosPlanilla']); 
   Route::get('/listar-gerencia', [GerenciaDepartamentoController::class, 'GerenciaDepartamento']);
   Route::get('/{puestoId}', [PlanillaController::class, 'infPersonaPuesto']);
+});
+
+Route::group(['prefix' => 'interinato'], function () {
+  Route::post('/', [InterinatoController::class, 'crearInterinato']);
 });
 
 // incorporaciones
