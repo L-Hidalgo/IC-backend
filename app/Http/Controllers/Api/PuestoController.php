@@ -21,19 +21,6 @@ class PuestoController extends Controller
         return $this->sendSuccess($puesto);
     }
 
-    /*public function getByItem($item_puesto)
-    {
-        $puesto = Puesto::where('item_puesto', $item_puesto)
-            ->with('departamento', 'departamento.gerencia', 'persona_actual')
-            ->first();
-
-        if ($puesto) {
-            Log::info($puesto);
-            return $this->sendObject($puesto);
-        } else {
-            return null;
-        }
-    }*/
     public function getByItem($item_puesto)
     {
         $puesto = Puesto::where('item_puesto', $item_puesto)

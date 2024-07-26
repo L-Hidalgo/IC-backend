@@ -59,12 +59,12 @@ class Interinato extends Model
         return $this->belongsTo(Persona::class, 'titular_puesto_actual_id', 'id_persona');
     }
 
-    public function creador()
+    public function usuarioCreador()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
-    public function modificador()
+    public function usuarioModificador()
     {
         return $this->belongsTo(User::class, 'modified_by', 'id');
     }

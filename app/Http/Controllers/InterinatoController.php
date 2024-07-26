@@ -35,20 +35,13 @@ class InterinatoController extends Controller
             'fchInicioInterinato' => 'nullable|date',
             'fchFinInterinato' => 'nullable|date',
             'totalDiasInterinato' => 'nullable|integer',
-            'periodoInterinatosInterinato' => 'nullable|integer',
+            'periodoInterinato' => 'nullable|string',
             'createdBy' => 'nullable|integer',
-            'modifiedBy' => 'nullable|integer',
             'tipoNotaInformeMinutaInterinato' => 'nullable|string',
             'observacionesInterinato' => 'nullable|string',
             'sayriInterinato' => 'nullable|string',
         ]);
         
-        $fchInicioInterinato = Carbon::parse($validatedData['fchInicioInterinato']);
-        $fchFinInterinato = Carbon::parse($validatedData['fchFinInterinato']);
-
-        $totalDiasInterinato = $fchInicioInterinato->diffInDays($fchFinInterinato);
-        $periodoInterinatosInterinato = $fchInicioInterinato->translatedFormat('j F Y') . ' al ' . $fchFinInterinato->translatedFormat('j F Y');
-
         $titularPuestoNuevoId = null;
         $titularPuestoActualId = null;
 
@@ -83,15 +76,16 @@ class InterinatoController extends Controller
             'fch_memorandum_rap_interinato' => $validatedData['fchMemorandumRapInterinato'],
             'fch_inicio_interinato' => $validatedData['fchInicioInterinato'],
             'fch_fin_interinato' => $validatedData['fchFinInterinato'],
-            'total_dias_interinato' => $totalDiasInterinato,
-            'periodo_interinato' => $periodoInterinatosInterinato,
+            'total_dias_interinato' => $validatedData['totalDiasInterinato'],
+            'periodo_interinato' => $validatedData['periodoInterinato'],
             'created_by' => $validatedData['createdBy'],
-            'modified_by' => $validatedData['modifiedBy'],
             'tipo_nota_informe_minuta_interinato' => $validatedData['tipoNotaInformeMinutaInterinato'],
             'observaciones_interinato' => $validatedData['observacionesInterinato'],
             'sayri_interinato' => $validatedData['sayriInterinato'],
         ]);
 
+        $fchInicioInterinato = Carbon::parse($validatedData['fchInicioInterinato']);
+        $fchFinInterinato = Carbon::parse($validatedData['fchFinInterinato']);
         $fechaActual = Carbon::now();
 
         if ($fchInicioInterinato->toDateString() === $fechaActual->toDateString()) {
