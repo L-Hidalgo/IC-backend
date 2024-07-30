@@ -12,7 +12,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 
-
+// Schedule para mover todos los interinatos del dia a destino cada dia a las 1 y 57
 Schedule::call(function () {
   $interinatosADestino = Interinato::where('estado', 0)->where('fch_inicio_interinato', '<=', Carbon::now()->toDateString())->get();
   foreach ($interinatosADestino as $interinato) {
@@ -31,5 +31,6 @@ Schedule::call(function () {
 })->daily()->at('23:00');
 
 Schedule::call(function () {
-  Log::info('Schedule example running <------------------');
+  //Print format fecha hora server
+  Log::info('Schedule example running <------------------'.Carbon::now()->toDateTimeString());
 })->everyMinute();

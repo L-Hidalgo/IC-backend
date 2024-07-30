@@ -82,6 +82,7 @@ class InterinatoController extends Controller
             'tipo_nota_informe_minuta_interinato' => $validatedData['tipoNotaInformeMinutaInterinato'],
             'observaciones_interinato' => $validatedData['observacionesInterinato'],
             'sayri_interinato' => $validatedData['sayriInterinato'],
+            'estado' => 0,
         ]);
 
         // $fchInicioInterinato = Carbon::parse($validatedData['fchInicioInterinato']);

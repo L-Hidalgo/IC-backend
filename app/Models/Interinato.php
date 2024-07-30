@@ -77,6 +77,7 @@ class Interinato extends Model
   {
     $fechaActual = Carbon::now();
     if ($this->fch_inicio_interinato <= $fechaActual->toDateString() && $this->estado === 0) {
+      
       if ($this->puesto_actual_id && $this->puesto_nuevo_id) {
         $puestoActual = $this->puestoActual;
         $puestoNuevo = $this->puestoNuevo;
@@ -92,13 +93,13 @@ class Interinato extends Model
           $puestoActual->estado_id = 1;
           $puestoActual->save();
 
-          Log::info('interinato ya ejecutado a destino <------------');
-
           $this->estado = 1; // enviado a puesto destino
           $this->save();
+          return true;
         }
       }
     }
+    return false;
   }
 
   public function actualizarInterinatoOrigen()
@@ -129,8 +130,10 @@ class Interinato extends Model
 
           $this->estado = 2; // enviado a puesto origen
           $this->save();
+          return true;
         }
       }
     }
+    return false;
   }
 }
