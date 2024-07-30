@@ -18,7 +18,7 @@ Schedule::call(function () {
   foreach ($interinatosADestino as $interinato) {
     $interinato->actualizarInterinatoDestino();
   }
-  Log::info('Interinatos migrados a destino' . sizeof($interinatosADestino));
+  Log::info('Interinatos migrados a destino ' . sizeof($interinatosADestino));
 })->daily()->at('05:00');
 
 // Schedule para mover todos los interinatos de su puesto de destino al de origen
@@ -27,7 +27,7 @@ Schedule::call(function () {
   foreach ($interinatosAOrigen as $interinato) {
     $interinato->actualizarInterinatoOrigen();
   }
-  Log::info('Interinatos migrados a origen' . sizeof($interinatosAOrigen));
+  Log::info('Interinatos migrados a origen ' . sizeof($interinatosAOrigen));
 })->daily()->at('23:00');
 
 Schedule::call(function () {
