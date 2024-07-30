@@ -84,63 +84,65 @@ class InterinatoController extends Controller
             'sayri_interinato' => $validatedData['sayriInterinato'],
         ]);
 
-        $fchInicioInterinato = Carbon::parse($validatedData['fchInicioInterinato']);
-        $fchFinInterinato = Carbon::parse($validatedData['fchFinInterinato']);
-        $fechaActual = Carbon::now();
+        // $fchInicioInterinato = Carbon::parse($validatedData['fchInicioInterinato']);
+        // $fchFinInterinato = Carbon::parse($validatedData['fchFinInterinato']);
+        // $fechaActual = Carbon::now();
 
-        if ($fchInicioInterinato->toDateString() === $fechaActual->toDateString()) {
-            if ($request->has('puestoActualId') && $request->has('puestoNuevoId')) {
-                $puestoActual = Puesto::find($request->puestoActualId);
-                $puestoNuevo = Puesto::find($request->puestoNuevoId);
+        // if ($fchInicioInterinato->toDateString() === $fechaActual->toDateString()) {
+        //     if ($request->has('puestoActualId') && $request->has('puestoNuevoId')) {
+        //         $puestoActual = Puesto::find($request->puestoActualId);
+        //         $puestoNuevo = Puesto::find($request->puestoNuevoId);
 
-                if ($puestoActual && $puestoNuevo) {
-                    $puestoNuevo->persona_actual_id = $puestoActual->persona_actual_id;
-                    $puestoNuevo->denominacion_puesto = $puestoActual->denominacion_puesto . ' a.i.';
-                    $puestoNuevo->estado_id = 2;
-                    $puestoNuevo->save();
+        //         if ($puestoActual && $puestoNuevo) {
+        //             $puestoNuevo->persona_actual_id = $puestoActual->persona_actual_id;
+        //             $puestoNuevo->denominacion_puesto = $puestoActual->denominacion_puesto . ' a.i.';
+        //             $puestoNuevo->estado_id = 2;
+        //             $puestoNuevo->save();
 
-                    $puestoActual->persona_actual_id = null;
-                    $puestoActual->estado_id = 1;
-                    $puestoActual->save();
-                } else {
-                    throw new \Exception('No se encontraron los puestos especificados.');
-                }
-            } else {
-                throw new \Exception('Los parámetros "puestoActualId" y "puestoNuevoId" son requeridos.');
-            }
-        }
+        //             $puestoActual->persona_actual_id = null;
+        //             $puestoActual->estado_id = 1;
+        //             $puestoActual->save();
+        //         } else {
+        //             throw new \Exception('No se encontraron los puestos especificados.');
+        //         }
+        //     } else {
+        //         throw new \Exception('Los parámetros "puestoActualId" y "puestoNuevoId" son requeridos.');
+        //     }
+        // }
 
-        if ($fchFinInterinato->toDateString() === $fechaActual->toDateString()) {
-            if ($request->has('puestoActualId') && $request->has('puestoNuevoId')) {
-                $puestoActual = Puesto::find($request->puestoActualId);
-                $puestoNuevo = Puesto::find($request->puestoNuevoId);
-                if ($puestoActual && $puestoNuevo) {
-                    $puestoNuevo->persona_actual_id = $titularPuestoNuevoId;
-                    $puestoNuevo->denominacion_puesto = str_replace(' a.i.', '', $puestoActual->denominacion_puesto);
+        // if ($fchFinInterinato->toDateString() === $fechaActual->toDateString()) {
+        //     if ($request->has('puestoActualId') && $request->has('puestoNuevoId')) {
+        //         $puestoActual = Puesto::find($request->puestoActualId);
+        //         $puestoNuevo = Puesto::find($request->puestoNuevoId);
+        //         if ($puestoActual && $puestoNuevo) {
+        //             $puestoNuevo->persona_actual_id = $titularPuestoNuevoId;
+        //             $puestoNuevo->denominacion_puesto = str_replace(' a.i.', '', $puestoActual->denominacion_puesto);
 
-                    if (!is_null($titularPuestoNuevoId) && $titularPuestoNuevoId !== '') {
-                        $puestoNuevo->estado_id = 2;
-                    } else {
-                        $puestoNuevo->estado_id = 1;
-                    }
-                    $puestoNuevo->save();
+        //             if (!is_null($titularPuestoNuevoId) && $titularPuestoNuevoId !== '') {
+        //                 $puestoNuevo->estado_id = 2;
+        //             } else {
+        //                 $puestoNuevo->estado_id = 1;
+        //             }
+        //             $puestoNuevo->save();
 
-                    $puestoActual->persona_actual_id = $titularPuestoActualId;
-                    if (!is_null($titularPuestoNuevoId) && $titularPuestoNuevoId !== '') {
-                        $puestoNuevo->estado_id = 2;
-                    } else {
-                        $puestoNuevo->estado_id = 1;
-                    }
-                    $puestoActual->save();
-                } else {
-                    throw new \Exception('No se encontraron los puestos especificados.');
-                }
-            } else {
-                throw new \Exception('Los parámetros "puestoActualId" y "puestoNuevoId" son requeridos.');
-            }
-        }
+        //             $puestoActual->persona_actual_id = $titularPuestoActualId;
+        //             if (!is_null($titularPuestoActualId) && $titularPuestoActualId !== '') {
+        //                 $puestoActual->estado_id = 2;
+        //             } else {
+        //                 $puestoActual->estado_id = 1;
+        //             }
+        //             $puestoActual->save();
+        //         } else {
+        //             throw new \Exception('No se encontraron los puestos especificados.');
+        //         }
+        //     } else {
+        //         throw new \Exception('Los parámetros "puestoActualId" y "puestoNuevoId" son requeridos.');
+        //     }
+        // }
 
         $interinato->save();
+
+        $interinato->actualizarInterinatoDestino();
 
         return response()->json(['message' => 'Interinato creado correctamente', 'data' => $interinato], 200);
     }

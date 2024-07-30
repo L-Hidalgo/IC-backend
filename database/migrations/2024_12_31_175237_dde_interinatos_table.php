@@ -38,7 +38,7 @@ return new class extends Migration
             $table->string('tipo_nota_informe_minuta_interinato', 10)->nullable();
             $table->string('observaciones_interinato')->nullable();
             $table->string('sayri_interinato', 20)->nullable();
-            
+            $table->integer('estado')->default(0);
             $table->foreign('puesto_nuevo_id')->references('id_puesto')->on('dde_puestos');
             $table->foreign('titular_puesto_nuevo_id')->references('id_persona')->on('dde_personas');
             $table->foreign('puesto_actual_id')->references('id_puesto')->on('dde_puestos');
