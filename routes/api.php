@@ -53,14 +53,16 @@ Route::group(['prefix' => 'planilla'], function () {
   Route::get('/{puestoId}', [PlanillaController::class, 'infPersonaPuesto']);
 });
 
-Route::group(['prefix' => 'interinato'], function () {
+Route::group(['prefix' => 'interinatos'], function () {
   Route::post('/', [InterinatoController::class, 'crearInterinato']);
+  Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']); 
+  Route::post('/filtrar-interinatos', [InterinatoController::class, 'byFiltrosInterinatos']); 
 });
 
 // incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
-  Route::post('/list-incorporaciones', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
+  Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
   Route::post('/filtrar-incorporaciones', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
   Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
