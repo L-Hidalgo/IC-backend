@@ -83,7 +83,6 @@ class Interinato extends Model
         $puestoNuevo = $this->puestoNuevo;
 
         if ($puestoActual && $puestoNuevo) {
-          // cambiar funcionario historico de fechas asignacion de puesto
           $puestoNuevo->persona_actual_id = $puestoActual->persona_actual_id;
           $puestoNuevo->denominacion_puesto = $puestoNuevo->denominacion_puesto . ' a.i.';
           $puestoNuevo->estado_id = 2;
@@ -93,7 +92,7 @@ class Interinato extends Model
           $puestoActual->estado_id = 1;
           $puestoActual->save();
 
-          $this->estado = 1; // enviado a puesto destino
+          $this->estado = 1; 
           $this->save();
           return true;
         }
@@ -128,7 +127,7 @@ class Interinato extends Model
           }
           $puestoActual->save();
 
-          $this->estado = 2; // enviado a puesto origen
+          $this->estado = 2; 
           $this->save();
           return true;
         }

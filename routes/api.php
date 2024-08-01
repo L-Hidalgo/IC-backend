@@ -56,7 +56,9 @@ Route::group(['prefix' => 'planilla'], function () {
 Route::group(['prefix' => 'interinatos'], function () {
   Route::post('/', [InterinatoController::class, 'crearInterinato']);
   Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']); 
-  Route::post('/filtrar-interinatos', [InterinatoController::class, 'byFiltrosInterinatos']); 
+  Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']); 
+  Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);  
+  Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']);
 });
 
 // incorporaciones
