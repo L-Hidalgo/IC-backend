@@ -80,7 +80,7 @@ class InterinatoController extends Controller
             'fch_fin_interinato' => $validatedData['fchFinInterinato'],
             'total_dias_interinato' => $validatedData['totalDiasInterinato'],
             'periodo_interinato' => $validatedData['periodoInterinato'],
-            'created_by' => $validatedData['createdBy'],
+            'created_by_interinato' => $validatedData['createdBy'],
             'tipo_nota_informe_minuta_interinato' => $validatedData['tipoNotaInformeMinutaInterinato'],
             'observaciones_interinato' => $validatedData['observacionesInterinato'],
             'sayri_interinato' => $validatedData['sayriInterinato'],

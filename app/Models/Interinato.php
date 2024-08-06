@@ -16,13 +16,14 @@ class Interinato extends Model
   protected $primaryKey = 'id_interinato';
 
   protected $fillable = [
-    'proveido_tramite_interinato',
-    'cite_nota_informe_minuta_interinato',
-    'fch_cite_nota_inf_minuta_interinato',
     'puesto_nuevo_id',    //importante
     'titular_puesto_nuevo_id',
     'puesto_actual_id',   //importante
     'titular_puesto_actual_id',
+    //Desginacion
+    'proveido_tramite_interinato',
+    'cite_nota_informe_minuta_interinato',
+    'fch_cite_nota_inf_minuta_interinato',
     'cite_informe_interinato',
     'fojas_informe_interinato',
     'cite_memorandum_interinato',
@@ -34,13 +35,23 @@ class Interinato extends Model
     'fch_fin_interinato',     //importante
     'total_dias_interinato',
     'periodo_interinato',
-    'created_by',
-    'modified_by',
     'estado', // 0: nuevo, 1:enDestino, 2:finalizado, 3:suspendido
-
     'tipo_nota_informe_minuta_interinato',
     'observaciones_interinato',
+    //Suspencion
+    'proveido_tramite_interinato',
+    'fch_proveido_tramite_interinato_suspencion',
+    'cite_memorandum_interinato_suspencion',
+    'codigo_memorandum_interinato_suspencion',
+    'fch_memorandum_interinato_suspencion',
+    'fch_suspencion',
+    'codigo_suspencion',
+    'fch_designacion_suspencion',
+    'motivo_suspencion',
+
     'sayri_interinato',
+    'created_by_interinato',
+    'modified_by_interinato',
   ];
 
   public function puestoNuevo()
@@ -65,12 +76,12 @@ class Interinato extends Model
 
   public function usuarioCreador()
   {
-    return $this->belongsTo(User::class, 'created_by', 'id');
+    return $this->belongsTo(User::class, 'created_by_interinato', 'id');
   }
 
   public function usuarioModificador()
   {
-    return $this->belongsTo(User::class, 'modified_by', 'id');
+    return $this->belongsTo(User::class, 'modified_by_interinato', 'id');
   }
 
   public function actualizarInterinatoDestino()
