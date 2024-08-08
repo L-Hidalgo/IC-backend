@@ -37,7 +37,7 @@ return new class extends Migration
                 $table->unsignedBigInteger('modified_by_interinato')->nullable();
                 $table->string('tipo_nota_informe_minuta_interinato', 10)->nullable();
                 $table->string('observaciones_interinato')->nullable();
-                $table->integer('estado')->default(0);
+                $table->integer('estado_designacion_interinato')->default(0);
                 //Suspencion
                 $table->string('proveido_tramite_interinato_suspencion', 50)->nullable();
                 $table->date('fch_proveido_tramite_interinato_suspencion')->nullable();

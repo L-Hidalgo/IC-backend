@@ -38,9 +38,8 @@ class Kernel extends ConsoleKernel
     })->daily()->at('23:00');
 
     $schedule->call(function () {
-      Log::info('Schedule example running <------------------');
+      Log::info('Tarea programada ejecutada. <------------------');
     })->everyMinute();
-
   }
 
   /**

@@ -5,28 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Interinato;
 use App\Models\Puesto;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-
-
+use Illuminate\Support\Facades\Log;
 
 class InterinatoController extends Controller
 {
-
 
     public function crearInterinato(Request $request)
     {
         $validatedData = $request->validate([
             'idInterinato' => 'nullable|integer',
+            'puestoNuevoId' => 'nullable|integer',
+            'puestoActualId' => 'nullable|integer',
+
             'proveidoTramiteInterinato' => 'nullable|string',
             'citeNotaInformeMinutaInterinato' => 'nullable|string',
             'fchCiteNotaInfMinutaInterinato' => 'nullable|date',
-
-            'puestoNuevoId' => 'nullable|integer',
-            'titularPuestoNuevoId' => 'nullable|integer',
-            'puestoActualId' => 'nullable|integer',
-            'titularPuestoActualId' => 'nullable|integer',
-
             'citeInformeInterinato' => 'nullable|string',
             'fojasInformeInterinato' => 'nullable|string',
             'citeMemorandumInterinato' => 'nullable|string',
@@ -34,14 +27,16 @@ class InterinatoController extends Controller
             'citeRapInterinato' => 'nullable|string',
             'codigoRapInterinato' => 'nullable|string',
             'fchMemorandumRapInterinato' => 'nullable|date',
+
             'fchInicioInterinato' => 'nullable|date',
             'fchFinInterinato' => 'nullable|date',
             'totalDiasInterinato' => 'nullable|integer',
             'periodoInterinato' => 'nullable|string',
-            'createdBy' => 'nullable|integer',
             'tipoNotaInformeMinutaInterinato' => 'nullable|string',
             'observacionesInterinato' => 'nullable|string',
             'sayriInterinato' => 'nullable|string',
+
+            'createdByInterinato' => 'nullable|integer',
         ]);
 
         $titularPuestoNuevoId = null;
@@ -80,68 +75,12 @@ class InterinatoController extends Controller
             'fch_fin_interinato' => $validatedData['fchFinInterinato'],
             'total_dias_interinato' => $validatedData['totalDiasInterinato'],
             'periodo_interinato' => $validatedData['periodoInterinato'],
-            'created_by_interinato' => $validatedData['createdBy'],
+            'created_by_interinato' => $validatedData['createdByInterinato'],
             'tipo_nota_informe_minuta_interinato' => $validatedData['tipoNotaInformeMinutaInterinato'],
             'observaciones_interinato' => $validatedData['observacionesInterinato'],
             'sayri_interinato' => $validatedData['sayriInterinato'],
-            'estado' => 0,
+            'estado_designacion_interinato' => 0,
         ]);
-
-        // $fchInicioInterinato = Carbon::parse($validatedData['fchInicioInterinato']);
-        // $fchFinInterinato = Carbon::parse($validatedData['fchFinInterinato']);
-        // $fechaActual = Carbon::now();
-
-        // if ($fchInicioInterinato->toDateString() === $fechaActual->toDateString()) {
-        //     if ($request->has('puestoActualId') && $request->has('puestoNuevoId')) {
-        //         $puestoActual = Puesto::find($request->puestoActualId);
-        //         $puestoNuevo = Puesto::find($request->puestoNuevoId);
-
-        //         if ($puestoActual && $puestoNuevo) {
-        //             $puestoNuevo->persona_actual_id = $puestoActual->persona_actual_id;
-        //             $puestoNuevo->denominacion_puesto = $puestoActual->denominacion_puesto . ' a.i.';
-        //             $puestoNuevo->estado_id = 2;
-        //             $puestoNuevo->save();
-
-        //             $puestoActual->persona_actual_id = null;
-        //             $puestoActual->estado_id = 1;
-        //             $puestoActual->save();
-        //         } else {
-        //             throw new \Exception('No se encontraron los puestos especificados.');
-        //         }
-        //     } else {
-        //         throw new \Exception('Los parámetros "puestoActualId" y "puestoNuevoId" son requeridos.');
-        //     }
-        // }
-
-        // if ($fchFinInterinato->toDateString() === $fechaActual->toDateString()) {
-        //     if ($request->has('puestoActualId') && $request->has('puestoNuevoId')) {
-        //         $puestoActual = Puesto::find($request->puestoActualId);
-        //         $puestoNuevo = Puesto::find($request->puestoNuevoId);
-        //         if ($puestoActual && $puestoNuevo) {
-        //             $puestoNuevo->persona_actual_id = $titularPuestoNuevoId;
-        //             $puestoNuevo->denominacion_puesto = str_replace(' a.i.', '', $puestoActual->denominacion_puesto);
-
-        //             if (!is_null($titularPuestoNuevoId) && $titularPuestoNuevoId !== '') {
-        //                 $puestoNuevo->estado_id = 2;
-        //             } else {
-        //                 $puestoNuevo->estado_id = 1;
-        //             }
-        //             $puestoNuevo->save();
-
-        //             $puestoActual->persona_actual_id = $titularPuestoActualId;
-        //             if (!is_null($titularPuestoActualId) && $titularPuestoActualId !== '') {
-        //                 $puestoActual->estado_id = 2;
-        //             } else {
-        //                 $puestoActual->estado_id = 1;
-        //             }
-        //             $puestoActual->save();
-        //         } else {
-        //             throw new \Exception('No se encontraron los puestos especificados.');
-        //         }
-        //     } else {
-        //         throw new \Exception('Los parámetros "puestoActualId" y "puestoNuevoId" son requeridos.');
-        //     }
-        // }
 
         $interinato->save();
 
@@ -175,57 +114,6 @@ class InterinatoController extends Controller
 
         return $this->sendPaginated($interinatos);
     }
-
-    /* public function byFiltrosInterinatos(Request $request)
-    {
-        $limit = $request->input('limit');
-        $page = $request->input('page', 1);
-
-        $itemNombre = $request->input('query.itemNombre');
-
-        $query = Interinato::query()
-            ->leftJoin('dde_puestos as puestoNuevo', 'dde_interinatos.puesto_nuevo_id', '=', 'puestoNuevo.id_puesto')
-            ->leftJoin('dde_puestos as puestoActual', 'dde_interinatos.puesto_actual_id', '=', 'puestoActual.id_puesto')
-
-            ->leftJoin('dde_personas as titular_nuevo', 'dde_interinatos.titular_puesto_nuevo_id', '=', 'titular_nuevo.id_persona')
-            ->leftJoin('dde_personas as titular_actual', 'dde_interinatos.titular_puesto_actual_id', '=', 'titular_actual.id_persona');
-
-        if (!empty($itemNombre)) {
-            $query->where(function ($query) use ($itemNombre) {
-                $query->where('puestoNuevo.item_puesto', $itemNombre);
-                    //->orWhere('titular_nuevo.nombre_persona', 'LIKE', "%{$itemNombre}%")
-                    
-                    //->orWhere('titular_nuevo.primer_apellido_persona', 'LIKE', "%{$itemNombre}%")
-                   // ->orWhere('titular_nuevo.segundo_apellido_persona', 'LIKE', "%{$itemNombre}%");
-            });
-        }
-
-        $query->select([
-           // 'titular_nuevo.nombre_persona as nombrePersona',
-            //'titular_nuevo.primer_apellido_persona as primerApellidoPersona',
-            //'titular_nuevo.segundo_apellido_persona as segundoApellidoPersona',
-            'dde_interinatos.id_interinato as idInterinato',
-
-            'puestoNuevo.id_puesto as idPuestoNuevo',
-            'puestoNuevo.item_puesto as itemPuestoNuevo',
-            'puestoNuevo.denominacion_puesto as denominacionPuestoNuevo',
-            
-            //'puestoNuevo.nombre_departamento as departamento',
-
-            'puestoActual.id_puesto as idPuestoActual',
-            'puestoActual.item_puesto as itemPuestoActual',
-            'puestoActual.denominacion_puesto as denominacionPuestoActual',
-          // 'departamentoActual.nombre_departamento as departamentoActual',
-          //  'puestoActual.segundo_apellido_persona as segundoApellidoPersonaActual'
-
-        ]);
-
-        $query->orderBy('dde_interinatos.created_at', 'desc');
-
-        $personaPuestos = $query->paginate($limit, ['*'], 'page', $page);
-
-        return response()->json($personaPuestos);
-    }*/
 
     public function byFiltrosInterinatos(Request $request)
     {
@@ -273,8 +161,9 @@ class InterinatoController extends Controller
     {
         $interinato = Interinato::with([
             'puestoNuevo.departamento.gerencia',
-            'puestoNuevo.persona_actual',  
-            'puestoActual.departamento', 'puestoActual.persona_actual', 
+            'puestoNuevo.persona_actual',
+            'puestoActual.departamento.gerencia',
+            'puestoActual.persona_actual',
             'personaNuevo', 'personaActual'
         ])->findOrFail($id);
         return response()->json($interinato);
@@ -282,12 +171,59 @@ class InterinatoController extends Controller
 
     public function modificarInterinato(Request $request, $id)
     {
-        $interinato = Interinato::findOrFail($id);
+        // Validación de datos
+        $validatedData = $request->validate([
+            'proveidoTramiteInterinato' => 'nullable|string',
+            'citeNotaInformeMinutaInterinato' => 'nullable|string',
+            'fchCiteNotaInfMinutaInterinato' => 'nullable|date',
+            'fchMemorandumRapInterinato' => 'nullable|date',
+            'citeInformeInterinato' => 'nullable|string',
+            'fojasInformeInterinato' => 'nullable|string',
+            'citeMemorandumInterinato' => 'nullable|string',
+            'codigoMemorandumInterinato' => 'nullable|string',
+            'citeRapInterinato' => 'nullable|string',
+            'codigoRapInterinato' => 'nullable|string',
+            'fchInicioInterinato' => 'nullable|date',
+            'fchFinInterinato' => 'nullable|date',
+            'totalDiasInterinato' => 'nullable|integer',
+            'periodoInterinato' => 'nullable|string',
+            'tipoNotaInformeMinutaInterinato' => 'nullable|string',
+            'sayriInterinato' => 'nullable|string',
+            'observacionesInterinato' => 'nullable|string',
+            'modifiedByInterinato' => 'nullable|integer',
+        ]);
 
-        $interinato->fill($request->all());
+        $fchCiteNotaInfMinutaInterinato = date('Y-m-d', strtotime($request->input('fchCiteNotaInfMinutaInterinato')));
+        $fchMemorandumRapInterinato = date('Y-m-d', strtotime($request->input('fchMemorandumRapInterinato')));
+        $fchInicioInterinato = date('Y-m-d', strtotime($request->input('fchInicioInterinato')));
+        $fchFinInterinato = date('Y-m-d', strtotime($request->input('fchFinInterinato')));
 
-        $interinato->save();
+        // Actualización de datos
+        $updated = Interinato::where('id_interinato', $id)->update([
+            'proveido_tramite_interinato' => $request->input('proveidoTramiteInterinato'),
+            'cite_nota_informe_minuta_interinato' => $request->input('citeNotaInformeMinutaInterinato'),
+            'fch_cite_nota_inf_minuta_interinato' => $fchCiteNotaInfMinutaInterinato,
+            'fch_memorandum_rap_interinato' => $fchMemorandumRapInterinato,
+            'cite_informe_interinato' => $request->input('citeInformeInterinato'),
+            'fojas_informe_interinato' => $request->input('fojasInformeInterinato'),
+            'cite_memorandum_interinato' => $request->input('citeMemorandumInterinato'),
+            'codigo_memorandum_interinato' => $request->input('codigoMemorandumInterinato'),
+            'cite_rap_interinato' => $request->input('citeRapInterinato'),
+            'codigo_rap_interinato' => $request->input('codigoRapInterinato'),
+            'fch_inicio_interinato' => $fchInicioInterinato,
+            'fch_fin_interinato' => $fchFinInterinato,
+            'total_dias_interinato' => $request->input('totalDiasInterinato'),
+            'periodo_interinato' => $request->input('periodoInterinato'),
+            'tipo_nota_informe_minuta_interinato' => $request->input('tipoNotaInformeMinutaInterinato'),
+            'sayri_interinato' => $request->input('sayriInterinato'),
+            'observaciones_interinato' => $request->input('observacionesInterinato'),
+            'modified_by_interinato' => $request->input('modifiedByInterinato')
+        ]);
 
-        return response()->json(['message' => 'Interinato actualizado correctamente', 'data' => $interinato]);
+        if ($updated) {
+            return response()->json(['message' => 'Interinato actualizado correctamente']);
+        } else {
+            return response()->json(['message' => 'No se encontró el interinato para actualizar'], 404);
+        }
     }
 }

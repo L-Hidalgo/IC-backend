@@ -35,7 +35,7 @@ class Interinato extends Model
     'fch_fin_interinato',     //importante
     'total_dias_interinato',
     'periodo_interinato',
-    'estado', // 0: nuevo, 1:enDestino, 2:finalizado, 3:suspendido
+    'estado_designacion_interinato', // 0: nuevo, 1:enDestino, 2:finalizado, 3:suspendido
     'tipo_nota_informe_minuta_interinato',
     'observaciones_interinato',
     //Suspencion
