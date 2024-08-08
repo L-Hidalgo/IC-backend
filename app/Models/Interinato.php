@@ -84,66 +84,66 @@ class Interinato extends Model
     return $this->belongsTo(User::class, 'modified_by_interinato', 'id');
   }
 
-  public function actualizarInterinatoDestino()
-  {
-    $fechaActual = Carbon::now();
-    if ($this->fch_inicio_interinato <= $fechaActual->toDateString() && $this->estado === 0) {
+  // public function actualizarInterinatoDestino()
+  // {
+  //   $fechaActual = Carbon::now();
+  //   if ($this->fch_inicio_interinato <= $fechaActual->toDateString() && $this->estado === 0) {
       
-      if ($this->puesto_actual_id && $this->puesto_nuevo_id) {
-        $puestoActual = $this->puestoActual;
-        $puestoNuevo = $this->puestoNuevo;
+  //     if ($this->puesto_actual_id && $this->puesto_nuevo_id) {
+  //       $puestoActual = $this->puestoActual;
+  //       $puestoNuevo = $this->puestoNuevo;
 
-        if ($puestoActual && $puestoNuevo) {
-          $puestoNuevo->persona_actual_id = $puestoActual->persona_actual_id;
-          $puestoNuevo->denominacion_puesto = $puestoNuevo->denominacion_puesto . ' a.i.';
-          $puestoNuevo->estado_id = 2;
-          $puestoNuevo->save();
+  //       if ($puestoActual && $puestoNuevo) {
+  //         $puestoNuevo->persona_actual_id = $puestoActual->persona_actual_id;
+  //         $puestoNuevo->denominacion_puesto = $puestoNuevo->denominacion_puesto . ' a.i.';
+  //         $puestoNuevo->estado_id = 2;
+  //         $puestoNuevo->save();
 
-          $puestoActual->persona_actual_id = null;
-          $puestoActual->estado_id = 1;
-          $puestoActual->save();
+  //         $puestoActual->persona_actual_id = null;
+  //         $puestoActual->estado_id = 1;
+  //         $puestoActual->save();
 
-          $this->estado = 1; 
-          $this->save();
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+  //         $this->estado = 1; 
+  //         $this->save();
+  //         return true;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // }
 
-  public function actualizarInterinatoOrigen()
-  {
-    $fechaActual = Carbon::now();
-    if ($this->fch_fin_interinato <= $fechaActual->toDateString() && $this->estado === 1) {
-      if ($this->puesto_actual_id && $this->puesto_nuevo_id) {
-        $puestoActual = $this->puestoActual;
-        $puestoNuevo = $this->puestoNuevo;
-        if ($puestoActual && $puestoNuevo) {
-          $puestoNuevo->persona_actual_id = $this->titular_puesto_nuevo_id;
-          $puestoNuevo->denominacion_puesto = str_replace(' a.i.', '', $puestoNuevo->denominacion_puesto);
+  // public function actualizarInterinatoOrigen()
+  // {
+  //   $fechaActual = Carbon::now();
+  //   if ($this->fch_fin_interinato <= $fechaActual->toDateString() && $this->estado === 1) {
+  //     if ($this->puesto_actual_id && $this->puesto_nuevo_id) {
+  //       $puestoActual = $this->puestoActual;
+  //       $puestoNuevo = $this->puestoNuevo;
+  //       if ($puestoActual && $puestoNuevo) {
+  //         $puestoNuevo->persona_actual_id = $this->titular_puesto_nuevo_id;
+  //         $puestoNuevo->denominacion_puesto = str_replace(' a.i.', '', $puestoNuevo->denominacion_puesto);
 
-          if (!is_null($this->titular_puesto_nuevo_id) && $this->titular_puesto_nuevo_id !== '') {
-            $puestoNuevo->estado_id = 2;
-          } else {
-            $puestoNuevo->estado_id = 1;
-          }
-          $puestoNuevo->save();
+  //         if (!is_null($this->titular_puesto_nuevo_id) && $this->titular_puesto_nuevo_id !== '') {
+  //           $puestoNuevo->estado_id = 2;
+  //         } else {
+  //           $puestoNuevo->estado_id = 1;
+  //         }
+  //         $puestoNuevo->save();
 
-          $puestoActual->persona_actual_id = $this->titular_puesto_actual_id;
-          if (!is_null($this->titular_puesto_actual_id) && $this->titular_puesto_actual_id !== '') {
-            $puestoActual->estado_id = 2;
-          } else {
-            $puestoActual->estado_id = 1;
-          }
-          $puestoActual->save();
+  //         $puestoActual->persona_actual_id = $this->titular_puesto_actual_id;
+  //         if (!is_null($this->titular_puesto_actual_id) && $this->titular_puesto_actual_id !== '') {
+  //           $puestoActual->estado_id = 2;
+  //         } else {
+  //           $puestoActual->estado_id = 1;
+  //         }
+  //         $puestoActual->save();
 
-          $this->estado = 2; 
-          $this->save();
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+  //         $this->estado = 2; 
+  //         $this->save();
+  //         return true;
+  //       }
+  //     }
+  //   }
+  //   return false;
+  // }
 }

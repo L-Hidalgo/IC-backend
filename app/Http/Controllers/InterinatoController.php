@@ -84,7 +84,7 @@ class InterinatoController extends Controller
 
         $interinato->save();
 
-        $interinato->actualizarInterinatoDestino();
+        // $interinato->actualizarInterinatoDestino();
 
         return response()->json(['message' => 'Interinato creado correctamente', 'data' => $interinato], 200);
     }

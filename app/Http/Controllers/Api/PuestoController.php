@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Puesto;
 use App\Models\Requisito;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class PuestoController extends Controller
@@ -28,10 +29,19 @@ class PuestoController extends Controller
             ->first();
 
         if ($puesto) {
-            if ($puesto->persona_actual_id) {
-                $puesto->persona_anterior_id = $puesto->persona_actual_id;
-                $puesto->save();
-            }
+           // RECODE: solo deberia asignarse cuando el puesto cambie de responsable
+            // if ($puesto->persona_actual_id) {
+            //     $puesto->persona_anterior_id = $puesto->persona_actual_id;
+
+            //     $puesto->save();
+            // }
+
+
+            // recuperar interinos
+            // 'fch_inicio_interinato',  //importante
+            // 'fch_fin_interinato',     //importante
+            $puesto->interinos = $puesto->interinos()->where('fch_inicio_interinato', '<=', Carbon::now()->toDateString())->where('fch_fin_interinato', '>=', Carbon::now()->toDateString())->where('estado_designacion_interinato', 0)->get();
+
             return $this->sendObject($puesto);
         } else {
             return null;
