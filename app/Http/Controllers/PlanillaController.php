@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Interinato;
 use App\Models\Persona;
 use App\Models\Puesto;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PlanillaController extends Controller
@@ -40,11 +38,6 @@ class PlanillaController extends Controller
         $query = $query->orderBy('dde_puestos.id_puesto');
 
         $personaPuestos = $query->paginate($limit, ['*'], 'page', $page);
-        // iterar items de $personaPuesto y agregar columna interinatos
-        foreach( $personaPuestos->items as $personaPuesto ) {
-          // recuperar interinos
-          $personaPuesto->interinatos = Interinato::where('puesto_nuevo_id', $personaPuesto->idPuesto)->where('fch_inicio_interinato', '<=', Carbon::now()->toDateString())->where('fch_fin_interinato', '>=', Carbon::now()->toDateString())->where('estado_designacion_interinato', 0)->get();
-        }
 
         return response()->json($personaPuestos);
     }

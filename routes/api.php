@@ -13,7 +13,6 @@ use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\ImportarImagesController;
-use App\Http\Controllers\InterinatoController;
 use App\Http\Controllers\PlanillaController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +38,7 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::get('/imagen-user/{personaCi}', [ImportarImagesController::class, 'getImagenUserPersona']);
   Route::get('/incorporacionDetalle', [IncorporacionesController::class, 'getIncorporacionDetalle']);
   Route::get('/puestoDetalle', [PuestoController::class, 'getPuestoDetalle']);
+
   //--------------------------------------
   Route::post('/listar-usuarios', [UserController::class, 'listarUsuarios']);
   Route::post('/filtrar-nombre-usuario', [UserController::class, 'byNombreUsuarios']);
@@ -53,19 +53,11 @@ Route::group(['prefix' => 'planilla'], function () {
   Route::get('/{puestoId}', [PlanillaController::class, 'infPersonaPuesto']);
 });
 
-Route::group(['prefix' => 'interinatos'], function () {
-  Route::post('/', [InterinatoController::class, 'crearInterinato']);
-  Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']); 
-  Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']); 
-  Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);  
-  Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']);
-});
-
 // incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
-  Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
-  Route::post('/filtrar-incorporaciones', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
+  Route::post('/list', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
+  Route::post('/byFiltrosIncorporacion', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
   Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
   Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);

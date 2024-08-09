@@ -55,14 +55,6 @@ class Puesto extends Model
         return $this->belongsTo(Persona::class, 'persona_actual_id', 'id_persona');
     }
 
-    public function interinos() {
-        return $this->hasMany(Interinato::class, 'puesto_nuevo_id', 'id_puesto');
-    }
-
-    public function interinoDe() {
-      return $this->hasMany(Interinato::class, 'puesto_actual_id', 'id_puesto');
-  }
-
     public function incorporacion()
     {
         return $this->hasMany(Incorporacion::class);
