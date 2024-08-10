@@ -1691,7 +1691,7 @@ class IncorporacionesController extends Controller
             $drawing->setMimeType(\PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing::MIMETYPE_DEFAULT);
             $sheet->mergeCells('D7:E18');
             $drawing->setCoordinates('D7');
-            $drawing->setHeight(400); 
+            $drawing->setHeight(300); 
             $drawing->setWidth(180); 
             $drawing->setWorksheet($sheet);
         } else {

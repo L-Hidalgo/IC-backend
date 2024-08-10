@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Interinato;
 use App\Models\Persona;
 use App\Models\Puesto;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class PlanillaController extends Controller
             ->leftJoin('dde_personas as persona', 'dde_puestos.persona_actual_id', '=', 'persona.id_persona')
             ->leftJoin('dde_gerencias as gerencia', 'departamento.gerencia_id', '=', 'gerencia.id_gerencia');
 
-        $query = $query->select([
+        $query->select([
             'dde_puestos.id_puesto as idPuesto',
             'dde_puestos.item_puesto as item',
             'dde_puestos.denominacion_puesto as denominacionPuesto',
@@ -35,12 +36,23 @@ class PlanillaController extends Controller
             'persona.segundo_apellido_persona as segundoApellidoPersona'
         ]);
 
-        $query = $query->orderBy('dde_puestos.id_puesto');
+        $query->orderBy('dde_puestos.id_puesto');
 
         $personaPuestos = $query->paginate($limit, ['*'], 'page', $page);
 
+        $personaPuestos->getCollection()->transform(function ($personaPuesto) {
+            $personaPuesto->interinatos = Interinato::where('puesto_nuevo_id', $personaPuesto->idPuesto)
+                ->where('fch_inicio_interinato', '<=', now()->toDateString())
+                ->where('fch_fin_interinato', '>=', now()->toDateString())
+                ->where('estado_designacion_interinato', 0)
+                ->get();
+
+            return $personaPuesto;
+        });
+
         return response()->json($personaPuestos);
     }
+
 
     public function getImagenFuncionario($personaId)
     {
@@ -129,6 +141,16 @@ class PlanillaController extends Controller
 
         $personaPuestos = $query->paginate($limit, ['*'], 'page', $page);
 
+        $personaPuestos->getCollection()->transform(function ($personaPuesto) {
+            $personaPuesto->interinatos = Interinato::with('puestoActual.persona_actual')
+                ->where('puesto_nuevo_id', $personaPuesto->idPuesto)
+                ->where('fch_inicio_interinato', '<=', now()->toDateString())
+                ->where('fch_fin_interinato', '>=', now()->toDateString())
+                ->where('estado_designacion_interinato', 0)
+                ->get();
+            return $personaPuesto;
+        });
+        
         return response()->json($personaPuestos);
     }
 

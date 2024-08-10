@@ -36,6 +36,11 @@ class Persona extends Model
         'fecha_fin' => 'datetime',
     ];
 
+    public function puestos_actual()
+    {
+        return $this->hasMany(Puesto::class, 'persona_actual_id', 'id_persona');
+    }
+    
     public function funcionario()
     {
         return $this->hasMany(Funcionario::class, 'persona_id', 'id_persona');
@@ -44,11 +49,6 @@ class Persona extends Model
     public function incorporacionFormulario()
     {
         return $this->hasMany(Incorporacion::class, 'persona_id', 'id_persona');
-    }
-
-    public function puestos_actual()
-    {
-        return $this->hasMany(Puesto::class, 'persona_actual_id', 'id_persona');
     }
 
     public function formacion()
