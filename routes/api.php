@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
 
 // usuarios y roles
 Route::group(['prefix' => 'users'], function () {
-  Route::get('/', [UserController::class, 'listar']);
+  Route::get('/listar-users-dde', [UserController::class, 'listarUsersDDE']);
   Route::get('/listarRol', [RolController::class, 'listarRol']);
   Route::get('/{userId}/listarUsuariosRol', [RolController::class, 'listarUsuariosRol']);
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
@@ -34,11 +34,11 @@ Route::group(['prefix' => 'users'], function () {
 
 // administracion
 Route::group(['prefix' => 'administracion'], function () {
-  Route::post('/import-planilla', [ImportarExcelController::class, 'importPlanilla']);
-  Route::post('/import-imagenes', [ImportarImagesController::class, 'importImagenes']);
-  Route::get('/imagen-user/{personaCi}', [ImportarImagesController::class, 'getImagenUserPersona']);
-  Route::get('/incorporacionDetalle', [IncorporacionesController::class, 'getIncorporacionDetalle']);
-  Route::get('/puestoDetalle', [PuestoController::class, 'getPuestoDetalle']);
+  Route::post('/upload-excel-planilla', [ImportarExcelController::class, 'importarExcelPlanilla']);
+  Route::post('/upload-imagenes-funcionarios', [ImportarImagesController::class, 'importarImgFuncionarios']);
+  Route::get('{userCi}/img-user-administrador', [ImportarImagesController::class, 'getImgUserAdministrador']);
+
+
   //--------------------------------------
   Route::post('/listar-usuarios', [UserController::class, 'listarUsuarios']);
   Route::post('/filtrar-nombre-usuario', [UserController::class, 'byNombreUsuarios']);

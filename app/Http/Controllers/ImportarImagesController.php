@@ -9,7 +9,7 @@ use ZipArchive;
 
 class ImportarImagesController extends Controller
 {
-    public function importImagenes(Request $request)
+    public function importarImgFuncionarios(Request $request)
     {
         try {
             if ($request->hasFile('file')) {
@@ -28,7 +28,7 @@ class ImportarImagesController extends Controller
                             $nombreArchivo = $zip->getNameIndex($i);
                             $partesNombre = pathinfo($nombreArchivo);
                             $ci_persona = $partesNombre['filename'];
-                            $extension = isset($partesNombre['extension']) ? $partesNombre['extension'] : 'txt'; 
+                            $extension = isset($partesNombre['extension']) ? $partesNombre['extension'] : 'txt';
 
                             $persona = Persona::where('ci_persona', $ci_persona)->first();
 
@@ -95,9 +95,9 @@ class ImportarImagesController extends Controller
         }
     }
 
-    public function getImagenUserPersona($personaCi)
+    public function getImgUserAdministrador($userCi)
     {
-        $persona = Persona::where('ci_persona', $personaCi)->first();
+        $persona = Persona::where('ci_persona', $userCi)->first();
 
         if ($persona) {
             $imagen = $persona->imagenes()->latest()->first();
@@ -108,7 +108,7 @@ class ImportarImagesController extends Controller
                 $imagen_data = base64_decode($base64_imagen);
 
                 return response($imagen_data)
-                    ->header('Content-Type', 'image/jpeg')
+                    ->header('Content-Type', $tipo_mime_imagen)
                     ->header('Content-Disposition', 'inline')
                     ->header('Content-Length', strlen($imagen_data));
             } else {

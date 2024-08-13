@@ -10,7 +10,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ImportarExcelController extends Controller
 {
-    /*public function importPlanilla(Request $request)
+    /*public function importarExcelPlanilla(Request $request)
     {
         try {
             //$userAuth = Auth::user();
@@ -34,7 +34,7 @@ class ImportarExcelController extends Controller
 
         return $this->sendSuccess(["msn"=>"Exitoso"]);
     }*/
-    public function importPlanilla(Request $request)
+    public function importarExcelPlanilla(Request $request)
     {
         try {
             $file = $request->file('archivoPlanilla');

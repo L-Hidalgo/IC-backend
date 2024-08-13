@@ -72,22 +72,29 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 
-    public function listar()
+    public function listarUsersDDE()
     {
-        $user = User::select(['id', 'name'])
-            ->where('gerencia', '=', 'Dotacion Evaluacion y Capacitacion')
+        $gerencias = [
+            'Dotacion Evaluacion y Capacitacion',
+            'Administracion y Recursos Humanos'
+        ];
+
+        $users = User::select(['id', 'name'])
+            ->whereIn('gerencia', $gerencias)
             ->get();
-        return $this->sendList($user);
+
+        return $this->sendList($users);
     }
+
 
     public function listarUsuarios(Request $request)
     {
         $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0); 
+        $page = $request->input('page', 0);
 
         $query = User::select(['id', 'name', 'username', 'email', 'cargo'])
-        ->with('roles:name')
-        ->orderBy('id', 'asc');
+            ->with('roles:name')
+            ->orderBy('id', 'asc');
 
         $users = $query->paginate($limit, ['*'], 'page', $page);
 
@@ -102,7 +109,7 @@ class UserController extends Controller
 
     public function byNombreUsuarios(Request $request)
     {
-        
+
         $name = $request->input('name');
 
         $query = User::select(['id', 'name', 'username', 'email', 'cargo']);
