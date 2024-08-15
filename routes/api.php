@@ -26,8 +26,9 @@ Route::middleware('auth')->group(function () {
 // usuarios y roles
 Route::group(['prefix' => 'users'], function () {
   Route::get('/listar-users-dde', [UserController::class, 'listarUsersDDE']);
-  Route::get('/listarRol', [RolController::class, 'listarRol']);
-  Route::get('/{userId}/listarUsuariosRol', [RolController::class, 'listarUsuariosRol']);
+  Route::get('/{userId}/listar-user-roles', [RolController::class, 'listarUsuariosRoles']);
+  Route::get('/listar-roles', [RolController::class, 'listarRoles']);
+  
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
   Route::get('/{userId}/userRol', [UserController::class, 'obtenerRolUser']);
 });
@@ -37,9 +38,7 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::post('/upload-excel-planilla', [ImportarExcelController::class, 'importarExcelPlanilla']);
   Route::post('/upload-imagenes-funcionarios', [ImportarImagesController::class, 'importarImgFuncionarios']);
   Route::get('{userCi}/img-user-administrador', [ImportarImagesController::class, 'getImgUserAdministrador']);
-
-
-  //--------------------------------------
+  Route::get('{userCi}/img-users', [ImportarImagesController::class, 'getImgUserAdministrador']);
   Route::post('/listar-usuarios', [UserController::class, 'listarUsuarios']);
   Route::post('/filtrar-nombre-usuario', [UserController::class, 'byNombreUsuarios']);
 });

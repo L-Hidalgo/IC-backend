@@ -8,13 +8,13 @@ use App\Models\User;
 
 class RolController extends Controller
 {
-    public function listarRol()
+    public function listarRoles()
     {
         $rol = Rol::select(['id', 'name'])->get();
         return $this->sendList($rol);
     }
 
-    public function listarUsuariosRol($userId){
+    public function listarUsuariosRoles($userId){
         $usuario = User::find($userId);
         
         if($usuario){

@@ -92,7 +92,7 @@ class UserController extends Controller
         $limit = $request->input('limit', 1000);
         $page = $request->input('page', 0);
 
-        $query = User::select(['id', 'name', 'username', 'email', 'cargo'])
+        $query = User::select(['id', 'name', 'ci', 'username', 'email', 'cargo'])
             ->with('roles:name')
             ->orderBy('id', 'asc');
 
