@@ -49,7 +49,7 @@ Route::group(['prefix' => 'planilla'], function () {
   Route::get('/imagen-funcionario/{personaId}', [PlanillaController::class, 'getImagenFuncionario']);
   Route::post('/filtrar-puesto', [PlanillaController::class, 'byFiltrosPlanilla']); 
   Route::get('/listar-gerencia', [GerenciaDepartamentoController::class, 'GerenciaDepartamento']);
-  Route::get('/{puestoId}', [PlanillaController::class, 'infPersonaPuesto']);
+  Route::get('/{puestoId}/inf-persona-puesto', [PlanillaController::class, 'infPersonaPuesto']);
 });
 
 Route::group(['prefix' => 'interinatos'], function () {
