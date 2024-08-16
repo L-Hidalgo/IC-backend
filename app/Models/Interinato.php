@@ -20,6 +20,9 @@ class Interinato extends Model
     'titular_puesto_nuevo_id',
     'puesto_actual_id',   //importante
     'titular_puesto_actual_id',
+    'fch_inicio_interinato',  //importante
+    'fch_fin_interinato',     //importante
+    'estado_designacion_interinato', // 0: nuevo, 1:enDestino, 2:finalizado, 3:suspendido
     //Desginacion
     'proveido_tramite_interinato',
     'cite_nota_informe_minuta_interinato',
@@ -31,11 +34,8 @@ class Interinato extends Model
     'cite_rap_interinato',
     'codigo_rap_interinato',
     'fch_memorandum_rap_interinato',
-    'fch_inicio_interinato',  //importante
-    'fch_fin_interinato',     //importante
     'total_dias_interinato',
     'periodo_interinato',
-    'estado_designacion_interinato', // 0: nuevo, 1:enDestino, 2:finalizado, 3:suspendido
     'tipo_nota_informe_minuta_interinato',
     'observaciones_interinato',
     //Suspencion

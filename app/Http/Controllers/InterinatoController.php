@@ -12,11 +12,11 @@ class InterinatoController extends Controller
 
     public function crearInterinato(Request $request)
     {
+        // Validación de los datos
         $validatedData = $request->validate([
             'idInterinato' => 'nullable|integer',
             'puestoNuevoId' => 'nullable|integer',
             'puestoActualId' => 'nullable|integer',
-
             'proveidoTramiteInterinato' => 'nullable|string',
             'citeNotaInformeMinutaInterinato' => 'nullable|string',
             'fchCiteNotaInfMinutaInterinato' => 'nullable|date',
@@ -27,7 +27,6 @@ class InterinatoController extends Controller
             'citeRapInterinato' => 'nullable|string',
             'codigoRapInterinato' => 'nullable|string',
             'fchMemorandumRapInterinato' => 'nullable|date',
-
             'fchInicioInterinato' => 'nullable|date',
             'fchFinInterinato' => 'nullable|date',
             'totalDiasInterinato' => 'nullable|integer',
@@ -35,9 +34,29 @@ class InterinatoController extends Controller
             'tipoNotaInformeMinutaInterinato' => 'nullable|string',
             'observacionesInterinato' => 'nullable|string',
             'sayriInterinato' => 'nullable|string',
-
             'createdByInterinato' => 'nullable|integer',
         ]);
+
+        if ($request->has('puestoActualId') && $request->fchInicioInterinato && $request->fchFinInterinato) {
+            $puestoActualId = $request->puestoActualId;
+            $fchInicio = $request->fchInicioInterinato;
+            $fchFin = $request->fchFinInterinato;
+
+            $interinatoExistente = Interinato::where('puesto_actual_id', $puestoActualId)
+                ->where(function ($query) use ($fchInicio, $fchFin) {
+                    $query->whereBetween('fch_inicio_interinato', [$fchInicio, $fchFin])
+                        ->orWhereBetween('fch_fin_interinato', [$fchInicio, $fchFin])
+                        ->orWhere(function ($query) use ($fchInicio, $fchFin) {
+                            $query->where('fch_inicio_interinato', '<=', $fchInicio)
+                                ->where('fch_fin_interinato', '>=', $fchFin);
+                        });
+                })
+                ->exists();
+
+            if ($interinatoExistente) {
+                return response()->json(['message' => 'El puesto actual ya está asignado a otro interinato en el mismo período.'], 400);
+            }
+        }
 
         $titularPuestoNuevoId = null;
         $titularPuestoActualId = null;
@@ -83,7 +102,7 @@ class InterinatoController extends Controller
         ]);
 
         $interinato->save();
-        // $interinato->actualizarInterinatoDestino();
+
         return response()->json(['message' => 'Interinato creado correctamente', 'data' => $interinato], 200);
     }
 

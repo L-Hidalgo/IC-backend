@@ -43,17 +43,16 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::post('/filtrar-nombre-usuario', [UserController::class, 'byNombreUsuarios']);
 });
 
-//planilla
 Route::group(['prefix' => 'planilla'], function () {
-  Route::post('/listar-puestos', [PlanillaController::class, 'listarPuestos']); //asi es recomendable
-  Route::get('/imagen-funcionario/{personaId}', [PlanillaController::class, 'getImagenFuncionario']);
+  Route::post('/listar-puestos', [PlanillaController::class, 'listarPuestos']);
+  Route::get('/{personaId}/imagen-funcionario', [PlanillaController::class, 'getImagenFuncionario']);
   Route::post('/filtrar-puesto', [PlanillaController::class, 'byFiltrosPlanilla']); 
   Route::get('/listar-gerencia', [GerenciaDepartamentoController::class, 'GerenciaDepartamento']);
   Route::get('/{puestoId}/inf-persona-puesto', [PlanillaController::class, 'infPersonaPuesto']);
 });
 
 Route::group(['prefix' => 'interinatos'], function () {
-  Route::post('/', [InterinatoController::class, 'crearInterinato']);
+  Route::post('/crear-interinato', [InterinatoController::class, 'crearInterinato']);
   Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']); 
   Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']); 
   Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);  
