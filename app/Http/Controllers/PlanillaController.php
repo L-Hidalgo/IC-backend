@@ -7,6 +7,7 @@ use App\Models\Persona;
 use App\Models\Puesto;
 use Illuminate\Http\Request;
 
+
 class PlanillaController extends Controller
 {
 
@@ -52,7 +53,6 @@ class PlanillaController extends Controller
 
         return response()->json($personaPuestos);
     }
-
 
     public function getImagenFuncionario($personaId)
     {
@@ -156,7 +156,22 @@ class PlanillaController extends Controller
 
     public function infPersonaPuesto($puestoId)
     {
-        $personaPuesto = Puesto::with(['persona_actual', 'departamento.gerencia', 'funcionario', 'estado', 'interinos.personaActual'])->find($puestoId);
+        $personaPuesto = Puesto::with([
+            'persona_actual',
+            'departamento.gerencia',
+            'funcionario',
+            'estado',
+        ])->find($puestoId);
+
+        if ($personaPuesto) {
+            $today = now()->toDateString();
+            $personaPuesto->interinos = Interinato::with('personaActual')
+                ->where('puesto_nuevo_id', $puestoId)
+                ->whereDate('fch_inicio_interinato', '<=', $today)
+                ->whereDate('fch_fin_interinato', '>=', $today)
+                ->where('estado_designacion_interinato', 0)
+                ->get();
+        }
 
         return response()->json($personaPuesto);
     }

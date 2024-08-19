@@ -30,6 +30,11 @@ class Puesto extends Model
         'fecha_fin' => 'datetime',
     ];
 
+    public function interinos()
+    {
+        return $this->hasMany(Interinato::class, 'puesto_nuevo_id', 'id_puesto');
+    }
+    
     public function persona_actual()
     {
         return $this->belongsTo(Persona::class, 'persona_actual_id', 'id_persona');
@@ -53,11 +58,6 @@ class Puesto extends Model
     public function departamento()
     {
         return $this->belongsTo(Departamento::class, 'departamento_id', 'id_departamento');
-    }
-
-    public function interinos()
-    {
-        return $this->hasMany(Interinato::class, 'puesto_nuevo_id', 'id_puesto');
     }
 
     public function interinoDe()
