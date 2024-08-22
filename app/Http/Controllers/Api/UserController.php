@@ -86,11 +86,10 @@ class UserController extends Controller
         return $this->sendList($users);
     }
 
-
-    public function listarUsuarios(Request $request)
+    /* public function listarUsuarios(Request $request)
     {
-        $limit = $request->input('limit', 1000);
-        $page = $request->input('page', 0);
+        $limit = $request->input('limit');
+        $page = $request->input('page');
 
         $query = User::select(['id', 'name', 'ci', 'username', 'email', 'cargo'])
             ->with('roles:name')
@@ -121,6 +120,31 @@ class UserController extends Controller
         $users = $query->get();
 
         return $this->sendList($users);
+    }*/
+
+    public function listarUsuarios(Request $request)
+    {
+        $limit = $request->input('limit'); 
+        $page = $request->input('page'); 
+        $name = $request->input('name');
+
+        $query = User::select(['id', 'name', 'ci', 'username', 'email', 'cargo'])
+            ->with('roles:name')
+            ->orderBy('id', 'asc');
+
+        if ($name !== null) {
+            $query->where('name', 'LIKE', '%' . $name . '%');
+        }
+
+        $users = $query->paginate($limit, ['*'], 'page', $page);
+
+        $users->getCollection()->transform(function ($user) {
+            $user->rol = $user->roles->implode('name', ', ');
+            unset($user->roles);
+            return $user;
+        });
+
+        return $this->sendPaginated($users);
     }
 
     public function obtenerRolUser($userId)

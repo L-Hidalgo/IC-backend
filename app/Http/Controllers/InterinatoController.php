@@ -170,6 +170,7 @@ class InterinatoController extends Controller
         }
 
         $interinatos = $query->paginate($limit, ['*'], 'page', $page);
+        
 
         return $this->sendPaginated($interinatos);
     }

@@ -60,16 +60,16 @@ class DesignacionEvaluacionSheet implements FromArray, WithHeadings, WithStyles
         $fechaNacimiento = Carbon::parse($incorporacion->persona->fch_nacimiento_persona);
         $edad = $fechaNacimiento->age;
 
-        if (empty($incorporacion->observacion_incorporacion)) {
+        if (empty($incorporacion->obs_evaluacion_incorporacion)) {
             $detalle_observacion = "No se registró la observación de evaluación";
         } else {
-            if ($incorporacion->observacion_incorporacion == 'Cumple') {
+            if ($incorporacion->obs_evaluacion_incorporacion == 'Cumple') {
                 $detalle_observacion = "Si cumple";
-            } elseif ($incorporacion->observacion_incorporacion == 'No cumple') {
-                if (empty($incorporacion->observacion_detalle_incorporacion)) {
+            } elseif ($incorporacion->obs_evaluacion_incorporacion == 'No cumple') {
+                if (empty($incorporacion->obs_evaluacion_detalle_incorporacion)) {
                     $detalle_observacion = "No se registró el detalle de observación de evaluación";
                 } else {
-                    $detalle_observacion = $incorporacion->observacion_detalle_incorporacion;
+                    $detalle_observacion = $incorporacion->obs_evaluacion_detalle_incorporacion;
                 }
             }
         }
@@ -78,7 +78,7 @@ class DesignacionEvaluacionSheet implements FromArray, WithHeadings, WithStyles
             'NOMBRE' => mb_strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona),
             'EDAD' => $edad . ' AÑOS',
             'FORMACIÓN ACADÉMICA' => mb_strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico) ?? 'NO SE REGISTRO FORMACIÓN ACADÉMICA',
-            'EXPERIENCIA' => $incorporacion->experiencia_incorporacion == 0 ? 'NO CUENTA CON EXPERIENCIA EN SERVICIO DE IMPUESTOS NACIONALES' : 'SI CUENTA CON EXPERIENCIA EN IMPUESTOS NACIONALES',
+            'EXPERIENCIA' => $incorporacion->exp_evaluacion_incorporacion == 0 ? 'NO CUENTA CON EXPERIENCIA EN SERVICIO DE IMPUESTOS NACIONALES' : 'SI CUENTA CON EXPERIENCIA EN IMPUESTOS NACIONALES',
             'ITEM' => $incorporacion->puesto_nuevo->item_puesto,
             'DENOMINACION DEL PUESTO' => $incorporacion->puesto_nuevo->denominacion_puesto,
             'GERENCIA' => $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia,
@@ -88,9 +88,9 @@ class DesignacionEvaluacionSheet implements FromArray, WithHeadings, WithStyles
             'EXP. PROFESIONAL  DEL ITEM' => '',
             'EXP. RELACIONADA AL AREA DE FORMACIÓN  DEL ITEM' => '',
             'EXP. EN FUNCIONES DE MANDO DEL ITEM' => '',
-            'OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->observacion_incorporacion) ? 'NO SE REGISTRÓ EVALUACIÓN' : mb_strtoupper($incorporacion->observacion_incorporacion),
+            'OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ EVALUACIÓN' : mb_strtoupper($incorporacion->obs_evaluacion_incorporacion),
             'DETALLE DE OBSERVACIÓN DE EVALUACIÓN' => mb_strtoupper($detalle_observacion),
-            'FECHA DE OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->fch_observacion_incorporacion) ? 'NO SE REGISTRÓ LA FCH. DE EVALUACIÓN' : $incorporacion->fch_observacion_incorporacion,
+            'FECHA DE OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->fch_obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ LA FCH. DE EVALUACIÓN' : $incorporacion->fch_obs_evaluacion_incorporacion,
             'RESPONSABLE' => $incorporacion->user->name,
         ];
 
@@ -111,18 +111,28 @@ class DesignacionEvaluacionSheet implements FromArray, WithHeadings, WithStyles
     {
         $sheet->getStyle('A1:Q1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1A59A8']]
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '012e58']]
         ]);
 
         $sheet->setAutoFilter('A1:Q1');
-
         $sheet->setTitle('Designación');
 
         $lastRow = $sheet->getHighestRow();
         if ($lastRow >= 2) {
             $sheet->getStyle('I2:I' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
         }
-        
+        $this->adjustColumnWidths($sheet);
         return [];
+    }
+    
+    protected function adjustColumnWidths(Worksheet $sheet)
+    {
+        $highestColumn = $sheet->getHighestColumn(); 
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+        for ($col = 1; $col <= $highestColumnIndex; ++$col) {
+            $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            $sheet->getColumnDimension($column)->setAutoSize(true); 
+        }
     }
 }

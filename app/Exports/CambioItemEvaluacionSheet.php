@@ -59,18 +59,18 @@ class CambioItemEvaluacionSheet implements FromArray, WithHeadings, WithStyles
     }
 
     protected function formatDataCambioItem($incorporacion)
-    {  
+    {
 
-        if (empty($incorporacion->observacion_incorporacion)) {
+        if (empty($incorporacion->obs_evaluacion_incorporacion)) {
             $detalle_observacion = "No se registró la observación de evaluación";
         } else {
-            if ($incorporacion->observacion_incorporacion == 'Cumple') {
+            if ($incorporacion->obs_evaluacion_incorporacion == 'Cumple') {
                 $detalle_observacion = "Si cumple";
-            } elseif ($incorporacion->observacion_incorporacion == 'No cumple') {
-                if (empty($incorporacion->observacion_detalle_incorporacion)) {
+            } elseif ($incorporacion->obs_evaluacion_incorporacion == 'No cumple') {
+                if (empty($incorporacion->obs_evaluacion_detalle_incorporacion)) {
                     $detalle_observacion = "No se registró el detalle de observación de evaluación";
                 } else {
-                    $detalle_observacion = $incorporacion->observacion_detalle_incorporacion;
+                    $detalle_observacion = $incorporacion->obs_evaluacion_detalle_incorporacion;
                 }
             }
         }
@@ -93,9 +93,9 @@ class CambioItemEvaluacionSheet implements FromArray, WithHeadings, WithStyles
             'EXP. PROFESIONAL DEL ITEM PROPUESTO' => '',
             'EXP. RELACIONADA AL AREA DE FORMACIÓN DEL ITEM PROPUESTO' => '',
             'EXP. EN FUNCIONES DE MANDO DEL ITEM PROPUESTO' => '',
-            'OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->observacion_incorporacion) ? 'NO SE REGISTRÓ EVALUACIÓN' : mb_strtoupper($incorporacion->observacion_incorporacion),
+            'OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ EVALUACIÓN' : mb_strtoupper($incorporacion->obs_evaluacion_incorporacion),
             'DETALLE DE OBSERVACIÓN DE EVALUACIÓN' => mb_strtoupper($detalle_observacion),
-            'FECHA DE OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->fch_observacion_incorporacion) ? 'NO SE REGISTRÓ LA FCH. DE EVALUACIÓN' : $incorporacion->fch_observacion_incorporacion,
+            'FECHA DE OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->fch_obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ LA FCH. DE EVALUACIÓN' : $incorporacion->fch_obs_evaluacion_incorporacion,
             'RESPONSABLE' => $incorporacion->user->name,
         ];
 
@@ -116,11 +116,10 @@ class CambioItemEvaluacionSheet implements FromArray, WithHeadings, WithStyles
     {
         $sheet->getStyle('A1:U1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1A7BA8']]
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '012e58']]
         ]);
 
         $sheet->setAutoFilter('A1:U1');
-
         $sheet->setTitle('Cambio de Item');
 
         $lastRow = $sheet->getHighestRow();
@@ -128,8 +127,18 @@ class CambioItemEvaluacionSheet implements FromArray, WithHeadings, WithStyles
             $sheet->getStyle('H2:H' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
             $sheet->getStyle('M2:M' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
         }
-
+        $this->adjustColumnWidths($sheet);
         return [];
     }
+    
+    protected function adjustColumnWidths(Worksheet $sheet)
+    {
+        $highestColumn = $sheet->getHighestColumn(); 
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
 
+        for ($col = 1; $col <= $highestColumnIndex; ++$col) {
+            $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            $sheet->getColumnDimension($column)->setAutoSize(true); 
+        }
+    }
 }

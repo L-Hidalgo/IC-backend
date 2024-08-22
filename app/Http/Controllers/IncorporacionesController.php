@@ -14,6 +14,7 @@ use App\Exports\ReportTrimestralExport;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use App\Models\Persona;
 
 class IncorporacionesController extends Controller
 {
@@ -105,19 +106,19 @@ class IncorporacionesController extends Controller
                 }
 
                 if (isset($validatedData['observacionIncorporacion'])) {
-                    $incorporacion->observacion_incorporacion = $validatedData['observacionIncorporacion'];
+                    $incorporacion->obs_evaluacion_incorporacion = $validatedData['observacionIncorporacion'];
                 }
 
                 if (isset($validatedData['observacionDetalleIncorporacion'])) {
-                    $incorporacion->observacion_detalle_incorporacion = $validatedData['observacionDetalleIncorporacion'];
+                    $incorporacion->obs_evaluacion_detalle_incorporacion = $validatedData['observacionDetalleIncorporacion'];
                 }
 
                 if (isset($validatedData['experienciaIncorporacion'])) {
-                    $incorporacion->experiencia_incorporacion = $validatedData['experienciaIncorporacion'];
+                    $incorporacion->exp_evaluacion_incorporacion = $validatedData['experienciaIncorporacion'];
                 }
 
                 if (isset($validatedData['fchObservacionIncorporacion'])) {
-                    $incorporacion->fch_observacion_incorporacion = Carbon::parse($validatedData['fchObservacionIncorporacion'])->format('Y-m-d');
+                    $incorporacion->fch_obs_evaluacion_incorporacion = Carbon::parse($validatedData['fchObservacionIncorporacion'])->format('Y-m-d');
                 }
 
                 if (isset($validatedData['fchIncorporacion'])) {
@@ -478,7 +479,7 @@ class IncorporacionesController extends Controller
             $templateProcessor->setValue('persona.profesionCambioItem', 'Registrar datos de la persona');
         }
 
-        $respaldo = $incorporacion->observacion_incorporacion;
+        $respaldo = $incorporacion->obs_evaluacion_incorporacion;
         $valorRespaldo = ($respaldo == 'Cumple') ? 'Si' : 'No';
         $templateProcessor->setValue('persona.respaldo', $valorRespaldo);
 
@@ -853,7 +854,7 @@ class IncorporacionesController extends Controller
             $templateProcessor->setValue('persona.profesionCambioItem', 'Registrar datos de la persona');
         }
 
-        $respaldo = $incorporacion->observacion_incorporacion;
+        $respaldo = $incorporacion->obs_evaluacion_incorporacion;
         $valorRespaldo = ($respaldo == 'Cumple') ? 'Si' : 'No';
         $templateProcessor->setValue('persona.respaldo', $valorRespaldo);
 
@@ -1691,13 +1692,13 @@ class IncorporacionesController extends Controller
             $drawing->setMimeType(\PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing::MIMETYPE_DEFAULT);
             $sheet->mergeCells('D7:E18');
             $drawing->setCoordinates('D7');
-            $drawing->setHeight(300); 
-            $drawing->setWidth(180); 
+            $drawing->setHeight(300);
+            $drawing->setWidth(180);
             $drawing->setWorksheet($sheet);
         } else {
             $sheet->setCellValue('D7', 'FOTO');
             $sheet->mergeCells('D7:E18');
-        }        
+        }
 
         $sheet->setCellValue('H7', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
         $sheet->setCellValue('H9', $incorporacion->puesto_nuevo->denominacion_puesto);
@@ -1827,7 +1828,6 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoNuevo.denominacion', mb_strtoupper($incorporacion->puesto_nuevo->denominacion_puesto));
 
-        //$templateProcessor->setValue('puestoNuevo.salario', $incorporacion->puesto_nuevo->salario_puesto);
         $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
         $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
 
@@ -1841,9 +1841,9 @@ class IncorporacionesController extends Controller
             }
         }
 
-        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->observacion_incorporacion));
+        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->obs_evaluacion_incorporacion));
 
-        $experiencia = $incorporacion->experiencia_incorporacion;
+        $experiencia = $incorporacion->exp_evaluacion_incorporacion;
         if ($experiencia == 0) {
             $mensajeExperiencia = 'NO CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
         } elseif ($experiencia == 1) {
@@ -2004,7 +2004,7 @@ class IncorporacionesController extends Controller
             }
         }
 
-        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->observacion_incorporacion));
+        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->obs_evaluacion_incorporacion));
 
         $fileName = 'R-1023-01 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
 
@@ -2481,16 +2481,16 @@ class IncorporacionesController extends Controller
     public function genReportEvaluacion(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => 'nullable',
-            'fechaInicio' => 'required|date',
-            'fechaFin' => 'required|date',
+            'name' => 'nullable|string',
+            'fechaInicio' => 'nullable|date',
+            'fechaFin' => 'nullable|date',
         ]);
 
         $name = $request->input('name');
         $fechaInicio = $validatedData['fechaInicio'];
         $fechaFin = $validatedData['fechaFin'];
 
-        $incorporaciones = Incorporacion::with([
+        $query = Incorporacion::with([
             'persona',
             'persona.funcionario' => function ($query) {
                 $query->orderBy('fch_inicio_puesto_funcionario', 'desc');
@@ -2499,15 +2499,24 @@ class IncorporacionesController extends Controller
             'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
             'user',
-        ])
-            ->whereHas('user', function ($query) use ($name) {
-                $query->where('name', $name);
-            })
-            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
-            ->get();
+        ]);
 
-        return Excel::download(new ReportEvaluacionExport($incorporaciones), "Reporte de Evaluacion de {$name}.xlsx");
+        if ($name) {
+            $query->whereHas('user', function ($query) use ($name) {
+                $query->where('name', $name);
+            });
+        }
+
+        if ($fechaInicio && $fechaFin) {
+            $query->whereBetween('created_at', [$fechaInicio, $fechaFin]);
+        }
+
+        $incorporaciones = $query->get();
+
+        $filename = $name ? "Reporte de Evaluacion de {$name}.xlsx" : "Reporte de Evaluacion.xlsx";
+        return Excel::download(new ReportEvaluacionExport($incorporaciones), $filename);
     }
+
 
     public function genReportTrimestral(Request $request)
     {
@@ -2584,5 +2593,38 @@ class IncorporacionesController extends Controller
         return [
             'cantidad_incorporaciones_creadas' => $cantidadIncorporacionesCreadas
         ];
+    }
+    //------------------------------------------------------------------------------
+    public function byCiPersonaFormIncorporacion($ciPersona)
+    {
+        $persona = Persona::where('ci_persona', $ciPersona)->first();
+
+        if (!$persona) {
+            return response()->json(['message' => 'No se encontró ninguna persona con el CI proporcionado.'], 404);
+        }
+
+        $incorporacion = Incorporacion::where('persona_id', $persona->id_persona)->first();
+
+        if (!$incorporacion) {
+            return response()->json(['message' => 'No se encontró ninguna incorporación para la persona con el CI proporcionado.'], 404);
+        }
+
+        $fieldsComplete = $incorporacion->puesto_actual_id &&
+            $incorporacion->puesto_nuevo_id &&
+            $incorporacion->obs_evaluacion_incorporacion;
+
+        if ($fieldsComplete) {
+            return response()->json([
+                'message' => 'Ya se puede descargar los datos de su evaluación.',
+                'idIncorporacion' => $incorporacion->id_incorporacion,
+                'puestoActualId' => $incorporacion->puesto_actual_id,
+                'puestoNuevoId' => $incorporacion->puesto_nuevo_id
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Los datos de evaluación no están disponibles.',
+                'idIncorporacion' => $incorporacion->id_incorporacion
+            ], 400);
+        }
     }
 }

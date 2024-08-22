@@ -17,7 +17,13 @@ class Incorporacion extends Model
 
         'persona_id',
         'puesto_actual_id',
-        'puesto_nevo_id',
+        'puesto_nuevo_id',
+        //datos de evaluacion  cambiaron de nombre 
+        'obs_evaluacion_incorporacion', 
+        'obs_evaluacion_detalle_incorporacion', 
+        'fch_obs_evaluacion_incorporacion',
+        'exp_evaluacion_incorporacion', 
+        //------------
         'estado_incorporacion',
         'cumple_exp_profesional_incorporacion',
         'cumple_exp_especifica_incorporacion',
@@ -37,10 +43,9 @@ class Incorporacion extends Model
         'cite_rap_incorporacion',
         'codigo_rap_incorporacion',
         'fch_rap_incorporacion',
-        'observacion_incorporacion', //desde aqui son datos de evaluacion
-        'observacion_detalle_incorporacion',
-        'experiencia_incorporacion',
-        'fch_observacion_incorporacion',
+       
+        
+        
         'user_id',
     ];
 
@@ -48,6 +53,11 @@ class Incorporacion extends Model
         'fecha_inicio' => 'datetime',
         'fecha_fin' => 'datetime',
     ];
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class, 'persona_id', 'id_persona');
+    }
 
     public function puesto_actual()
     {
@@ -57,11 +67,6 @@ class Incorporacion extends Model
     public function puesto_nuevo()
     {
         return $this->belongsTo(Puesto::class, 'puesto_nuevo_id', 'id_puesto');
-    }
-
-    public function persona()
-    {
-        return $this->belongsTo(Persona::class, 'persona_id', 'id_persona');
     }
 
     public function user()

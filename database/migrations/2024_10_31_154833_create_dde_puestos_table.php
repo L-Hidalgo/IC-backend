@@ -27,7 +27,6 @@ return new class extends Migration
             $table->foreign('departamento_id')->references('id_departamento')->on('dde_departamentos');
             $table->foreign('estado_id')->references('id_estado')->on('dde_estados');
             $table->foreign('persona_actual_id')->references('id_persona')->on('dde_personas')->nullable(); 
-            //$table->foreignId('persona_actual_id')->nullable()->constrained('personas'); //noda
         });
     }
 

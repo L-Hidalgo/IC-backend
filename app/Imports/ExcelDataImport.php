@@ -43,13 +43,13 @@ class ExcelDataImport implements ToModel, WithStartRow
             );
 
             $puesto->persona_actual_id = $persona->id_persona;
-            
+
             if ($puesto->persona_actual_id) {
                 $estado = Estado::where('nombre_estado', 'Ocupado')->first();
             } else {
                 $estado = Estado::where('nombre_estado', 'Acefalo')->first();
             }
-        
+
             if (!$estado) {
                 if ($puesto->persona_actual_id) {
                     $estado = new Estado(['nombre_estado' => 'Ocupado']);
@@ -58,7 +58,7 @@ class ExcelDataImport implements ToModel, WithStartRow
                 }
                 $estado->save();
             }
-        
+
             $puesto->estado()->associate($estado);
             $puesto->save();
 
@@ -143,7 +143,6 @@ class ExcelDataImport implements ToModel, WithStartRow
         return $puesto;
     }
 
-
     public function migrarPersona(
         $ci,  // 7
         $exp, // 9
@@ -156,10 +155,22 @@ class ExcelDataImport implements ToModel, WithStartRow
         $telefono,        // 19
     ): Persona {
         $persona = Persona::where('ci_persona', $ci)->first();
-        if (!isset($persona)) {
-            $timestamp = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fechaNacimiento);
-            $fechaNacimiento = Carbon::createFromTimestamp($timestamp)->format('Y-m-d');
 
+        $timestamp = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fechaNacimiento);
+        $fechaNacimiento = Carbon::createFromTimestamp($timestamp)->format('Y-m-d');
+
+        if ($persona) {
+            $persona->update([
+                'exp_persona' => $exp,
+                'primer_apellido_persona' => $primerApellido,
+                'segundo_apellido_persona' => $segundoApellido,
+                'nombre_persona' => $nombres,
+                'profesion_persona' => $profesion,
+                'genero_persona' => $sexo,
+                'fch_nacimiento_persona' => $fechaNacimiento,
+                'telefono_persona' => $telefono,
+            ]);
+        } else {
             $persona = Persona::create([
                 'ci_persona' => $ci,
                 'exp_persona' => $exp,
@@ -172,6 +183,7 @@ class ExcelDataImport implements ToModel, WithStartRow
                 'telefono_persona' => $telefono,
             ]);
         }
+
         return $persona;
     }
 

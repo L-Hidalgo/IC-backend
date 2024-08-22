@@ -40,13 +40,11 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::get('{userCi}/img-user-administrador', [ImportarImagesController::class, 'getImgUserAdministrador']);
   Route::get('{userCi}/img-users', [ImportarImagesController::class, 'getImgUserAdministrador']);
   Route::post('/listar-usuarios', [UserController::class, 'listarUsuarios']);
-  Route::post('/filtrar-nombre-usuario', [UserController::class, 'byNombreUsuarios']);
 });
 
 Route::group(['prefix' => 'planilla'], function () {
   Route::post('/listar-puestos', [PlanillaController::class, 'listarPuestos']);
   Route::get('/{personaId}/imagen-funcionario', [PlanillaController::class, 'getImagenFuncionario']);
-  Route::post('/filtrar-puesto', [PlanillaController::class, 'byFiltrosPlanilla']); 
   Route::get('/listar-gerencia', [GerenciaDepartamentoController::class, 'GerenciaDepartamento']);
   Route::get('/{puestoId}/inf-persona-puesto', [PlanillaController::class, 'infPersonaPuesto']);
 });
@@ -92,6 +90,8 @@ Route::group(['prefix' => 'incorporaciones'], function () {
 
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
+  //---------------------------------------------------------------------------------
+  Route::get('/{ciPersona}/by-ci-persona-form-inc', [IncorporacionesController::class, 'byCiPersonaFormIncorporacion']);
 });
 
 /* ------------------------------------------ Formacion ------------------------------------------ */
