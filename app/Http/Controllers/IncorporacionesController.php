@@ -110,7 +110,7 @@ class IncorporacionesController extends Controller
                 }
 
                 if (isset($validatedData['observacionDetalleIncorporacion'])) {
-                    $incorporacion->obs_evaluacion_detalle_incorporacion = $validatedData['observacionDetalleIncorporacion'];
+                    $incorporacion->detalle_obs_evaluacion_incorporacion = $validatedData['observacionDetalleIncorporacion'];
                 }
 
                 if (isset($validatedData['experienciaIncorporacion'])) {
@@ -261,7 +261,7 @@ class IncorporacionesController extends Controller
         return response()->json(['message' => 'Incorporación dada de baja exitosamente'], 200);
     }
 
-    public function listPaginateIncorporaciones(Request $request)
+    public function listarIncorporaciones(Request $request)
     {
         $limit = $request->input('limit', 1000);
         $page = $request->input('page', 0);
@@ -274,7 +274,8 @@ class IncorporacionesController extends Controller
             'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
             'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'user',
+            'createdBy',
+            'modifiedBy',
         ])->where('estado_incorporacion', '!=', 3)
             ->orderBy('id_incorporacion', 'desc');
 
@@ -2594,7 +2595,7 @@ class IncorporacionesController extends Controller
             'cantidad_incorporaciones_creadas' => $cantidadIncorporacionesCreadas
         ];
     }
-    //------------------------------------------------------------------------------
+
     public function byCiPersonaFormIncorporacion($ciPersona)
     {
         $persona = Persona::where('ci_persona', $ciPersona)->first();
@@ -2609,22 +2610,71 @@ class IncorporacionesController extends Controller
             return response()->json(['message' => 'No se encontró ninguna incorporación para la persona con el CI proporcionado.'], 404);
         }
 
-        $fieldsComplete = $incorporacion->puesto_actual_id &&
+        $messages = [];
+
+        $fieldsEvaluationAvailable = $incorporacion->persona_id &&
+            $incorporacion->puesto_actual_id &&
             $incorporacion->puesto_nuevo_id &&
             $incorporacion->obs_evaluacion_incorporacion;
 
-        if ($fieldsComplete) {
+        $fieldsNoteOrMinuteAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_informe_incorporacion &&
+            $incorporacion->fch_informe_incorporacion &&
+            $incorporacion->cumple_exp_profesional_incorporacion &&
+            $incorporacion->cumple_exp_especifica_incorporacion &&
+            $incorporacion->cumple_exp_mando_incorporacion &&
+            $incorporacion->cumple_formacion_incorporacion &&
+            $incorporacion->cite_nota_minuta_incorporacion &&
+            $incorporacion->codigo_nota_minuta_incorporacion &&
+            $incorporacion->fch_nota_minuta_incorporacion &&
+            $incorporacion->fch_recepcion_nota_incorporacion;
+
+        $fieldsRapAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_informe_incorporacion &&
+            $incorporacion->fch_informe_incorporacion &&
+            $incorporacion->cite_rap_incorporacion &&
+            $incorporacion->codigo_rap_incorporacion &&
+            $incorporacion->fch_rap_incorporacion;
+
+        $fieldsMemoAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_informe_incorporacion &&
+            $incorporacion->fch_informe_incorporacion &&
+            $incorporacion->cite_memorandum_incorporacion &&
+            $incorporacion->codigo_memorandum_incorporacion &&
+            $incorporacion->fch_memorandum_incorporacion;
+
+        if ($fieldsEvaluationAvailable) {
+            $messages[] = 'Los formularios de evaluación ya están disponibles.';
+        }
+
+        if ($fieldsNoteOrMinuteAvailable) {
+            $messages[] = 'Inf. con Nota o Minuta ya están disponibles.';
+        }
+
+        if ($fieldsRapAvailable) {
+            $messages[] = 'RAP ya están disponibles.';
+        }
+
+        if ($fieldsMemoAvailable) {
+            $messages[] = 'Memorándum ya están disponibles.';
+        }
+
+        if (empty($messages)) {
+            $messages[] = 'No hay formularios disponibles.';
             return response()->json([
-                'message' => 'Ya se puede descargar los datos de su evaluación.',
-                'idIncorporacion' => $incorporacion->id_incorporacion,
-                'puestoActualId' => $incorporacion->puesto_actual_id,
-                'puestoNuevoId' => $incorporacion->puesto_nuevo_id
-            ], 200);
-        } else {
-            return response()->json([
-                'message' => 'Los datos de evaluación no están disponibles.',
+                'message' => implode(' ', $messages),
                 'idIncorporacion' => $incorporacion->id_incorporacion
             ], 400);
         }
+
+        return response()->json([
+            'message' => implode(' ', $messages),
+            'idIncorporacion' => $incorporacion->id_incorporacion,
+            'puestoActualId' => $incorporacion->puesto_actual_id,
+            'puestoNuevoId' => $incorporacion->puesto_nuevo_id
+        ], 200);
     }
 }

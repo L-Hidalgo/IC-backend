@@ -20,38 +20,35 @@ class Incorporacion extends Model
         'puesto_nuevo_id',
         //datos de evaluacion  cambiaron de nombre 
         'obs_evaluacion_incorporacion', 
-        'obs_evaluacion_detalle_incorporacion', 
+        'detalle_obs_evaluacion_incorporacion', 
         'fch_obs_evaluacion_incorporacion',
         'exp_evaluacion_incorporacion', 
-        //------------
-        'estado_incorporacion',
+        //Para otro documentos es importante
+        'fch_incorporacion',
+        'hp_incorporacion',
+        'cite_informe_incorporacion',
+        'fch_informe_incorporacion',
+        //inf con minuta y nota 
         'cumple_exp_profesional_incorporacion',
         'cumple_exp_especifica_incorporacion',
         'cumple_exp_mando_incorporacion',
         'cumple_formacion_incorporacion',
-        'fch_incorporacion',
-        'hp_incorporacion',
         'cite_nota_minuta_incorporacion',
         'codigo_nota_minuta_incorporacion',
         'fch_nota_minuta_incorporacion',
         'fch_recepcion_nota_incorporacion',
-        'cite_informe_incorporacion',
-        'fch_informe_incorporacion',
-        'cite_memorandum_incorporacion',
-        'codigo_memorandum_incorporacion',
-        'fch_memorandum_incorporacion',
+        //rap
         'cite_rap_incorporacion',
         'codigo_rap_incorporacion',
         'fch_rap_incorporacion',
-       
-        
-        
-        'user_id',
-    ];
-
-    protected $casts = [
-        'fecha_inicio' => 'datetime',
-        'fecha_fin' => 'datetime',
+       //memo
+       'cite_memorandum_incorporacion',
+       'codigo_memorandum_incorporacion',
+       'fch_memorandum_incorporacion',    
+           
+        'created_by_incorporacion',
+        'modified_by_incorporacion',
+        'estado_incorporacion',
     ];
 
     public function persona()
@@ -69,8 +66,13 @@ class Incorporacion extends Model
         return $this->belongsTo(Puesto::class, 'puesto_nuevo_id', 'id_puesto');
     }
 
-    public function user()
+    public function createdBy()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'created_by_incorporacion');
+    }
+
+    public function modifiedBy()
+    {
+        return $this->belongsTo(User::class, 'modified_by_incorporacion');
     }
 }

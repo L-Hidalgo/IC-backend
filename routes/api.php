@@ -25,8 +25,9 @@ Route::middleware('auth')->group(function () {
 
 // usuarios y roles
 Route::group(['prefix' => 'users'], function () {
+  Route::post('/listar-users', [UserController::class, 'listarUsers']);
   Route::get('/listar-users-dde', [UserController::class, 'listarUsersDDE']);
-  Route::get('/{userId}/listar-user-roles', [RolController::class, 'listarUsuariosRoles']);
+  Route::get('/{userId}/listar-user-roles', [RolController::class, 'listarUsersRoles']);
   Route::get('/listar-roles', [RolController::class, 'listarRoles']);
   
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
@@ -39,7 +40,7 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::post('/upload-imagenes-funcionarios', [ImportarImagesController::class, 'importarImgFuncionarios']);
   Route::get('{userCi}/img-user-administrador', [ImportarImagesController::class, 'getImgUserAdministrador']);
   Route::get('{userCi}/img-users', [ImportarImagesController::class, 'getImgUserAdministrador']);
-  Route::post('/listar-usuarios', [UserController::class, 'listarUsuarios']);
+  
 });
 
 Route::group(['prefix' => 'planilla'], function () {
@@ -60,7 +61,7 @@ Route::group(['prefix' => 'interinatos'], function () {
 // incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
-  Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
+  Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listarIncorporaciones']);
   Route::post('/filtrar-incorporaciones', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
   Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);

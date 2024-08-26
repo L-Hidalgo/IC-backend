@@ -86,54 +86,18 @@ class UserController extends Controller
         return $this->sendList($users);
     }
 
-    /* public function listarUsuarios(Request $request)
+    public function listarUsers(Request $request)
     {
         $limit = $request->input('limit');
         $page = $request->input('page');
+        $nombreUsuario = $request->input('query.nombreUsuario');
 
         $query = User::select(['id', 'name', 'ci', 'username', 'email', 'cargo'])
             ->with('roles:name')
             ->orderBy('id', 'asc');
 
-        $users = $query->paginate($limit, ['*'], 'page', $page);
-
-        $users->getCollection()->transform(function ($user) {
-            $user->rol = $user->roles->implode('name', ', ');
-            unset($user->roles);
-            return $user;
-        });
-
-        return $this->sendPaginated($users);
-    }
-
-    public function byNombreUsuarios(Request $request)
-    {
-
-        $name = $request->input('name');
-
-        $query = User::select(['id', 'name', 'username', 'email', 'cargo']);
-
-        if ($name !== null) {
-            $query->where('name', 'LIKE', '%' . $name . '%');
-        }
-
-        $users = $query->get();
-
-        return $this->sendList($users);
-    }*/
-
-    public function listarUsuarios(Request $request)
-    {
-        $limit = $request->input('limit'); 
-        $page = $request->input('page'); 
-        $name = $request->input('name');
-
-        $query = User::select(['id', 'name', 'ci', 'username', 'email', 'cargo'])
-            ->with('roles:name')
-            ->orderBy('id', 'asc');
-
-        if ($name !== null) {
-            $query->where('name', 'LIKE', '%' . $name . '%');
+        if ($nombreUsuario !== null) {
+            $query->where('name', 'LIKE', '%' . $nombreUsuario . '%');
         }
 
         $users = $query->paginate($limit, ['*'], 'page', $page);
@@ -146,6 +110,7 @@ class UserController extends Controller
 
         return $this->sendPaginated($users);
     }
+
 
     public function obtenerRolUser($userId)
     {

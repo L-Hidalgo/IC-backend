@@ -67,10 +67,10 @@ class CambioItemEvaluacionSheet implements FromArray, WithHeadings, WithStyles
             if ($incorporacion->obs_evaluacion_incorporacion == 'Cumple') {
                 $detalle_observacion = "Si cumple";
             } elseif ($incorporacion->obs_evaluacion_incorporacion == 'No cumple') {
-                if (empty($incorporacion->obs_evaluacion_detalle_incorporacion)) {
+                if (empty($incorporacion->detalle_obs_evaluacion_incorporacion)) {
                     $detalle_observacion = "No se registró el detalle de observación de evaluación";
                 } else {
-                    $detalle_observacion = $incorporacion->obs_evaluacion_detalle_incorporacion;
+                    $detalle_observacion = $incorporacion->detalle_obs_evaluacion_incorporacion;
                 }
             }
         }
