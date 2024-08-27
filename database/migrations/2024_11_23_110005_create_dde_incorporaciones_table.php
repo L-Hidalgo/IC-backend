@@ -27,6 +27,7 @@ return new class extends Migration
             $table->integer('cumple_formacion_incorporacion')->default(0);
             $table->date('fch_incorporacion')->nullable();
             $table->string('hp_incorporacion', 50)->nullable();
+            $table->string('n_tramite_incorporcion', 50)->nullable();
             $table->string('cite_informe_incorporacion', 18)->nullable();
             $table->date('fch_informe_incorporacion')->nullable();
             $table->string('cite_nota_minuta_incorporacion', 4)->nullable();

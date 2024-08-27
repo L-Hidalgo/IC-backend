@@ -27,13 +27,14 @@ class IncorporacionesController extends Controller
             'puestoActualId' => 'nullable|integer',
             'personaId' => 'nullable|integer',
 
-            'observacionIncorporacion' => 'nullable|string',
-            'observacionDetalleIncorporacion' => 'nullable|string',
-            'experienciaIncorporacion' => 'nullable|string',
-            'fchObservacionIncorporacion'  => 'nullable|string',
+            'obsEvaluacionIncorporacion' => 'nullable|string',
+            'detalleObsEvaluacionIncorporacion' => 'nullable|string',
+            'expEvaluacionIncorporacion' => 'nullable|string',
+            'fchObsEvaluacionIncorporacion'  => 'nullable|string',
 
             'fchIncorporacion' => 'nullable|string',
             'hpIncorporacion' => 'nullable|string',
+            'nTramiteIncorporcion' => 'nullable|string',
 
             'cumpleExpProfesionalIncorporacion' => 'nullable|integer',
             'cumpleExpEspecificaIncorporacion' => 'nullable|integer',
@@ -105,21 +106,24 @@ class IncorporacionesController extends Controller
                     $incorporacion->puesto_actual_id = $validatedData['puestoActualId'];
                 }
 
-                if (isset($validatedData['observacionIncorporacion'])) {
-                    $incorporacion->obs_evaluacion_incorporacion = $validatedData['observacionIncorporacion'];
+                /*evluacion*/
+                if (isset($validatedData['obsEvaluacionIncorporacion'])) {
+                    $incorporacion->obs_evaluacion_incorporacion = $validatedData['obsEvaluacionIncorporacion'];
                 }
 
-                if (isset($validatedData['observacionDetalleIncorporacion'])) {
-                    $incorporacion->detalle_obs_evaluacion_incorporacion = $validatedData['observacionDetalleIncorporacion'];
+                if (isset($validatedData['detalleObsEvaluacionIncorporacion'])) {
+                    $incorporacion->detalle_obs_evaluacion_incorporacion = $validatedData['detalleObsEvaluacionIncorporacion'];
                 }
 
-                if (isset($validatedData['experienciaIncorporacion'])) {
-                    $incorporacion->exp_evaluacion_incorporacion = $validatedData['experienciaIncorporacion'];
+                if (isset($validatedData['expEvaluacionIncorporacion'])) {
+                    $incorporacion->exp_evaluacion_incorporacion = $validatedData['expEvaluacionIncorporacion'];
                 }
 
-                if (isset($validatedData['fchObservacionIncorporacion'])) {
-                    $incorporacion->fch_obs_evaluacion_incorporacion = Carbon::parse($validatedData['fchObservacionIncorporacion'])->format('Y-m-d');
+                if (isset($validatedData['fchObsEvaluacionIncorporacion'])) {
+                    $incorporacion->fch_obs_evaluacion_incorporacion = Carbon::parse($validatedData['fchObsEvaluacionIncorporacion'])->format('Y-m-d');
                 }
+
+                /*incorporacion*/
 
                 if (isset($validatedData['fchIncorporacion'])) {
                     $incorporacion->fch_incorporacion = Carbon::parse($validatedData['fchIncorporacion'])->format('Y-m-d');
@@ -127,6 +131,10 @@ class IncorporacionesController extends Controller
 
                 if (isset($validatedData['hpIncorporacion'])) {
                     $incorporacion->hp_incorporacion = $validatedData['hpIncorporacion'];
+                }
+
+                if (isset($validatedData['nTramiteIncorporcion'])) {
+                    $incorporacion->hp_incorporacion = $validatedData['nTramiteIncorporcion'];
                 }
 
                 /* ------------------------------- DATOS DE SI CUEMPLE LA PERSONA ------------------------------- */

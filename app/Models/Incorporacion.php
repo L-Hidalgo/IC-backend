@@ -26,6 +26,7 @@ class Incorporacion extends Model
         //Para otro documentos es importante
         'fch_incorporacion',
         'hp_incorporacion',
+        'n_tramite_incorporcion',
         'cite_informe_incorporacion',
         'fch_informe_incorporacion',
         //inf con minuta y nota 
