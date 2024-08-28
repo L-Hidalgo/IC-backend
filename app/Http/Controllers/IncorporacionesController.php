@@ -12,42 +12,41 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ReportEvaluacionExport;
 use App\Exports\ReportTrimestralExport;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use App\Models\Persona;
 
 class IncorporacionesController extends Controller
 {
+
     public function crearActualizarIncorporacion(Request $request)
     {
         $validatedData = $request->validate([
-            'userId' => 'nullable|integer',
             'idIncorporacion' => 'nullable|integer',
             'puestoNuevoId' => 'nullable|integer',
             'puestoActualId' => 'nullable|integer',
             'personaId' => 'nullable|integer',
+            'createdByIncorporacion' => 'nullable|integer',
+            'modifiedByIncorporacion' => 'nullable|integer',
 
             'obsEvaluacionIncorporacion' => 'nullable|string',
             'detalleObsEvaluacionIncorporacion' => 'nullable|string',
             'expEvaluacionIncorporacion' => 'nullable|string',
             'fchObsEvaluacionIncorporacion'  => 'nullable|string',
 
-            'fchIncorporacion' => 'nullable|string',
-            'hpIncorporacion' => 'nullable|string',
-            'nTramiteIncorporcion' => 'nullable|string',
-
             'cumpleExpProfesionalIncorporacion' => 'nullable|integer',
             'cumpleExpEspecificaIncorporacion' => 'nullable|integer',
             'cumpleExpMandoIncorporacion' => 'nullable|integer',
             'cumpleFormacionIncorporacion' => 'nullable|integer',
 
+            'hpIncorporacion' => 'nullable|string',
+            'nTramiteIncorporcion' => 'nullable|string',
+            'citeInformeIncorporacion' => 'nullable|string',
+            'fchInformeIncorporacion' => 'nullable|string',
+            'fchIncorporacion' => 'nullable|string',
+
             'citeNotaMinutaIncorporacion' => 'nullable|string',
             'codigoNotaMinutaIncorporacion' => 'nullable|string',
             'fchNotaMinutaIncorporacion' => 'nullable|string',
             'fchRecepcionNotaIncorporacion' => 'nullable|string',
-
-            'citeInformeIncorporacion' => 'nullable|string',
-            'fchInformeIncorporacion' => 'nullable|string',
 
             'citeMemorandumIncorporacion' => 'nullable|string',
             'codigoMemorandumIncorporacion' => 'nullable|string',
@@ -61,23 +60,20 @@ class IncorporacionesController extends Controller
         $puesto = null;
 
         if (isset($validatedData['puestoNuevoId']) && isset($validatedData['personaId'])) {
-
             $puesto = Puesto::find($validatedData['puestoNuevoId']);
 
             if ($puesto) {
-
-
-                if (isset($validatedData['personaId']) && isset($validatedData['puestoActualId'])) {
+                if (isset($validatedData['puestoActualId']) && isset($validatedData['personaId'])) {
                     $puestoActual = Puesto::find($validatedData['puestoActualId']);
                     if ($puestoActual && $puestoActual->persona_actual_id == $validatedData['personaId']) {
                         $puestoActual->persona_actual_id = null;
-                        $puestoActual->estado_id = 1; //desocupado
+                        $puestoActual->estado_id = 1; // Desocupado
                         $puestoActual->save();
                     }
                 }
 
                 $puesto->persona_actual_id = $validatedData['personaId'];
-                $puesto->estado_id = 2; //ocuapdo
+                $puesto->estado_id = 2; // Ocupado
                 $puesto->save();
 
                 $existingIncorporacion = Incorporacion::where('persona_id', $validatedData['personaId'])
@@ -90,130 +86,80 @@ class IncorporacionesController extends Controller
                     $incorporacion = new Incorporacion();
                 }
 
-                if (isset($validatedData['personaId'])) {
-                    $incorporacion->persona_id = $validatedData['personaId'];
+                $incorporacion->puesto_nuevo_id = $validatedData['puestoNuevoId'] ?? $incorporacion->puesto_nuevo_id;
+                $incorporacion->puesto_actual_id = $validatedData['puestoActualId'] ?? $incorporacion->puesto_actual_id;
+                $incorporacion->persona_id = $validatedData['personaId'] ?? $incorporacion->persona_id;
+                $incorporacion->created_by_incorporacion = $validatedData['createdByIncorporacion'] ?? $incorporacion->created_by_incorporacion;
+                if (isset($validatedData['modifiedByIncorporacion']) && $validatedData['modifiedByIncorporacion'] != $incorporacion->created_by_incorporacion) {
+                    $incorporacion->modified_by_incorporacion = $validatedData['modifiedByIncorporacion'];
                 }
-
-                if (isset($validatedData['userId'])) {
-                    $incorporacion->user_id = $validatedData['userId'];
-                }
-
-                if (isset($validatedData['puestoNuevoId'])) {
-                    $incorporacion->puesto_nuevo_id = $validatedData['puestoNuevoId'];
-                }
-
-                if (isset($validatedData['puestoActualId'])) {
-                    $incorporacion->puesto_actual_id = $validatedData['puestoActualId'];
-                }
-
-                /*evluacion*/
-                if (isset($validatedData['obsEvaluacionIncorporacion'])) {
-                    $incorporacion->obs_evaluacion_incorporacion = $validatedData['obsEvaluacionIncorporacion'];
-                }
-
-                if (isset($validatedData['detalleObsEvaluacionIncorporacion'])) {
-                    $incorporacion->detalle_obs_evaluacion_incorporacion = $validatedData['detalleObsEvaluacionIncorporacion'];
-                }
-
-                if (isset($validatedData['expEvaluacionIncorporacion'])) {
-                    $incorporacion->exp_evaluacion_incorporacion = $validatedData['expEvaluacionIncorporacion'];
-                }
-
+                // Evaluación
+                $incorporacion->obs_evaluacion_incorporacion = $validatedData['obsEvaluacionIncorporacion'] ?? $incorporacion->obs_evaluacion_incorporacion;
+                $incorporacion->detalle_obs_evaluacion_incorporacion = $validatedData['detalleObsEvaluacionIncorporacion'] ?? $incorporacion->detalle_obs_evaluacion_incorporacion;
+                $incorporacion->exp_evaluacion_incorporacion = $validatedData['expEvaluacionIncorporacion'] ?? $incorporacion->exp_evaluacion_incorporacion;
                 if (isset($validatedData['fchObsEvaluacionIncorporacion'])) {
                     $incorporacion->fch_obs_evaluacion_incorporacion = Carbon::parse($validatedData['fchObsEvaluacionIncorporacion'])->format('Y-m-d');
                 }
+                // Datos de cumplimiento
+                $incorporacion->cumple_exp_profesional_incorporacion = $validatedData['cumpleExpProfesionalIncorporacion'] ?? $incorporacion->cumple_exp_profesional_incorporacion;
+                $incorporacion->cumple_exp_especifica_incorporacion = $validatedData['cumpleExpEspecificaIncorporacion'] ?? $incorporacion->cumple_exp_especifica_incorporacion;
+                $incorporacion->cumple_exp_mando_incorporacion = $validatedData['cumpleExpMandoIncorporacion'] ?? $incorporacion->cumple_exp_mando_incorporacion;
+                $incorporacion->cumple_formacion_incorporacion = $validatedData['cumpleFormacionIncorporacion'] ?? $incorporacion->cumple_formacion_incorporacion;
+                // Incorporación
+                $incorporacion->hp_incorporacion = $validatedData['hpIncorporacion'] ?? $incorporacion->hp_incorporacion;
+                $incorporacion->n_tramite_incorporcion = $validatedData['nTramiteIncorporcion'] ?? $incorporacion->n_tramite_incorporcion;
+                $incorporacion->cite_informe_incorporacion = $validatedData['citeInformeIncorporacion'] ?? $incorporacion->cite_informe_incorporacion;
+                $incorporacion->fch_informe_incorporacion = isset($validatedData['fchInformeIncorporacion']) ? Carbon::parse($validatedData['fchInformeIncorporacion'])->format('Y-m-d') : $incorporacion->fch_informe_incorporacion;
+                $incorporacion->fch_incorporacion = isset($validatedData['fchIncorporacion']) ? Carbon::parse($validatedData['fchIncorporacion'])->format('Y-m-d') : $incorporacion->fch_incorporacion;
+                // Cites y fechas
+                $incorporacion->cite_nota_minuta_incorporacion = $validatedData['citeNotaMinutaIncorporacion'] ?? $incorporacion->cite_nota_minuta_incorporacion;
+                $incorporacion->codigo_nota_minuta_incorporacion = $validatedData['codigoNotaMinutaIncorporacion'] ?? '022400000';
+                $incorporacion->fch_nota_minuta_incorporacion = isset($validatedData['fchNotaMinutaIncorporacion']) ? Carbon::parse($validatedData['fchNotaMinutaIncorporacion'])->format('Y-m-d') : $incorporacion->fch_nota_minuta_incorporacion;
+                $incorporacion->fch_recepcion_nota_incorporacion = isset($validatedData['fchRecepcionNotaIncorporacion']) ? Carbon::parse($validatedData['fchRecepcionNotaIncorporacion'])->format('Y-m-d') : $incorporacion->fch_recepcion_nota_incorporacion;
+                //memo
+                $incorporacion->cite_memorandum_incorporacion = $validatedData['citeMemorandumIncorporacion'] ?? $incorporacion->cite_memorandum_incorporacion;
+                $incorporacion->codigo_memorandum_incorporacion = $validatedData['codigoMemorandumIncorporacion'] ?? '08240000';
+                $incorporacion->fch_memorandum_incorporacion = isset($validatedData['fchMemorandumIncorporacion']) ? Carbon::parse($validatedData['fchMemorandumIncorporacion'])->format('Y-m-d') : $incorporacion->fch_memorandum_incorporacion;
+                //rap
+                $incorporacion->cite_rap_incorporacion = $validatedData['citeRapIncorporacion'] ?? $incorporacion->cite_rap_incorporacion;
+                $incorporacion->codigo_rap_incorporacion = $validatedData['codigoRapIncorporacion'] ?? '032400000';
+                $incorporacion->fch_rap_incorporacion = isset($validatedData['fchRapIncorporacion']) ? Carbon::parse($validatedData['fchRapIncorporacion'])->format('Y-m-d') : $incorporacion->fch_rap_incorporacion;
 
-                /*incorporacion*/
+                $estado_incorporacion = 1;
 
-                if (isset($validatedData['fchIncorporacion'])) {
-                    $incorporacion->fch_incorporacion = Carbon::parse($validatedData['fchIncorporacion'])->format('Y-m-d');
+                if (
+                    isset($validatedData['hpIncorporacion']) && isset($validatedData['nTramiteIncorporcion'])
+                    && isset($validatedData['citeInformeIncorporacion']) && isset($validatedData['fchInformeIncorporacion'])
+                    && isset($validatedData['citeInformeIncorporacion']) && isset($validatedData['fchInformeIncorporacion'])
+                    && isset($validatedData['fchIncorporacion']) || isset($validatedData['citeNotaMinutaIncorporacion'])
+                    && isset($validatedData['fchNotaMinutaIncorporacion']) && isset($validatedData['citeMemorandumIncorporacion'])
+                    && isset($validatedData['codigoMemorandumIncorporacion']) && isset($validatedData['fchMemorandumIncorporacion'])
+                    && isset($validatedData['citeRapIncorporacion']) && isset($validatedData['codigoRapIncorporacion'])
+                    && isset($validatedData['fchRapIncorporacion'])
+                ) {
+                    $estado_incorporacion = 2;
                 }
 
-                if (isset($validatedData['hpIncorporacion'])) {
-                    $incorporacion->hp_incorporacion = $validatedData['hpIncorporacion'];
+                if (
+                    isset($validatedData['idIncorporacion']) && isset($validatedData['puestoNuevoId'])
+                    && isset($validatedData['puestoActualId']) && isset($validatedData['personaId'])
+                    && isset($validatedData['createdByIncorporacion']) && isset($validatedData['modifiedByIncorporacion'])
+                    && isset($validatedData['obsEvaluacionIncorporacion']) && isset($validatedData['detalleObsEvaluacionIncorporacion'])
+                    && isset($validatedData['expEvaluacionIncorporacion']) && isset($validatedData['fchObsEvaluacionIncorporacion'])
+                    && isset($validatedData['cumpleExpProfesionalIncorporacion']) && isset($validatedData['cumpleExpEspecificaIncorporacion'])
+                    && isset($validatedData['cumpleExpMandoIncorporacion']) && isset($validatedData['cumpleFormacionIncorporacion'])
+                    && isset($validatedData['hpIncorporacion']) && isset($validatedData['nTramiteIncorporcion'])
+                    && isset($validatedData['citeInformeIncorporacion']) && isset($validatedData['fchInformeIncorporacion'])
+                    && isset($validatedData['fchIncorporacion']) && isset($validatedData['citeNotaMinutaIncorporacion'])
+                    && isset($validatedData['fchNotaMinutaIncorporacion']) && isset($validatedData['citeMemorandumIncorporacion'])
+                    && isset($validatedData['codigoMemorandumIncorporacion']) && isset($validatedData['fchMemorandumIncorporacion'])
+                    && isset($validatedData['citeRapIncorporacion']) && isset($validatedData['codigoRapIncorporacion'])
+                    && isset($validatedData['fchRapIncorporacion'])
+                ) {
+                    $estado_incorporacion = 3;
                 }
 
-                if (isset($validatedData['nTramiteIncorporcion'])) {
-                    $incorporacion->hp_incorporacion = $validatedData['nTramiteIncorporcion'];
-                }
-
-                /* ------------------------------- DATOS DE SI CUEMPLE LA PERSONA ------------------------------- */
-
-                if (isset($validatedData['cumpleExpProfesionalIncorporacion'])) {
-                    $incorporacion->cumple_exp_profesional_incorporacion = $validatedData['cumpleExpProfesionalIncorporacion'];
-                }
-                if (isset($validatedData['cumpleExpEspecificaIncorporacion'])) {
-                    $incorporacion->cumple_exp_especifica_incorporacion = $validatedData['cumpleExpEspecificaIncorporacion'];
-                }
-                if (isset($validatedData['cumpleExpMandoIncorporacion'])) {
-                    $incorporacion->cumple_exp_mando_incorporacion = $validatedData['cumpleExpMandoIncorporacion'];
-                }
-                if (isset($validatedData['cumpleFormacionIncorporacion'])) {
-                    $incorporacion->cumple_formacion_incorporacion = $validatedData['cumpleFormacionIncorporacion'];
-                }
-
-                /* ----------------------------------- DATOS DE CITES Y FECHAS ---------------------------------- */
-                if (isset($validatedData['citeNotaMinutaIncorporacion'])) {
-                    $incorporacion->cite_nota_minuta_incorporacion = $validatedData['citeNotaMinutaIncorporacion'];
-                }
-
-                if (isset($validatedData['codigoNotaMinutaIncorporacion'])) {
-                    $incorporacion->codigo_nota_minuta_incorporacion = $validatedData['codigoNotaMinutaIncorporacion'];
-                } else {
-                    $incorporacion->codigo_nota_minuta_incorporacion = '022400000';
-                }
-
-                if (isset($validatedData['fchNotaMinutaIncorporacion'])) {
-                    $incorporacion->fch_nota_minuta_incorporacion = Carbon::parse($validatedData['fchNotaMinutaIncorporacion'])->format('Y-m-d');
-                }
-
-                if (isset($validatedData['fchRecepcionNotaIncorporacion'])) {
-                    $incorporacion->fch_recepcion_nota_incorporacion = Carbon::parse($validatedData['fchRecepcionNotaIncorporacion'])->format('Y-m-d');
-                }
-
-                if (isset($validatedData['citeInformeIncorporacion'])) {
-                    $incorporacion->cite_informe_incorporacion = $validatedData['citeInformeIncorporacion'];
-                }
-
-                if (isset($validatedData['fchInformeIncorporacion'])) {
-                    $incorporacion->fch_informe_incorporacion = Carbon::parse($validatedData['fchInformeIncorporacion'])->format('Y-m-d');
-                }
-
-                if (isset($validatedData['citeMemorandumIncorporacion'])) {
-                    $incorporacion->cite_memorandum_incorporacion = $validatedData['citeMemorandumIncorporacion'];
-                }
-
-                if (isset($validatedData['codigoMemorandumIncorporacion'])) {
-                    $incorporacion->codigo_memorandum_incorporacion = $validatedData['codigoMemorandumIncorporacion'];
-                } else {
-                    $incorporacion->codigo_memorandum_incorporacion = '08240000';
-                }
-
-                if (isset($validatedData['fchMemorandumIncorporacion'])) {
-                    $incorporacion->fch_memorandum_incorporacion = Carbon::parse($validatedData['fchMemorandumIncorporacion'])->format('Y-m-d');
-                }
-
-                if (isset($validatedData['citeRapIncorporacion'])) {
-                    $incorporacion->cite_rap_incorporacion = $validatedData['citeRapIncorporacion'];
-                }
-
-                if (isset($validatedData['codigoRapIncorporacion'])) {
-                    $incorporacion->codigo_rap_incorporacion = $validatedData['codigoRapIncorporacion'];
-                } else {
-                    $incorporacion->codigo_rap_incorporacion = '032400000';
-                }
-
-                if (isset($validatedData['fchRapIncorporacion'])) {
-                    $incorporacion->fch_rap_incorporacion = Carbon::parse($validatedData['fchRapIncorporacion'])->format('Y-m-d');
-                }
-
-                if (isset($validatedData['citeNotaMinutaIncorporacion']) && isset($validatedData['citeInformeIncorporacion']) && isset($validatedData['citeMemorandumIncorporacion']) && isset($validatedData['citeRapIncorporacion']) && isset($validatedData['puestoNuevoId']) && isset($validatedData['personaId'])) {
-                    $incorporacion->estado_incorporacion = 2;
-                } elseif (isset($validatedData['puestoNuevoId']) && isset($validatedData['personaId'])) {
-                    $incorporacion->estado_incorporacion = 1;
-                }
-
-                // guardar
+                $incorporacion->estado_incorporacion = $estado_incorporacion;
                 $incorporacion->save();
 
                 return $this->sendObject($incorporacion, 'Datos registrados exitosamente!!');
@@ -1732,330 +1678,9 @@ class IncorporacionesController extends Controller
         return response()->download($savedPath)->deleteFileAfterSend(true);
     }
 
-    public function generarFormR0980($incorporacionId)
-    {
-        $incorporacion = Incorporacion::find($incorporacionId);
 
-        if (!isset($incorporacion)) {
-            return response('', 404);
-        }
 
-        $disk = Storage::disk('form_templates');
-        if (isset($incorporacion->puesto_actual)) {
-            $pathTemplate = $disk->path('R-0980-01.docx');
-        } else {
-            $pathTemplate = $disk->path('R-0980-01.docx');
-        }
 
-        $templateProcessor = new TemplateProcessor($pathTemplate);
-
-        $carbonFechaInfo = Carbon::parse($incorporacion->fch_informe_incorporacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaInfo->locale('es_UY');
-        $fechaInfoFormateada = $carbonFechaInfo->isoFormat('LL');
-        $templateProcessor->setValue('incorporacion.fechaInfo', $fechaInfoFormateada);
-
-        $templateProcessor->setValue('puestoNuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
-
-        $gerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
-        $gerenciasDepartamentos = array(
-            "Gerencia Distrital La Paz I" => "el Departamento Administrativo y Recursos Humanos",
-            "Gerencia Distrital La Paz II" => "la Administrativo y Recursos Humanos",
-            "Gerencia GRACO La Paz" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital El Alto" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Cochabamba" => "el Departamento Administrativo y Recursos Humanos",
-            "Gerencia GRACO Cochabamba" => "el Departamento Administrativo y Recursos Humanos",
-            "Gerencia Distrital Santa Cruz I" => "el Departamento Administrativo y Recursos Humanos",
-            "Gerencia Distrital Santa Cruz II" => "la Administrativo y Recursos Humanos",
-            "Gerencia GRACO Santa Cruz" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Montero" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Chuquisaca" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Tarija" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Yacuiba" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Oruro" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Potosí" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Beni" => "la Administrativo y Recursos Humanos",
-            "Gerencia Distrital Pando" => "la Administrativo y Recursos Humanos",
-        );
-
-        if (isset($gerenciasDepartamentos[$gerencia])) {
-            $departamento = $gerenciasDepartamentos[$gerencia];
-        } else {
-            $departamento = "el Departamento de Dotación y Evaluación";
-        }
-        $templateProcessor->setValue('puestoNuevo.departamento', $departamento);
-
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
-        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
-        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
-
-        $fileName = 'R-0980-01 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
-
-        $incorporacion->descargas++;
-
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
-
-        $templateProcessor->saveAs($savedPath);
-
-        return response()->download($savedPath)->deleteFileAfterSend(true);
-    }
-
-    //formularios de incorporacion
-    public function generarFormR0078($incorporacionId)
-    {
-        $incorporacion = Incorporacion::find($incorporacionId);
-        if (!isset($incorporacion)) {
-            return response('', 404);
-        }
-
-        $disk = Storage::disk('form_templates');
-
-        $pathTemplate = $disk->path('R-0078-01.docx'); // ruta de plantilla
-
-        $templateProcessor = new TemplateProcessor($pathTemplate);
-
-        $templateProcessor->setValue('persona.nombreCompleto', mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona));
-
-        $gradoAcademico = mb_strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico ?? '', 'UTF-8');
-        $areaFormacion = mb_strtoupper($incorporacion->persona->formacion[0]->areaFormacion->nombre_area_formacion ?? '', 'UTF-8');
-        if (empty($gradoAcademico) || empty($areaFormacion)) {
-            $profesion = 'Registrar grado académico y área de formación';
-        } else {
-            $profesion = $gradoAcademico . ' EN ' . $areaFormacion;
-        }
-        $templateProcessor->setValue('persona.profesion', $profesion);
-
-        $fechaNacimiento = Carbon::parse($incorporacion->persona->fch_nacimiento_persona);
-        $edad = $fechaNacimiento->age;
-        $templateProcessor->setValue('persona.edad', $edad . ' ' . 'AÑOS');
-
-        $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
-
-        $templateProcessor->setValue('puestoNuevo.gerencia', mb_strtoupper($incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia));
-
-        $templateProcessor->setValue('puestoNuevo.departamento', mb_strtoupper($incorporacion->puesto_nuevo->departamento->nombre_departamento));
-
-        $templateProcessor->setValue('puestoNuevo.denominacion', mb_strtoupper($incorporacion->puesto_nuevo->denominacion_puesto));
-
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
-        $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
-
-        foreach ($incorporacion->puesto_nuevo->requisitos as $requisito) {
-            if ($requisito) {
-                $templateProcessor->setValue('puestoNuevo.formacionRequerida', $requisito->formacion_requisito);
-                $templateProcessor->setValue('puestoNuevo.experienciaProfesionalSegunCargo', $requisito->exp_cargo_requisito);
-                $templateProcessor->setValue('puestoNuevo.experienciaRelacionadoAlArea', $requisito->exp_area_requisito);
-                $templateProcessor->setValue('puestoNuevo.experienciaEnFuncionesDeMando', $requisito->exp_mando_requisito);
-                break;
-            }
-        }
-
-        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->obs_evaluacion_incorporacion));
-
-        $experiencia = $incorporacion->exp_evaluacion_incorporacion;
-        if ($experiencia == 0) {
-            $mensajeExperiencia = 'NO CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
-        } elseif ($experiencia == 1) {
-            $mensajeExperiencia = 'SI CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
-        }
-        $templateProcessor->setValue('incorporacion.experiencia', mb_strtoupper($mensajeExperiencia));
-
-
-        $fileName = 'R-0078 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
-
-        $incorporacion->descargas++;
-
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
-
-        $templateProcessor->saveAs($savedPath);
-
-        return response()->download($savedPath)->deleteFileAfterSend(true);
-    }
-
-    public function generarFormR1401($incorporacionId)
-    {
-        $incorporacion = Incorporacion::find($incorporacionId);
-
-        if (!isset($incorporacion)) {
-            return response('', 404);
-        }
-
-        $disk = Storage::disk('form_templates');
-        $pathTemplate = $disk->path('R-1401-01.docx');
-        $templateProcessor = new TemplateProcessor($pathTemplate);
-
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
-        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
-        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
-
-        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
-
-        switch ($nombreGerencia) {
-            case 'El Alto':
-                $ubicacion = 'El Alto';
-                break;
-            case 'Cochabamba':
-            case 'GRACO Cochabamba':
-                $ubicacion = 'Cochabamba';
-                break;
-            case 'Quillacollo':
-                $ubicacion = 'Quillacollo';
-                break;
-            case 'Santa Cruz I':
-            case 'Santa Cruz II':
-            case 'GRACO Santa Cruz':
-                $ubicacion = 'Santa Cruz';
-                break;
-            case 'Montero':
-                $ubicacion = 'Montero';
-                break;
-            case 'Chuquisaca':
-                $ubicacion = 'Chuquisaca';
-                break;
-            case 'Tarija':
-                $ubicacion = 'Tarija';
-                break;
-            case 'Yacuiba':
-                $ubicacion = 'Yacuiba';
-                break;
-            case 'Oruro':
-                $ubicacion = 'Oruro';
-                break;
-            case 'Potosí':
-                $ubicacion = 'Potosí';
-                break;
-            case 'Beni':
-                $ubicacion = 'Beni';
-                break;
-            case 'Pando':
-                $ubicacion = 'Pando';
-                break;
-            default:
-                $ubicacion = 'La Paz';
-                break;
-        }
-        $templateProcessor->setValue('ubicacion', $ubicacion);
-
-        $carbonFechaincorporacion = Carbon::parse($incorporacion->fch_incorporacion);
-        setlocale(LC_TIME, 'es_UY');
-        $carbonFechaincorporacion->locale('es_UY');
-        $fechaincorporacionFormateada = $carbonFechaincorporacion->isoFormat('LL');
-        $templateProcessor->setValue('fechaIncorporacion', $fechaincorporacionFormateada);
-
-        $fileName = 'R-1401 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
-
-        $incorporacion->descargas++;
-
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
-
-        $templateProcessor->saveAs($savedPath);
-
-        return response()->download($savedPath)->deleteFileAfterSend(true);
-    }
-
-    //formularios de cambio item
-    public function generarFormR1023($incorporacionId)
-    {
-        $incorporacion = Incorporacion::find($incorporacionId);
-        if (!isset($incorporacion)) {
-            return response('', 404);
-        }
-
-        $disk = Storage::disk('form_templates');
-
-        $pathTemplate = $disk->path('R-1023-01-CambioItem.docx'); // ruta de plantilla
-
-        $templateProcessor = new TemplateProcessor($pathTemplate);
-
-        $templateProcessor->setValue('persona.nombreCompleto', mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona));
-        $templateProcessor->setValue('persona.formacion', mb_strtoupper($incorporacion->persona->profesion_persona));
-
-        if (!$incorporacion->puesto_actual->funcionario->isEmpty()) {
-            $fechaDesignacion = $incorporacion->puesto_actual->funcionario->first()->fch_inicio_sin_funcionario;
-            $carbonFecha = Carbon::parse($fechaDesignacion);
-            setlocale(LC_TIME, 'es_UY');
-            $carbonFecha->locale('es_UY');
-            $fechaFormateada = $carbonFecha->isoFormat('LL');
-            $templateProcessor->setValue('puestoActual.fechaDeUltimaDesignacion', strtoupper($fechaFormateada));
-        }
-
-        $templateProcessor->setValue('puestoActual.item', $incorporacion->puesto_actual->item_puesto);
-
-        $templateProcessor->setValue('puestoActual.gerencia', $incorporacion->puesto_actual->departamento->gerencia->nombre_gerencia);
-
-        $templateProcessor->setValue('puestoActual.departamento', $incorporacion->puesto_actual->departamento->nombre_departamento);
-
-        $templateProcessor->setValue('puestoActual.denominacion', $incorporacion->puesto_actual->denominacion_puesto);
-
-        //$templateProcessor->setValue('puestoActual.salario', $incorporacion->puesto_actual->salario_puesto);
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
-        $templateProcessor->setValue('puestoActual.salario', $salarioFormateado);
-
-        $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
-
-        $templateProcessor->setValue('puestoNuevo.gerencia', $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia);
-
-        $templateProcessor->setValue('puestoNuevo.departamento', $incorporacion->puesto_nuevo->departamento->nombre_departamento);
-
-        $templateProcessor->setValue('puestoNuevo.denominacion', $incorporacion->puesto_nuevo->denominacion_puesto);
-
-        //$templateProcessor->setValue('puestoNuevo.salario', $incorporacion->puesto_nuevo->salario_puesto);
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
-        $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
-
-        foreach ($incorporacion->puesto_nuevo->requisitos as $requisito) {
-            if ($requisito) {
-                $templateProcessor->setValue('puestoNuevo.formacionRequerida', $requisito->formacion_requisito);
-                $templateProcessor->setValue('puestoNuevo.experienciaProfesionalSegunCargo', $requisito->exp_cargo_requisito);
-                $templateProcessor->setValue('puestoNuevo.experienciaRelacionadoAlArea', $requisito->exp_area_requisito);
-                $templateProcessor->setValue('puestoNuevo.experienciaEnFuncionesDeMando', $requisito->exp_mando_requisito);
-                break;
-            }
-        }
-
-        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($incorporacion->obs_evaluacion_incorporacion));
-
-        $fileName = 'R-1023-01 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
-
-        $incorporacion->descargas++;
-
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
-
-        $templateProcessor->saveAs($savedPath);
-
-        return response()->download($savedPath)->deleteFileAfterSend(true);
-    }
-
-    public function generarFormR1129($incorporacionId)
-    {
-        $incorporacion = Incorporacion::find($incorporacionId);
-
-        if (!isset($incorporacion)) {
-            return response('', 404);
-        }
-
-        $disk = Storage::disk('form_templates');
-
-        $pathTemplate = $disk->path('R-1129-01-CambioItem.docx'); // ruta de plantilla
-
-        $templateProcessor = new TemplateProcessor($pathTemplate);
-
-        $templateProcessor->setValue('persona.nombreCompleto', $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona);
-
-        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
-
-        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
-
-        $fileName = 'R-1129-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
-
-        $incorporacion->descargas++;
-
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
-
-        $templateProcessor->saveAs($savedPath);
-
-        return response()->download($savedPath)->deleteFileAfterSend(true);
-    }
 
     // otros formularios de incorporacion
     public function generarR0976($incorporacionId)
@@ -2487,6 +2112,313 @@ class IncorporacionesController extends Controller
             //return response()->json(['incorporacion' => $incorporacion, 'filePath' => $fileName . '.docx']);
         }*/
 
+    //formularios de evaluacion
+    private function valoresComunesByEvaluation(TemplateProcessor $templateProcessor, Incorporacion $incorporacion)
+    {
+        $templateProcessor->setValue('persona.nombreCompleto', mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona));
+        $templateProcessor->setValue('persona.ci', $incorporacion->persona->ci_persona);
+        $templateProcessor->setValue('persona.exp', $incorporacion->persona->exp_persona);
+
+        $templateProcessor->setValue('puestoNuevo.item', $incorporacion->puesto_nuevo->item_puesto);
+
+        $templateProcessor->setValue('puestoNuevo.gerencia', mb_strtoupper($incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia));
+
+        $templateProcessor->setValue('puestoNuevo.departamento', mb_strtoupper($incorporacion->puesto_nuevo->departamento->nombre_departamento));
+
+        $templateProcessor->setValue('puestoNuevo.denominacion', mb_strtoupper($incorporacion->puesto_nuevo->denominacion_puesto));
+
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
+        $templateProcessor->setValue('puestoNuevo.salario', $salarioFormateado);
+
+        foreach ($incorporacion->puesto_nuevo->requisitos as $requisito) {
+            if ($requisito) {
+                $templateProcessor->setValue('puestoNuevo.formacionRequerida', $requisito->formacion_requisito);
+                $templateProcessor->setValue('puestoNuevo.experienciaProfesionalSegunCargo', $requisito->exp_cargo_requisito);
+                $templateProcessor->setValue('puestoNuevo.experienciaRelacionadoAlArea', $requisito->exp_area_requisito);
+                $templateProcessor->setValue('puestoNuevo.experienciaEnFuncionesDeMando', $requisito->exp_mando_requisito);
+                break;
+            }
+        }
+
+        $observacion = '';
+        if ($incorporacion->obs_evaluacion_incorporacion === '1') {
+            $observacion = 'CUMPLE';
+        } elseif ($incorporacion->obs_evaluacion_incorporacion === '0') {
+            $observacion = 'NO CUMPLE';
+        } else {
+            $observacion = 'NO REGISTRADO';
+        }
+
+        $templateProcessor->setValue('incorporacion.observacion', mb_strtoupper($observacion));
+    }
+
+    public function generarFormR0078($incorporacionId)
+    {
+        $incorporacion = Incorporacion::find($incorporacionId);
+        if (!isset($incorporacion)) {
+            return response('', 404);
+        }
+
+        $disk = Storage::disk('form_templates');
+
+        $pathTemplate = $disk->path('R-0078-01.docx');
+
+        $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $this->valoresComunesByEvaluation($templateProcessor, $incorporacion);
+
+        $gradoAcademico = mb_strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico ?? '', 'UTF-8');
+        $areaFormacion = mb_strtoupper($incorporacion->persona->formacion[0]->areaFormacion->nombre_area_formacion ?? '', 'UTF-8');
+        if (empty($gradoAcademico) || empty($areaFormacion)) {
+            $profesion = 'Registrar grado académico y área de formación';
+        } else {
+            $profesion = $gradoAcademico . ' EN ' . $areaFormacion;
+        }
+        $templateProcessor->setValue('persona.profesion', $profesion);
+
+        $fechaNacimiento = Carbon::parse($incorporacion->persona->fch_nacimiento_persona);
+        $edad = $fechaNacimiento->age;
+        $templateProcessor->setValue('persona.edad', $edad . ' ' . 'AÑOS');
+
+        $experiencia = $incorporacion->exp_evaluacion_incorporacion;
+        if ($experiencia == 0) {
+            $mensajeExperiencia = 'NO CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
+        } elseif ($experiencia == 1) {
+            $mensajeExperiencia = 'SI CUENTA CON EXPERIENCIA EN EL SERVICIO DE IMPUESTOS NACIONALES';
+        }
+        $templateProcessor->setValue('incorporacion.experiencia', mb_strtoupper($mensajeExperiencia));
+
+
+        $fileName = 'R-0078 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++;
+
+        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+
+        $templateProcessor->saveAs($savedPath);
+
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
+    public function generarFormR1401($incorporacionId)
+    {
+        $incorporacion = Incorporacion::find($incorporacionId);
+
+        if (!isset($incorporacion)) {
+            return response('', 404);
+        }
+
+        $disk = Storage::disk('form_templates');
+        $pathTemplate = $disk->path('R-1401-01.docx');
+        $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $this->valoresComunesByEvaluation($templateProcessor, $incorporacion);
+
+        $nombreGerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+
+        switch ($nombreGerencia) {
+            case 'El Alto':
+                $ubicacion = 'El Alto';
+                break;
+            case 'Cochabamba':
+            case 'GRACO Cochabamba':
+                $ubicacion = 'Cochabamba';
+                break;
+            case 'Quillacollo':
+                $ubicacion = 'Quillacollo';
+                break;
+            case 'Santa Cruz I':
+            case 'Santa Cruz II':
+            case 'GRACO Santa Cruz':
+                $ubicacion = 'Santa Cruz';
+                break;
+            case 'Montero':
+                $ubicacion = 'Montero';
+                break;
+            case 'Chuquisaca':
+                $ubicacion = 'Chuquisaca';
+                break;
+            case 'Tarija':
+                $ubicacion = 'Tarija';
+                break;
+            case 'Yacuiba':
+                $ubicacion = 'Yacuiba';
+                break;
+            case 'Oruro':
+                $ubicacion = 'Oruro';
+                break;
+            case 'Potosí':
+                $ubicacion = 'Potosí';
+                break;
+            case 'Beni':
+                $ubicacion = 'Beni';
+                break;
+            case 'Pando':
+                $ubicacion = 'Pando';
+                break;
+            default:
+                $ubicacion = 'La Paz';
+                break;
+        }
+        $templateProcessor->setValue('ubicacion', $ubicacion);
+
+        $carbonFechaincorporacion = Carbon::parse($incorporacion->fch_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaincorporacion->locale('es_UY');
+        $fechaincorporacionFormateada = $carbonFechaincorporacion->isoFormat('LL');
+        $templateProcessor->setValue('fechaIncorporacion', $fechaincorporacionFormateada);
+
+        $fileName = 'R-1401 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++;
+
+        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+
+        $templateProcessor->saveAs($savedPath);
+
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
+    public function generarFormR1023($incorporacionId)
+    {
+        $incorporacion = Incorporacion::find($incorporacionId);
+        if (!isset($incorporacion)) {
+            return response('', 404);
+        }
+
+        $disk = Storage::disk('form_templates');
+
+        $pathTemplate = $disk->path('R-1023-01-CambioItem.docx');
+
+        $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $this->valoresComunesByEvaluation($templateProcessor, $incorporacion);
+
+        $templateProcessor->setValue('persona.formacion', mb_strtoupper($incorporacion->persona->profesion_persona));
+
+        if (!$incorporacion->puesto_actual->funcionario->isEmpty()) {
+            $fechaDesignacion = $incorporacion->puesto_actual->funcionario->first()->fch_inicio_sin_funcionario;
+            $carbonFecha = Carbon::parse($fechaDesignacion);
+            setlocale(LC_TIME, 'es_UY');
+            $carbonFecha->locale('es_UY');
+            $fechaFormateada = $carbonFecha->isoFormat('LL');
+            $templateProcessor->setValue('puestoActual.fechaDeUltimaDesignacion', strtoupper($fechaFormateada));
+        }
+
+        $templateProcessor->setValue('puestoActual.item', $incorporacion->puesto_actual->item_puesto);
+
+        $templateProcessor->setValue('puestoActual.gerencia', $incorporacion->puesto_actual->departamento->gerencia->nombre_gerencia);
+
+        $templateProcessor->setValue('puestoActual.departamento', $incorporacion->puesto_actual->departamento->nombre_departamento);
+
+        $templateProcessor->setValue('puestoActual.denominacion', $incorporacion->puesto_actual->denominacion_puesto);
+
+        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
+        $templateProcessor->setValue('puestoActual.salario', $salarioFormateado);
+
+        $fileName = 'R-1023-01 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++;
+
+        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+
+        $templateProcessor->saveAs($savedPath);
+
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
+    public function generarFormR1129($incorporacionId)
+    {
+        $incorporacion = Incorporacion::find($incorporacionId);
+
+        if (!isset($incorporacion)) {
+            return response('', 404);
+        }
+
+        $disk = Storage::disk('form_templates');
+
+        $pathTemplate = $disk->path('R-1129-01-CambioItem.docx'); // ruta de plantilla
+
+        $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $this->valoresComunesByEvaluation($templateProcessor, $incorporacion);
+
+        $fileName = 'R-1129-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++;
+
+        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+
+        $templateProcessor->saveAs($savedPath);
+
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
+    public function generarFormR0980($incorporacionId)
+    {
+        $incorporacion = Incorporacion::find($incorporacionId);
+
+        if (!isset($incorporacion)) {
+            return response('', 404);
+        }
+
+        $disk = Storage::disk('form_templates');
+        if (isset($incorporacion->puesto_actual)) {
+            $pathTemplate = $disk->path('R-0980-01.docx');
+        } else {
+            $pathTemplate = $disk->path('R-0980-01.docx');
+        }
+
+        $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $carbonFechaInfo = Carbon::parse($incorporacion->fch_informe_incorporacion);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaInfo->locale('es_UY');
+        $fechaInfoFormateada = $carbonFechaInfo->isoFormat('LL');
+        $templateProcessor->setValue('incorporacion.fechaInfo', $fechaInfoFormateada);
+
+        $this->valoresComunesByEvaluation($templateProcessor, $incorporacion);
+
+        $gerencia = $incorporacion->puesto_nuevo->departamento->gerencia->nombre_gerencia;
+        $gerenciasDepartamentos = array(
+            "Gerencia Distrital La Paz I" => "el Departamento Administrativo y Recursos Humanos",
+            "Gerencia Distrital La Paz II" => "la Administrativo y Recursos Humanos",
+            "Gerencia GRACO La Paz" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital El Alto" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Cochabamba" => "el Departamento Administrativo y Recursos Humanos",
+            "Gerencia GRACO Cochabamba" => "el Departamento Administrativo y Recursos Humanos",
+            "Gerencia Distrital Santa Cruz I" => "el Departamento Administrativo y Recursos Humanos",
+            "Gerencia Distrital Santa Cruz II" => "la Administrativo y Recursos Humanos",
+            "Gerencia GRACO Santa Cruz" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Montero" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Chuquisaca" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Tarija" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Yacuiba" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Oruro" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Potosí" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Beni" => "la Administrativo y Recursos Humanos",
+            "Gerencia Distrital Pando" => "la Administrativo y Recursos Humanos",
+        );
+
+        if (isset($gerenciasDepartamentos[$gerencia])) {
+            $departamento = $gerenciasDepartamentos[$gerencia];
+        } else {
+            $departamento = "el Departamento de Dotación y Evaluación";
+        }
+        $templateProcessor->setValue('puestoNuevo.departamento', $departamento);
+
+        $fileName = 'R-0980-01 ' . strtoupper($incorporacion->persona->nombre_persona) . ' ' . strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;
+
+        $incorporacion->descargas++;
+
+        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+
+        $templateProcessor->saveAs($savedPath);
+
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
+    //reportes en excel de incorporaciones 
     public function genReportEvaluacion(Request $request)
     {
         $validatedData = $request->validate([
@@ -2507,11 +2439,11 @@ class IncorporacionesController extends Controller
             'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,salario_puesto,departamento_id',
             'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'user',
+            'createdBy',
         ]);
 
         if ($name) {
-            $query->whereHas('user', function ($query) use ($name) {
+            $query->whereHas('createdBy', function ($query) use ($name) {
                 $query->where('name', $name);
             });
         }
@@ -2526,20 +2458,19 @@ class IncorporacionesController extends Controller
         return Excel::download(new ReportEvaluacionExport($incorporaciones), $filename);
     }
 
-
     public function genReportTrimestral(Request $request)
     {
         $validatedData = $request->validate([
-            'name' => 'nullable',
-            'fechaInicio' => 'required|date',
-            'fechaFin' => 'required|date',
+            'name' => 'nullable|string',
+            'fechaInicio' => 'nullable|date',
+            'fechaFin' => 'nullable|date',
         ]);
 
-        $name = $request->input('name');
-        $fechaInicio = $validatedData['fechaInicio'];
-        $fechaFin = $validatedData['fechaFin'];
+        $name = $validatedData['name'] ?? null;
+        $fechaInicio = $validatedData['fechaInicio'] ?? null;
+        $fechaFin = $validatedData['fechaFin'] ?? null;
 
-        $incorporaciones = Incorporacion::with([
+        $query = Incorporacion::with([
             'persona',
             'persona.funcionario' => function ($query) {
                 $query->orderBy('fch_inicio_puesto_funcionario', 'desc');
@@ -2547,16 +2478,26 @@ class IncorporacionesController extends Controller
             'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,salario_puesto,departamento_id',
             'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
             'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'user',
-        ])
-            ->whereHas('user', function ($query) use ($name) {
-                $query->where('name', $name);
-            })
-            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
-            ->get();
+            'createdBy',
+        ]);
 
-        return Excel::download(new ReportTrimestralExport($incorporaciones), "Reporte Trimestral de {$name}.xlsx");
+        if ($name) {
+            $query->whereHas('createdBy', function ($query) use ($name) {
+                $query->where('name', $name);
+            });
+        }
+
+        if ($fechaInicio && $fechaFin) {
+            $query->whereBetween('created_at', [$fechaInicio, $fechaFin]);
+        }
+
+        $incorporaciones = $query->get();
+
+        $filename = $name ? "Reporte Trimestral de {$name}.xlsx" : "Reporte Trimestral.xlsx";
+
+        return Excel::download(new ReportTrimestralExport($incorporaciones), $filename);
     }
+
 
     public function downloadEvalForm($fileName)
     {
