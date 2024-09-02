@@ -30,7 +30,7 @@ class Incorporacion extends Model
         'cumple_formacion_incorporacion',
         //incorporacion
         'hp_incorporacion',
-        'n_tramite_incorporcion',
+        'n_tramite_incorporacion',   
         'cite_informe_incorporacion',
         'fch_informe_incorporacion',
         'fch_incorporacion',
