@@ -61,16 +61,16 @@ class CambioItemEvaluacionSheet implements FromArray, WithHeadings, WithStyles
     protected function formatDataCambioItem($incorporacion)
     {
 
-        if (empty($incorporacion->obs_evaluacion_incorporacion)) {
-            $detalle_observacion = "No se registró la observación de evaluación";
-        } else {
+        $detalle_observacion = "No se registró la observación de evaluación";
+
+        if (!empty($incorporacion->obs_evaluacion_incorporacion)) {
             if ($incorporacion->obs_evaluacion_incorporacion == 'Cumple') {
                 $detalle_observacion = "Si cumple";
             } elseif ($incorporacion->obs_evaluacion_incorporacion == 'No cumple') {
-                if (empty($incorporacion->obs_evaluacion_detalle_incorporacion)) {
+                if (empty($incorporacion->detalle_obs_evaluacion_incorporacion)) {
                     $detalle_observacion = "No se registró el detalle de observación de evaluación";
                 } else {
-                    $detalle_observacion = $incorporacion->obs_evaluacion_detalle_incorporacion;
+                    $detalle_observacion = $incorporacion->detalle_obs_evaluacion_incorporacion;
                 }
             }
         }
@@ -94,9 +94,9 @@ class CambioItemEvaluacionSheet implements FromArray, WithHeadings, WithStyles
             'EXP. RELACIONADA AL AREA DE FORMACIÓN DEL ITEM PROPUESTO' => '',
             'EXP. EN FUNCIONES DE MANDO DEL ITEM PROPUESTO' => '',
             'OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ EVALUACIÓN' : mb_strtoupper($incorporacion->obs_evaluacion_incorporacion),
-            'DETALLE DE OBSERVACIÓN DE EVALUACIÓN' => mb_strtoupper($detalle_observacion),
+            'DETALLE DE OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->detalle_obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ EL DETALLE DE EVALUACIÓN' : mb_strtoupper($incorporacion->detalle_obs_evaluacion_incorporacion),
             'FECHA DE OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->fch_obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ LA FCH. DE EVALUACIÓN' : $incorporacion->fch_obs_evaluacion_incorporacion,
-            'RESPONSABLE' => $incorporacion->user->name,
+            'RESPONSABLE' => $incorporacion->createdBy->name,
         ];
 
         foreach ($incorporacion->puesto_nuevo->requisitos as $requisito) {
