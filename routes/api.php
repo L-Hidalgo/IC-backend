@@ -62,9 +62,7 @@ Route::group(['prefix' => 'interinatos'], function () {
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
   Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listarIncorporaciones']);
-  Route::post('/filtrar-incorporaciones', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
- 
   // reportes words de evaluacion
   Route::get('/{incorporacionId}/gen-form-R0078', [IncorporacionesController::class, 'generarFormR0078']);
   Route::get('/{incorporacionId}/gen-form-R1401', [IncorporacionesController::class, 'generarFormR1401']);

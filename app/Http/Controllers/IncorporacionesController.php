@@ -220,6 +220,13 @@ class IncorporacionesController extends Controller
         $limit = $request->input('limit', 1000);
         $page = $request->input('page', 0);
 
+        $encargado = $request->input('query.encargado');
+        $nombreCompletoPersona = $request->input('query.nombreCompletoPersona');
+        $tipoIncorporacion = $request->input('query.tipoIncorporacion');
+        $fechaInicio = $request->input('query.fechaInicio');
+        $fechaFin = $request->input('query.fechaFin');
+
+
         $query = Incorporacion::with([
             'persona',
             'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
@@ -230,61 +237,32 @@ class IncorporacionesController extends Controller
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
             'createdBy',
             'modifiedBy',
-        ])->where('estado_incorporacion', '!=', 3)
-            ->orderBy('id_incorporacion', 'desc');
+        ])->orderBy('id_incorporacion', 'desc');
 
-        $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
-
-        return $this->sendPaginated($incorporaciones);
-    }
-
-    public function byFiltrosIncorporacion(Request $request)
-    {
-        $params = $request->all();
-
-        $limit = $params['limit'] ?? 1000;
-        $page = $params['page'] ?? 0;
-        $name = $params['name'] ?? null;
-        $nombre_completo_persona = $params['nombreCompletoPersona'] ?? null;
-        $tipo = $params['tipo'] ?? null;
-        $fecha_inicio = $params['fechaInicio'] ?? null;
-        $fecha_fin = $params['fechaFin'] ?? null;
-
-        $query = Incorporacion::with([
-            'persona',
-            'puesto_nuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_nuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_nuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'puesto_actual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puesto_actual.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
-            'user',
-        ])->where('estado_incorporacion', '!=', 3)
-            ->orderBy('id_incorporacion', 'desc');
-
-        if ($name) {
-            $query->whereHas('user', function ($q) use ($name) {
-                $q->whereRaw("name LIKE ?", ['%' . $name . '%']);
+        if ($encargado) {
+            $query->whereHas('createdBy', function ($q) use ($encargado) {
+                $q->whereRaw("name LIKE ?", ['%' . $encargado . '%']);
             });
         }
 
-        if ($nombre_completo_persona) {
-            $query->whereHas('persona', function ($q) use ($nombre_completo_persona) {
-                $q->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $nombre_completo_persona . '%']);
+        if ($nombreCompletoPersona) {
+            $query->whereHas('persona', function ($q) use ($nombreCompletoPersona) {
+                $q->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $nombreCompletoPersona . '%']);
             });
         }
 
-        if ($tipo == 1) {
+        if ($tipoIncorporacion == 1) {
             $query->whereNotNull('puesto_nuevo_id')->whereNull('puesto_actual_id');
-        } elseif ($tipo == 2) {
+        } elseif ($tipoIncorporacion == 2) {
             $query->whereNotNull('puesto_nuevo_id')->whereNotNull('puesto_actual_id');
         }
 
-        if ($fecha_inicio) {
-            $query->whereDate('created_at', '>=', $fecha_inicio);
+        if ($fechaInicio) {
+            $query->whereDate('created_at', '>=', $fechaInicio);
         }
-        if ($fecha_fin) {
-            $query->whereDate('created_at', '<=', $fecha_fin);
+
+        if ($fechaFin) {
+            $query->whereDate('created_at', '<=', $fechaFin);
         }
 
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
@@ -474,7 +452,22 @@ class IncorporacionesController extends Controller
 
         $this->valoresComunesByEvaluation($templateProcessor, $incorporacion);
 
-        $templateProcessor->setValue('persona.formacion', mb_strtoupper($incorporacion->persona->profesion_persona));
+        $profesionPersona = mb_strtoupper($incorporacion->persona->profesion_persona ?? '', 'UTF-8');
+
+        if (empty($profesionPersona)) {
+            $gradoAcademico = mb_strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico ?? '', 'UTF-8');
+            $areaFormacion = mb_strtoupper($incorporacion->persona->formacion[0]->areaFormacion->nombre_area_formacion ?? '', 'UTF-8');
+
+            if (empty($gradoAcademico) || empty($areaFormacion)) {
+                $profesion = 'Registrar grado académico y área de formación';
+            } else {
+                $profesion = $gradoAcademico . ' EN ' . $areaFormacion;
+            }
+
+            $templateProcessor->setValue('persona.formacion', $profesion);
+        } else {
+            $templateProcessor->setValue('persona.formacion', $profesionPersona);
+        }
 
         if (!$incorporacion->puesto_actual->funcionario->isEmpty()) {
             $fechaDesignacion = $incorporacion->puesto_actual->funcionario->first()->fch_inicio_sin_funcionario;
@@ -1025,6 +1018,8 @@ class IncorporacionesController extends Controller
             $templateProcessor->setValue('persona.referenciaAlPrincipioCambioItem', 'El servidor público interino ' . $nombreCompleto);
         }
 
+        $templateProcessor->setValue('incorporacion.numeroTramite', $incorporacion->n_tramite_incorporacion);
+
         if (isset($incorporacion->puesto_actual)) {
             $fileName = 'INF MINUTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto) . ' ' . $incorporacion->descargas;
         } else {
@@ -1095,6 +1090,8 @@ class IncorporacionesController extends Controller
             $templateProcessor->setValue('persona.referenciaCambioItem', 'del servidor publico interino ' . $nombreCompleto);
             $templateProcessor->setValue('persona.referenciaAlPrincipioCambioItem', 'El servidor publico interino ' . $nombreCompleto);
         }
+
+        $templateProcessor->setValue('incorporacion.numeroTramite', $incorporacion->n_tramite_incorporacion);
 
         if (isset($incorporacion->puesto_actual)) {
             $fileName = 'INF NOTA CAMBIO DE ITEM ' . strtoupper($nombreCompleto) . ' ' . $incorporacion->descargas;
@@ -1208,17 +1205,17 @@ class IncorporacionesController extends Controller
 
         $this->valoresComunesByIncorporacion($templateProcessor, $incorporacion);
 
-        $templateProcessor->setValue('incorporacion.codigoMemorandum', $incorporacion->codigo_memorandum_incorporacion);
+        $templateProcessor->setValue('incorporacion.codigoRap', $incorporacion->codigo_rap_incorporacion);
 
         $templateProcessor->setValue('incorporacion.citeMemorandum', $incorporacion->cite_memorandum_incorporacion);
+
+        $templateProcessor->setValue('incorporacion.codigoMemorandum', $incorporacion->codigo_memorandum_incorporacion);
 
         $carbonFechaMemo = Carbon::parse($incorporacion->fch_memorandum_incorporacion);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaMemo->locale('es_UY');
         $fechaMemoFormateada = $carbonFechaMemo->isoFormat('LL');
         $templateProcessor->setValue('incorporacion.fechaMemorandum', $fechaMemoFormateada);
-
-        $templateProcessor->setValue('incorporacion.codigoRap', $incorporacion->codigo_rap_incorporacion);
 
         $primerApellido = $incorporacion->persona->primer_apellido_persona;
         $genero = $incorporacion->persona->genero_persona;
@@ -1272,7 +1269,7 @@ class IncorporacionesController extends Controller
         } else {
             $pathTemplate = $disk->path('actaEntrega.docx');
         }
-        
+
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
         $this->valoresComunesByIncorporacion($templateProcessor, $incorporacion);
@@ -1545,7 +1542,7 @@ class IncorporacionesController extends Controller
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
         $this->valoresComunesByIncorporacion($templateProcessor, $incorporacion);
-    
+
         $fileName = 'R-SGC-0033-01 ' . $incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona . ' ' . $incorporacion->descargas;
 
         $incorporacion->descargas++;
