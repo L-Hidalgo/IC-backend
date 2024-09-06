@@ -38,7 +38,7 @@ class IncorporacionesController extends Controller
             'cumpleFormacionIncorporacion' => 'nullable|integer',
 
             'hpIncorporacion' => 'nullable|string',
-            'nTramiteIncorporcion' => 'nullable|string',
+            'nTramiteIncorporacion' => 'nullable|string',
             'citeInformeIncorporacion' => 'nullable|string',
             'fchInformeIncorporacion' => 'nullable|string',
             'fchIncorporacion' => 'nullable|string',
@@ -84,6 +84,9 @@ class IncorporacionesController extends Controller
                     $incorporacion = $existingIncorporacion;
                 } else {
                     $incorporacion = new Incorporacion();
+                    $incorporacion->codigo_nota_minuta_incorporacion = '022400000';
+                    $incorporacion->codigo_memorandum_incorporacion = '08240000';
+                    $incorporacion->codigo_rap_incorporacion = '032400000';
                 }
 
                 $incorporacion->puesto_nuevo_id = $validatedData['puestoNuevoId'] ?? $incorporacion->puesto_nuevo_id;
@@ -107,53 +110,51 @@ class IncorporacionesController extends Controller
                 $incorporacion->cumple_formacion_incorporacion = $validatedData['cumpleFormacionIncorporacion'] ?? $incorporacion->cumple_formacion_incorporacion;
                 // Incorporación
                 $incorporacion->hp_incorporacion = $validatedData['hpIncorporacion'] ?? $incorporacion->hp_incorporacion;
-                $incorporacion->n_tramite_incorporacion = $validatedData['nTramiteIncorporcion'] ?? $incorporacion->n_tramite_incorporacion;
+                $incorporacion->n_tramite_incorporacion = $validatedData['nTramiteIncorporacion'] ?? $incorporacion->n_tramite_incorporacion;
                 $incorporacion->cite_informe_incorporacion = $validatedData['citeInformeIncorporacion'] ?? $incorporacion->cite_informe_incorporacion;
                 $incorporacion->fch_informe_incorporacion = isset($validatedData['fchInformeIncorporacion']) ? Carbon::parse($validatedData['fchInformeIncorporacion'])->format('Y-m-d') : $incorporacion->fch_informe_incorporacion;
                 $incorporacion->fch_incorporacion = isset($validatedData['fchIncorporacion']) ? Carbon::parse($validatedData['fchIncorporacion'])->format('Y-m-d') : $incorporacion->fch_incorporacion;
                 // Cites y fechas
                 $incorporacion->cite_nota_minuta_incorporacion = $validatedData['citeNotaMinutaIncorporacion'] ?? $incorporacion->cite_nota_minuta_incorporacion;
-                $incorporacion->codigo_nota_minuta_incorporacion = $validatedData['codigoNotaMinutaIncorporacion'] ?? '022400000';
+                $incorporacion->codigo_nota_minuta_incorporacion = $validatedData['codigoNotaMinutaIncorporacion'] ?? $incorporacion->codigo_nota_minuta_incorporacion;
                 $incorporacion->fch_nota_minuta_incorporacion = isset($validatedData['fchNotaMinutaIncorporacion']) ? Carbon::parse($validatedData['fchNotaMinutaIncorporacion'])->format('Y-m-d') : $incorporacion->fch_nota_minuta_incorporacion;
                 $incorporacion->fch_recepcion_nota_incorporacion = isset($validatedData['fchRecepcionNotaIncorporacion']) ? Carbon::parse($validatedData['fchRecepcionNotaIncorporacion'])->format('Y-m-d') : $incorporacion->fch_recepcion_nota_incorporacion;
                 //memo
                 $incorporacion->cite_memorandum_incorporacion = $validatedData['citeMemorandumIncorporacion'] ?? $incorporacion->cite_memorandum_incorporacion;
-                $incorporacion->codigo_memorandum_incorporacion = $validatedData['codigoMemorandumIncorporacion'] ?? '08240000';
+                $incorporacion->codigo_memorandum_incorporacion = $validatedData['codigoMemorandumIncorporacion'] ?? $incorporacion->codigo_memorandum_incorporacion;
                 $incorporacion->fch_memorandum_incorporacion = isset($validatedData['fchMemorandumIncorporacion']) ? Carbon::parse($validatedData['fchMemorandumIncorporacion'])->format('Y-m-d') : $incorporacion->fch_memorandum_incorporacion;
                 //rap
                 $incorporacion->cite_rap_incorporacion = $validatedData['citeRapIncorporacion'] ?? $incorporacion->cite_rap_incorporacion;
-                $incorporacion->codigo_rap_incorporacion = $validatedData['codigoRapIncorporacion'] ?? '032400000';
+                $incorporacion->codigo_rap_incorporacion = $validatedData['codigoRapIncorporacion'] ?? $incorporacion->codigo_rap_incorporacion;
                 $incorporacion->fch_rap_incorporacion = isset($validatedData['fchRapIncorporacion']) ? Carbon::parse($validatedData['fchRapIncorporacion'])->format('Y-m-d') : $incorporacion->fch_rap_incorporacion;
 
                 $estado_incorporacion = 1;
 
                 if (
-                    isset($validatedData['hpIncorporacion']) && isset($validatedData['nTramiteIncorporcion'])
-                    && isset($validatedData['citeInformeIncorporacion']) && isset($validatedData['fchInformeIncorporacion'])
-                    && isset($validatedData['citeInformeIncorporacion']) && isset($validatedData['fchInformeIncorporacion'])
-                    && isset($validatedData['fchIncorporacion']) || isset($validatedData['citeNotaMinutaIncorporacion'])
-                    && isset($validatedData['fchNotaMinutaIncorporacion']) && isset($validatedData['citeMemorandumIncorporacion'])
-                    && isset($validatedData['codigoMemorandumIncorporacion']) && isset($validatedData['fchMemorandumIncorporacion'])
-                    && isset($validatedData['citeRapIncorporacion']) && isset($validatedData['codigoRapIncorporacion'])
-                    && isset($validatedData['fchRapIncorporacion'])
+                    isset($validatedData['idIncorporacion']) && isset($validatedData['puestoNuevoId'])
+                    && isset($validatedData['personaId']) && isset($validatedData['obsEvaluacionIncorporacion']) 
+                    && isset($validatedData['fchObsEvaluacionIncorporacion']) && isset($validatedData['cumpleExpProfesionalIncorporacion']) 
+                    && isset($validatedData['cumpleExpEspecificaIncorporacion']) && isset($validatedData['cumpleExpMandoIncorporacion']) 
+                    && isset($validatedData['cumpleFormacionIncorporacion']) && isset($validatedData['hpIncorporacion']) 
+                    && isset($validatedData['nTramiteIncorporcion']) && isset($validatedData['citeInformeIncorporacion']) 
+                    && isset($validatedData['fchInformeIncorporacion']) && isset($validatedData['fchIncorporacion']) 
+                    && isset($validatedData['citeNotaMinutaIncorporacion']) && isset($validatedData['fchNotaMinutaIncorporacion']) 
                 ) {
                     $estado_incorporacion = 2;
                 }
 
                 if (
                     isset($validatedData['idIncorporacion']) && isset($validatedData['puestoNuevoId'])
-                    && isset($validatedData['puestoActualId']) && isset($validatedData['personaId'])
-                    && isset($validatedData['createdByIncorporacion']) && isset($validatedData['modifiedByIncorporacion'])
-                    && isset($validatedData['obsEvaluacionIncorporacion']) && isset($validatedData['detalleObsEvaluacionIncorporacion'])
-                    && isset($validatedData['expEvaluacionIncorporacion']) && isset($validatedData['fchObsEvaluacionIncorporacion'])
-                    && isset($validatedData['cumpleExpProfesionalIncorporacion']) && isset($validatedData['cumpleExpEspecificaIncorporacion'])
-                    && isset($validatedData['cumpleExpMandoIncorporacion']) && isset($validatedData['cumpleFormacionIncorporacion'])
-                    && isset($validatedData['hpIncorporacion']) && isset($validatedData['nTramiteIncorporcion'])
-                    && isset($validatedData['citeInformeIncorporacion']) && isset($validatedData['fchInformeIncorporacion'])
-                    && isset($validatedData['fchIncorporacion']) && isset($validatedData['citeNotaMinutaIncorporacion'])
-                    && isset($validatedData['fchNotaMinutaIncorporacion']) && isset($validatedData['citeMemorandumIncorporacion'])
-                    && isset($validatedData['codigoMemorandumIncorporacion']) && isset($validatedData['fchMemorandumIncorporacion'])
-                    && isset($validatedData['citeRapIncorporacion']) && isset($validatedData['codigoRapIncorporacion'])
+                    && isset($validatedData['personaId']) && isset($validatedData['obsEvaluacionIncorporacion']) 
+                    && isset($validatedData['fchObsEvaluacionIncorporacion']) && isset($validatedData['cumpleExpProfesionalIncorporacion']) 
+                    && isset($validatedData['cumpleExpEspecificaIncorporacion']) && isset($validatedData['cumpleExpMandoIncorporacion']) 
+                    && isset($validatedData['cumpleFormacionIncorporacion']) && isset($validatedData['hpIncorporacion']) 
+                    && isset($validatedData['nTramiteIncorporcion']) && isset($validatedData['citeInformeIncorporacion']) 
+                    && isset($validatedData['fchInformeIncorporacion']) && isset($validatedData['fchIncorporacion']) 
+                    && isset($validatedData['citeNotaMinutaIncorporacion']) && isset($validatedData['fchNotaMinutaIncorporacion']) 
+                    && isset($validatedData['citeMemorandumIncorporacion']) && isset($validatedData['codigoMemorandumIncorporacion']) 
+                    && isset($validatedData['fchMemorandumIncorporacion']) && isset($validatedData['citeRapIncorporacion']) 
+                    && isset($validatedData['codigoRapIncorporacion'])
                     && isset($validatedData['fchRapIncorporacion'])
                 ) {
                     $estado_incorporacion = 3;
