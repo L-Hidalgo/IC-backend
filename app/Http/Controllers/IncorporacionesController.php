@@ -1635,6 +1635,155 @@ class IncorporacionesController extends Controller
         return Excel::download(new ReportTrimestralExport($incorporaciones), $filename);
     }
 
+    public function byCiPersonaFormIncorporacion($ciPersona)
+    {
+        $persona = Persona::where('ci_persona', $ciPersona)->first();
+
+        if (!$persona) {
+            return response()->json(['message' => 'No se encontró ninguna persona con el CI proporcionado.'], 404);
+        }
+
+        $incorporacion = Incorporacion::where('persona_id', $persona->id_persona)->first();
+
+        if (!$incorporacion) {
+            return response()->json(['message' => 'No se encontró ninguna incorporación para la persona con el CI proporcionado.'], 404);
+        }
+
+        $messages = [];
+
+        $fieldsEvaluationAvailable = $incorporacion->persona_id && $incorporacion->puesto_nuevo_id
+            && $incorporacion->obs_evaluacion_incorporacion && $incorporacion->exp_evaluacion_incorporacion;
+
+        $fieldsNoteOrMinuteAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_informe_incorporacion &&
+            $incorporacion->fch_informe_incorporacion &&
+            $incorporacion->cumple_exp_profesional_incorporacion &&
+            $incorporacion->cumple_exp_especifica_incorporacion &&
+            $incorporacion->cumple_exp_mando_incorporacion &&
+            $incorporacion->cumple_formacion_incorporacion &&
+            $incorporacion->cite_nota_minuta_incorporacion &&
+            $incorporacion->fch_nota_minuta_incorporacion &&
+
+            $fieldsRapAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_rap_incorporacion &&
+            $incorporacion->codigo_rap_incorporacion &&
+            $incorporacion->fch_rap_incorporacion;
+
+        $fieldsMemoAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_memorandum_incorporacion &&
+            $incorporacion->codigo_memorandum_incorporacion &&
+            $incorporacion->fch_memorandum_incorporacion;
+
+        if ($fieldsEvaluationAvailable) {
+            $messages[] = 'Los formularios de evaluación ya están disponibles.';
+        }
+
+        if ($fieldsNoteOrMinuteAvailable) {
+            $messages[] = 'Inf. con Nota o Minuta ya están disponibles.';
+        }
+
+        if ($fieldsRapAvailable) {
+            $messages[] = 'RAP ya están disponibles.';
+        }
+
+        if ($fieldsMemoAvailable) {
+            $messages[] = 'Memorándum ya están disponibles.';
+        }
+
+        if (empty($messages)) {
+            $messages[] = 'No hay formularios disponibles.';
+            return response()->json([
+                'message' => implode(' ', $messages),
+                'idIncorporacion' => $incorporacion->id_incorporacion
+            ], 400);
+        }
+
+        return response()->json([
+            'message' => implode(' ', $messages),
+            'idIncorporacion' => $incorporacion->id_incorporacion,
+            'puestoNuevoId' => $incorporacion->puesto_nuevo_id
+        ], 200);
+    }
+
+    public function byCiPersonaFormCambioItem($ciPersona)
+    {
+        $persona = Persona::where('ci_persona', $ciPersona)->first();
+
+        if (!$persona) {
+            return response()->json(['message' => 'No se encontró ninguna persona con el CI proporcionado.'], 404);
+        }
+
+        $incorporacion = Incorporacion::where('persona_id', $persona->id_persona)->first();
+
+        if (!$incorporacion) {
+            return response()->json(['message' => 'No se encontró ninguna incorporación para la persona con el CI proporcionado.'], 404);
+        }
+
+        $messages = [];
+
+        $fieldsEvaluationAvailable = $incorporacion->persona_id &&
+            $incorporacion->puesto_actual_id &&
+            $incorporacion->puesto_nuevo_id &&
+            $incorporacion->obs_evaluacion_incorporacion;
+
+        $fieldsNoteOrMinuteAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_informe_incorporacion &&
+            $incorporacion->fch_informe_incorporacion &&
+            $incorporacion->cumple_exp_profesional_incorporacion &&
+            $incorporacion->cumple_exp_especifica_incorporacion &&
+            $incorporacion->cumple_exp_mando_incorporacion &&
+            $incorporacion->cumple_formacion_incorporacion &&
+            $incorporacion->cite_nota_minuta_incorporacion &&
+            $incorporacion->fch_nota_minuta_incorporacion &&
+
+            $fieldsRapAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_rap_incorporacion &&
+            $incorporacion->codigo_rap_incorporacion &&
+            $incorporacion->fch_rap_incorporacion;
+
+        $fieldsMemoAvailable = $incorporacion->fch_incorporacion &&
+            $incorporacion->hp_incorporacion &&
+            $incorporacion->cite_memorandum_incorporacion &&
+            $incorporacion->codigo_memorandum_incorporacion &&
+            $incorporacion->fch_memorandum_incorporacion;
+
+        if ($fieldsEvaluationAvailable) {
+            $messages[] = 'Los formularios de evaluación ya están disponibles.';
+        }
+
+        if ($fieldsNoteOrMinuteAvailable) {
+            $messages[] = 'Inf. con Nota o Minuta ya están disponibles.';
+        }
+
+        if ($fieldsRapAvailable) {
+            $messages[] = 'RAP ya están disponibles.';
+        }
+
+        if ($fieldsMemoAvailable) {
+            $messages[] = 'Memorándum ya están disponibles.';
+        }
+
+        if (empty($messages)) {
+            $messages[] = 'No hay formularios disponibles.';
+            return response()->json([
+                'message' => implode(' ', $messages),
+                'idIncorporacion' => $incorporacion->id_incorporacion
+            ], 400);
+        }
+
+        return response()->json([
+            'message' => implode(' ', $messages),
+            'idIncorporacion' => $incorporacion->id_incorporacion,
+            'puestoActualId' => $incorporacion->puesto_actual_id,
+            'puestoNuevoId' => $incorporacion->puesto_nuevo_id
+        ], 200);
+    }
+
     public function downloadEvalForm($fileName)
     {
         $disk = Storage::disk('form_templates');
@@ -1681,85 +1830,4 @@ class IncorporacionesController extends Controller
         ];
     }
 
-    public function byCiPersonaFormIncorporacion($ciPersona)
-    {
-        $persona = Persona::where('ci_persona', $ciPersona)->first();
-
-        if (!$persona) {
-            return response()->json(['message' => 'No se encontró ninguna persona con el CI proporcionado.'], 404);
-        }
-
-        $incorporacion = Incorporacion::where('persona_id', $persona->id_persona)->first();
-
-        if (!$incorporacion) {
-            return response()->json(['message' => 'No se encontró ninguna incorporación para la persona con el CI proporcionado.'], 404);
-        }
-
-        $messages = [];
-
-        $fieldsEvaluationAvailable = $incorporacion->persona_id &&
-            $incorporacion->puesto_actual_id &&
-            $incorporacion->puesto_nuevo_id &&
-            $incorporacion->obs_evaluacion_incorporacion;
-
-        $fieldsNoteOrMinuteAvailable = $incorporacion->fch_incorporacion &&
-            $incorporacion->hp_incorporacion &&
-            $incorporacion->cite_informe_incorporacion &&
-            $incorporacion->fch_informe_incorporacion &&
-            $incorporacion->cumple_exp_profesional_incorporacion &&
-            $incorporacion->cumple_exp_especifica_incorporacion &&
-            $incorporacion->cumple_exp_mando_incorporacion &&
-            $incorporacion->cumple_formacion_incorporacion &&
-            $incorporacion->cite_nota_minuta_incorporacion &&
-            $incorporacion->codigo_nota_minuta_incorporacion &&
-            $incorporacion->fch_nota_minuta_incorporacion &&
-            $incorporacion->fch_recepcion_nota_incorporacion;
-
-        $fieldsRapAvailable = $incorporacion->fch_incorporacion &&
-            $incorporacion->hp_incorporacion &&
-            $incorporacion->cite_informe_incorporacion &&
-            $incorporacion->fch_informe_incorporacion &&
-            $incorporacion->cite_rap_incorporacion &&
-            $incorporacion->codigo_rap_incorporacion &&
-            $incorporacion->fch_rap_incorporacion;
-
-        $fieldsMemoAvailable = $incorporacion->fch_incorporacion &&
-            $incorporacion->hp_incorporacion &&
-            $incorporacion->cite_informe_incorporacion &&
-            $incorporacion->fch_informe_incorporacion &&
-            $incorporacion->cite_memorandum_incorporacion &&
-            $incorporacion->codigo_memorandum_incorporacion &&
-            $incorporacion->fch_memorandum_incorporacion;
-
-        if ($fieldsEvaluationAvailable) {
-            $messages[] = 'Los formularios de evaluación ya están disponibles.';
-        }
-
-        if ($fieldsNoteOrMinuteAvailable) {
-            $messages[] = 'Inf. con Nota o Minuta ya están disponibles.';
-        }
-
-        if ($fieldsRapAvailable) {
-            $messages[] = 'RAP ya están disponibles.';
-        }
-
-        if ($fieldsMemoAvailable) {
-            $messages[] = 'Memorándum ya están disponibles.';
-        }
-
-        if (empty($messages)) {
-            $messages[] = 'No hay formularios disponibles.';
-            return response()->json([
-                'message' => implode(' ', $messages),
-                'idIncorporacion' => $incorporacion->id_incorporacion
-            ], 400);
-        }
-
-        return response()->json([
-            'message' => implode(' ', $messages),
-            'idIncorporacion' => $incorporacion->id_incorporacion,
-            'puestoActualId' => $incorporacion->puesto_actual_id,
-            'puestoNuevoId' => $incorporacion->puesto_nuevo_id
-        ], 200);
-    }
 }

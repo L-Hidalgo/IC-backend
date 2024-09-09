@@ -86,13 +86,16 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   //reportes de Evaluacion
   Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
   Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
+  //Descarga de documentos
+  Route::get('/{ciPersona}/by-ciPersona-inc', [IncorporacionesController::class, 'byCiPersonaFormIncorporacion']);
+  Route::get('/{ciPersona}/by-ciPersona-camb-item', [IncorporacionesController::class, 'byCiPersonaFormCambioItem']);
 
   //Route::get('/{incorporacionId}/gen-form-RemisionDeDocumentos', [IncorporacionesController::class, 'genFormRemisionDeDocumentos']);
 
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
   //---------------------------------------------------------------------------------
-  Route::get('/{ciPersona}/by-ci-persona-form-inc', [IncorporacionesController::class, 'byCiPersonaFormIncorporacion']);
+ 
 });
 
 /* ------------------------------------------ Formacion ------------------------------------------ */
