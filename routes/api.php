@@ -60,7 +60,7 @@ Route::group(['prefix' => 'interinatos'], function () {
 
 // incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
-  Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
+  Route::put('/crear-actualizar-incorporacion', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
   Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listarIncorporaciones']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
   // reportes words de evaluacion

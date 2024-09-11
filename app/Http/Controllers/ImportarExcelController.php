@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ExcelDataImport;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Validators\ValidationException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Illuminate\Support\Facades\Storage;
 
 class ImportarExcelController extends Controller
 {
@@ -17,30 +18,34 @@ class ImportarExcelController extends Controller
 
             $spreadsheet = IOFactory::load($file->getPathname());
 
-            $originalFileName = $file->getClientOriginalName();
+            $sheetNames = $spreadsheet->getSheetNames();
+            $sheetIndex = array_search('NUEVA PLANILLA', $sheetNames);
 
-            $fileNameWithoutExtension = pathinfo($originalFileName, PATHINFO_FILENAME);
+            if ($sheetIndex === false) {
+                throw new \Exception('No se encontró el sheet "NUEVA PLANILLA" en el archivo.');
+            }
 
-            $newFileName = $fileNameWithoutExtension . '.xls';
+            $sheet = $spreadsheet->getSheet($sheetIndex);
+
+            $newSpreadsheet = new Spreadsheet();
+            $newSpreadsheet->addExternalSheet($sheet);
+
+            $newFileName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.xls';
 
             $tempFilePath = storage_path('app/temporary/' . $newFileName);
 
-            $writer = IOFactory::createWriter($spreadsheet, 'Xls');
+            $writer = IOFactory::createWriter($newSpreadsheet, 'Xls');
             $writer->save($tempFilePath);
 
             $convertedFile = new \Illuminate\Http\File($tempFilePath);
 
             Excel::import(new ExcelDataImport, $convertedFile);
-        } catch (ValidationException $e) {
-            $failures = $e->failures();
-            $errorMessages = [];
 
-            foreach ($failures as $failure) {
-                $errorMessages[] = "Fila {$failure->row()}: {$failure->errors()[0]}";
-            }
-            return $this->sendError($e->getMessage(), 406);
+            Storage::delete('temporary/' . $newFileName);
+        } catch (\PhpOffice\PhpSpreadsheet\Exception $e) {
+            return $this->sendError("Error de PhpSpreadsheet: " . $e->getMessage(), 406);
         } catch (\Exception $e) {
-            return $this->sendError($e->getMessage(), 406);
+            return $this->sendError("Error general: " . $e->getMessage(), 406);
         }
 
         return $this->sendSuccess(["msn" => "Exitoso"]);

@@ -21,10 +21,10 @@ return new class extends Migration
             $table->string('exp_evaluacion_incorporacion', 25)->nullable();
             $table->date('fch_obs_evaluacion_incorporacion')->nullable();
             //datos de inf nota y minuta            
-            $table->integer('cumple_exp_profesional_incorporacion')->default(2);
-            $table->integer('cumple_exp_especifica_incorporacion')->default(2);
-            $table->integer('cumple_exp_mando_incorporacion')->default(2);
-            $table->integer('cumple_formacion_incorporacion')->default(0);
+            $table->integer('cumple_exp_profesional_incorporacion')->default(2)->change();
+            $table->integer('cumple_exp_especifica_incorporacion')->default(2)->change();
+            $table->integer('cumple_exp_mando_incorporacion')->default(2)->change();
+            $table->integer('cumple_formacion_incorporacion')->default(0)->change();
             $table->date('fch_incorporacion')->nullable();
             $table->string('hp_incorporacion', 50)->nullable();
             $table->string('n_tramite_incorporacion', 50)->nullable();
