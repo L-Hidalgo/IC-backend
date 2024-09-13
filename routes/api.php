@@ -12,6 +12,7 @@ use App\Http\Controllers\ImportarExcelController;
 use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\ImportarImagesController;
 use App\Http\Controllers\InterinatoController;
 use App\Http\Controllers\PlanillaController;
@@ -60,16 +61,17 @@ Route::group(['prefix' => 'interinatos'], function () {
 
 // incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
-  Route::put('/crear-actualizar-incorporacion', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
-  Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listarIncorporaciones']);
+
+  Route::get('/{ciPersona}/by-ciPersona-inc', [IncorporacionesController::class, 'byCiPersonaFormIncorporacion']);
+  Route::get('/{ciPersona}/by-ciPersona-camb-item', [IncorporacionesController::class, 'byCiPersonaFormCambioItem']);
+
+
+  Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
+  Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
+  Route::post('/filtrar-incorporaciones', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
-  // reportes words de evaluacion
-  Route::get('/{incorporacionId}/gen-form-R0078', [IncorporacionesController::class, 'generarFormR0078']);
-  Route::get('/{incorporacionId}/gen-form-R1401', [IncorporacionesController::class, 'generarFormR1401']);
-  Route::get('/{incorporacionId}/gen-form-R1023', [IncorporacionesController::class, 'generarFormR1023']);
-  Route::get('/{incorporacionId}/gen-form-R1129', [IncorporacionesController::class, 'generarFormR1129']);
-  Route::get('/{incorporacionId}/gen-form-R0980', [IncorporacionesController::class, 'generarFormR0980']);
-  //formularios de incorporaciones 
+  Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
+  Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
   Route::get('/{incorporacionId}/gen-inf-minuta', [IncorporacionesController::class, 'generarInfMinuta']);
   Route::get('/{incorporacionId}/gen-inf-nota', [IncorporacionesController::class, 'generarInfNota']);
   Route::get('/{incorporacionId}/gen-rap', [IncorporacionesController::class, 'generarRap']);
@@ -78,24 +80,29 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-acta-posesion', [IncorporacionesController::class, 'generarActaPosesion']);
   Route::get('/{incorporacionId}/gen-form-R1418', [IncorporacionesController::class, 'generarFormR1418']);
   Route::get('/{incorporacionId}/gen-form-R1419', [IncorporacionesController::class, 'generarFormR1419']);
-  //otros formularios de incorporacion
+  Route::get('/{incorporacionId}/gen-form-R0980', [IncorporacionesController::class, 'generarFormR0980']);
+  //formularios para incorporacion
+  Route::get('/{incorporacionId}/gen-form-R0078', [IncorporacionesController::class, 'generarFormR0078']);
+  Route::get('/{incorporacionId}/gen-form-R1401', [IncorporacionesController::class, 'generarFormR1401']);
+  //formularios de cambio item
+  Route::get('/{incorporacionId}/gen-form-R1023', [IncorporacionesController::class, 'generarFormR1023']);
+  Route::get('/{incorporacionId}/gen-form-R1129', [IncorporacionesController::class, 'generarFormR1129']);
+  // otros formularios de incorporacion
   Route::get('/{incorporacionId}/gen-R0716', [IncorporacionesController::class, 'generarR0716']);
   Route::get('/{incorporacionId}/gen-R0921', [IncorporacionesController::class, 'generarR0921']);
   Route::get('/{incorporacionId}/gen-R0976', [IncorporacionesController::class, 'generarR0976']);
   Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);
-  //reportes de Evaluacion
-  Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
-  Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
-  //Descarga de documentos
-  Route::get('/{ciPersona}/by-ciPersona-inc', [IncorporacionesController::class, 'byCiPersonaFormIncorporacion']);
-  Route::get('/{ciPersona}/by-ciPersona-camb-item', [IncorporacionesController::class, 'byCiPersonaFormCambioItem']);
-
-  //Route::get('/{incorporacionId}/gen-form-RemisionDeDocumentos', [IncorporacionesController::class, 'genFormRemisionDeDocumentos']);
+  Route::get('/{incorporacionId}/gen-R1469', [IncorporacionesController::class, 'generarR1469']);
 
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
   //---------------------------------------------------------------------------------
  
+});
+
+Route::group(['prefix' => 'documentos'], function () {
+  Route::post('/upload-scanned-folder', [DocumentoController::class, 'uploadScannedFolder']); 
+  Route::post('/listar-documentos', [DocumentoController::class, 'listarDocumentos']);
 });
 
 /* ------------------------------------------ Formacion ------------------------------------------ */

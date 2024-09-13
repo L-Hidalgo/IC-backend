@@ -90,7 +90,6 @@ class UserController extends Controller
     {
         $limit = $request->input('limit');
         $page = $request->input('page');
-        
         $nombreUsuario = $request->input('query.nombreUsuario');
 
         $query = User::select(['id', 'name', 'ci', 'username', 'email', 'cargo'])

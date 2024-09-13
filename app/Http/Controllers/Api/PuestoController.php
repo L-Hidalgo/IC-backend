@@ -29,6 +29,17 @@ class PuestoController extends Controller
             ->first();
 
         if ($puesto) {
+           // RECODE: solo deberia asignarse cuando el puesto cambie de responsable
+            // if ($puesto->persona_actual_id) {
+            //     $puesto->persona_anterior_id = $puesto->persona_actual_id;
+
+            //     $puesto->save();
+            // }
+
+
+            // recuperar interinos
+            // 'fch_inicio_interinato',  //importante
+            // 'fch_fin_interinato',     //importante
             $puesto->interinos = $puesto->interinos()->where('fch_inicio_interinato', '<=', Carbon::now()->toDateString())->where('fch_fin_interinato', '>=', Carbon::now()->toDateString())->where('estado_designacion_interinato', 0)->get();
 
             return $this->sendObject($puesto);

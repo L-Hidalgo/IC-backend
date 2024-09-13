@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Rol;
-use App\Models\n_tramite_incorporacion;
+use App\Models\User;
 
 class RolController extends Controller
 {
@@ -14,8 +14,8 @@ class RolController extends Controller
         return $this->sendList($rol);
     }
 
-    public function listarn_tramite_incorporacionsRoles($n_tramite_incorporacionId){
-        $usuario = n_tramite_incorporacion::find($n_tramite_incorporacionId);
+    public function listarUsersRoles($userId){
+        $usuario = User::find($userId);
         
         if($usuario){
             $rolesUsuario = $usuario->roles()->select('id', 'name')->get();

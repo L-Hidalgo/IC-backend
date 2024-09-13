@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ExcelDataImport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Validators\ValidationException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Illuminate\Support\Facades\Storage;
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ImportarExcelController extends Controller
 {

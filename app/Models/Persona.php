@@ -60,4 +60,9 @@ class Persona extends Model
     {
         return $this->hasMany(Imagen::class, 'persona_id', 'id_persona');
     }
+
+    public function documentos()
+    {
+        return $this->hasMany(Documento::class, 'persona_id');
+    }
 }
