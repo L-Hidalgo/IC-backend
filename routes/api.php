@@ -103,6 +103,9 @@ Route::group(['prefix' => 'incorporaciones'], function () {
 Route::group(['prefix' => 'documentos'], function () {
   Route::post('/upload-scanned-folder', [DocumentoController::class, 'uploadScannedFolder']); 
   Route::post('/listar-documentos', [DocumentoController::class, 'listarDocumentos']);
+  Route::get('/{documentoId}/ver-documento', [DocumentoController::class, 'verDocumento']);
+  Route::get('/{documentoId}/download-documento', [DocumentoController::class, 'downloadDocumento']);
+  Route::patch('/{documentoId}/dar-baja-documento', [DocumentoController::class, 'darBajaDocumento']);
 });
 
 /* ------------------------------------------ Formacion ------------------------------------------ */

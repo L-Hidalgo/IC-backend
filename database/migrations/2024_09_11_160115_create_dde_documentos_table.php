@@ -13,7 +13,8 @@ return new class extends Migration
             $table->string('nombre_documento');
             $table->string('ruta_archivo_documento');
             $table->integer('tipo_documento');
-            $table->integer('persona_id')->unsigned()->nullable();  // Cambiado a integer
+            $table->integer('estado_documento'); //1 Activo, 2 Inactivo
+            $table->integer('persona_id')->unsigned()->nullable();  
             $table->unsignedBigInteger('created_by_documento')->nullable();
             $table->unsignedBigInteger('modified_by_documento')->nullable();
             $table->timestamps();

@@ -21,6 +21,7 @@ class Documento extends Model
         'nombre_documento',
         'ruta_archivo_documento',
         'tipo_documento',
+        'estado_documento',
         'persona_id',
         'incorporacion_id',
         'created_by_documento',

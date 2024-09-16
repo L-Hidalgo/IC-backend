@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Persona;
 use App\Models\Documento;
-
+use Symfony\Component\HttpFoundation\Response;
 
 class DocumentoController extends Controller
 {
@@ -24,6 +24,12 @@ class DocumentoController extends Controller
             return response()->json(['error' => 'Los archivos deben ser un array'], 400);
         }
 
+        $storagePath = storage_path("app/scan_documents/{$dateFolder}");
+
+        if (!file_exists($storagePath)) {
+            mkdir($storagePath, 0777, true);
+        }
+
         foreach ($files as $file) {
             $fileNameWithExtension = $file->getClientOriginalName();
             $fileName = pathinfo($fileNameWithExtension, PATHINFO_FILENAME);
@@ -34,12 +40,8 @@ class DocumentoController extends Controller
                 $persona = Persona::whereRaw('CONCAT(nombre_persona, " ", primer_apellido_persona, " ", segundo_apellido_persona) LIKE ?', ['%' . $fileName . '%'])->first();
             }
 
-            $storagePath = storage_path("app/scan_documents/{$dateFolder}");
-            if (!file_exists($storagePath)) {
-                mkdir($storagePath, 0777, true);
-            }
-
-            $filePath = $file->storeAs($dateFolder, $fileNameWithExtension, 'local');
+            $filePath = "{$dateFolder}/{$fileNameWithExtension}";
+            $file->move($storagePath, $fileNameWithExtension);
 
             if ($persona) {
                 Documento::create([
@@ -48,6 +50,7 @@ class DocumentoController extends Controller
                     'tipo_documento' => $tipoDocumento,
                     'persona_id' => $persona->id_persona,
                     'created_by_documento' => $createdByDocumento,
+                    'estado_documento' => 1
                 ]);
             } else {
                 Documento::create([
@@ -56,6 +59,7 @@ class DocumentoController extends Controller
                     'tipo_documento' => $tipoDocumento,
                     'persona_id' => null,
                     'created_by_documento' => $createdByDocumento,
+                    'estado_documento' => 1
                 ]);
             }
         }
@@ -75,8 +79,9 @@ class DocumentoController extends Controller
             'dde_documentos.tipo_documento',
             'users.name'
         ])
-            ->leftJoin('dde_personas', 'dde_documentos.persona_id', '=', 'dde_personas.id_persona') 
+            ->leftJoin('dde_personas', 'dde_documentos.persona_id', '=', 'dde_personas.id_persona')
             ->leftJoin('users', 'dde_documentos.created_by_documento', '=', 'users.id')
+            ->where('dde_documentos.estado_documento', 1)
             ->orderBy('dde_documentos.id_documento', 'desc');
 
         $query->where(function ($subQuery) use ($personaDocumento) {
@@ -93,5 +98,59 @@ class DocumentoController extends Controller
         $users = $query->paginate($limit, ['*'], 'page', $page);
 
         return $this->sendPaginated($users);
+    }
+
+    public function verDocumento($documentoId)
+    {
+        try {
+            $documento = Documento::findOrFail($documentoId);
+            $filePath = storage_path("app/scan_documents/{$documento->ruta_archivo_documento}");
+
+            if (!file_exists($filePath)) {
+                return response()->json(['error' => 'Archivo no encontrado.'], Response::HTTP_NOT_FOUND);
+            }
+
+            $fileName = $documento->nombre_documento ?: 'documento.pdf';
+
+            $response = response()->file($filePath, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "inline; filename=\"{$fileName}\""
+            ]);
+
+            $response->headers->set('X-Document-Name', $fileName);
+
+            return $response;
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error interno del servidor.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function downloadDocumento($documentoId)
+    {
+        $document = Documento::findOrFail($documentoId);
+        $pathToFile = storage_path('app/scan_documents/' . $document->ruta_archivo_documento);
+
+        if (file_exists($pathToFile)) {
+            return response()->download($pathToFile);
+        } else {
+            return response()->json(['message' => 'Archivo no encontrado'], 404);
+        }
+    }
+
+    public function darBajaDocumento(Request $request, $documentoId)
+    {
+        $documento = Documento::find($documentoId);
+
+        if (!$documento) {
+            return response()->json(['error' => 'Documento no encontrado'], 404);
+        }
+
+        $documento->estado_documento = 2;
+        $documento->modified_by_documento = $request->input('modifiedByDocumento');
+        $documento->save();
+
+        return response()->json(['message' => 'Documento dado de baja correctamente']);
     }
 }
