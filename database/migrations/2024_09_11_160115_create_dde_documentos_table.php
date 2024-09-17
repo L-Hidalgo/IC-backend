@@ -15,6 +15,7 @@ return new class extends Migration
             $table->integer('tipo_documento');
             $table->integer('estado_documento'); //1 Activo, 2 Inactivo
             $table->integer('persona_id')->unsigned()->nullable();  
+            $table->foreignId('carpeta_id')->nullable()->constrained('dde_carpetas')->onDelete('set null');
             $table->unsignedBigInteger('created_by_documento')->nullable();
             $table->unsignedBigInteger('modified_by_documento')->nullable();
             $table->timestamps();
@@ -28,5 +29,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('dde_documentos');
+
     }
 };

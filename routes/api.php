@@ -12,6 +12,7 @@ use App\Http\Controllers\ImportarExcelController;
 use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\CarpetaController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\ImportarImagesController;
 use App\Http\Controllers\InterinatoController;
@@ -97,7 +98,12 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
   //---------------------------------------------------------------------------------
- 
+});
+
+Route::group(['prefix' => 'carpeta'], function () {
+  Route::post('/crear-carpeta-file', [CarpetaController::class, 'crearCarpetaFile']);
+  Route::post('/listar-carpetas', [CarpetaController::class, 'listarCarpetas']);
+  
 });
 
 Route::group(['prefix' => 'documentos'], function () {
@@ -107,6 +113,7 @@ Route::group(['prefix' => 'documentos'], function () {
   Route::get('/{documentoId}/download-documento', [DocumentoController::class, 'downloadDocumento']);
   Route::patch('/{documentoId}/dar-baja-documento', [DocumentoController::class, 'darBajaDocumento']);
 });
+
 
 /* ------------------------------------------ Formacion ------------------------------------------ */
 Route::group(['prefix' => 'formaciones'], function () {
