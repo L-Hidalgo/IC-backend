@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DocumentoController extends Controller
 {
-    public function uploadScannedFolder(Request $request)
+  /*  public function uploadScannedFolder(Request $request)
     {
         $tipoDocumento = $request->input('tipoDocumento');
         $files = $request->file('files');
@@ -152,5 +152,5 @@ class DocumentoController extends Controller
         $documento->save();
 
         return response()->json(['message' => 'Documento dado de baja correctamente']);
-    }
+    }*/
 }

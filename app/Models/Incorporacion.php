@@ -75,8 +75,4 @@ class Incorporacion extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function documentos()
-    {
-        return $this->hasMany(Documento::class, 'incorporacion_id');
-    }
 }

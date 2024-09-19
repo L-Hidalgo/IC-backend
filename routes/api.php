@@ -14,6 +14,7 @@ use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\CarpetaController;
 use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\ImportarImagesController;
 use App\Http\Controllers\InterinatoController;
 use App\Http\Controllers\PlanillaController;
@@ -100,12 +101,17 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   //---------------------------------------------------------------------------------
 });
 
+Route::group(['prefix' => 'file'], function () {
+  Route::post('/crear-file', [FileController::class, 'crearFile']);
+  
+});
+/*
 Route::group(['prefix' => 'carpeta'], function () {
   Route::post('/crear-carpeta-file', [CarpetaController::class, 'crearCarpetaFile']);
   Route::post('/listar-carpetas', [CarpetaController::class, 'listarCarpetas']);
   
 });
-
+crear-file
 Route::group(['prefix' => 'documentos'], function () {
   Route::post('/upload-scanned-folder', [DocumentoController::class, 'uploadScannedFolder']); 
   Route::post('/listar-documentos', [DocumentoController::class, 'listarDocumentos']);
@@ -113,7 +119,7 @@ Route::group(['prefix' => 'documentos'], function () {
   Route::get('/{documentoId}/download-documento', [DocumentoController::class, 'downloadDocumento']);
   Route::patch('/{documentoId}/dar-baja-documento', [DocumentoController::class, 'darBajaDocumento']);
 });
-
+*/
 
 /* ------------------------------------------ Formacion ------------------------------------------ */
 Route::group(['prefix' => 'formaciones'], function () {
