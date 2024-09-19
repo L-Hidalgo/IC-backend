@@ -9,62 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DocumentoController extends Controller
 {
-  /*  public function uploadScannedFolder(Request $request)
-    {
-        $tipoDocumento = $request->input('tipoDocumento');
-        $files = $request->file('files');
-        $createdByDocumento = $request->input('createdByDocumento');
-        $dateFolder = date('d-m-Y');
-
-        if (is_null($files)) {
-            return response()->json(['error' => 'No se subieron archivos.'], 400);
-        }
-
-        if (!is_array($files)) {
-            return response()->json(['error' => 'Los archivos deben ser un array'], 400);
-        }
-
-        $storagePath = storage_path("app/scan_documents/{$dateFolder}");
-
-        if (!file_exists($storagePath)) {
-            mkdir($storagePath, 0777, true);
-        }
-
-        foreach ($files as $file) {
-            $fileNameWithExtension = $file->getClientOriginalName();
-            $fileName = pathinfo($fileNameWithExtension, PATHINFO_FILENAME);
-
-            if (is_numeric($fileName)) {
-                $persona = Persona::where('ci_persona', $fileName)->first();
-            } else {
-                $persona = Persona::whereRaw('CONCAT(nombre_persona, " ", primer_apellido_persona, " ", segundo_apellido_persona) LIKE ?', ['%' . $fileName . '%'])->first();
-            }
-
-            $filePath = "{$dateFolder}/{$fileNameWithExtension}";
-            $file->move($storagePath, $fileNameWithExtension);
-
-            if ($persona) {
-                Documento::create([
-                    'nombre_documento' => $fileName,
-                    'ruta_archivo_documento' => $filePath,
-                    'tipo_documento' => $tipoDocumento,
-                    'persona_id' => $persona->id_persona,
-                    'created_by_documento' => $createdByDocumento,
-                    'estado_documento' => 1
-                ]);
-            } else {
-                Documento::create([
-                    'nombre_documento' => $fileName,
-                    'ruta_archivo_documento' => $filePath,
-                    'tipo_documento' => $tipoDocumento,
-                    'persona_id' => null,
-                    'created_by_documento' => $createdByDocumento,
-                    'estado_documento' => 1
-                ]);
-            }
-        }
-        return response()->json(['message' => 'Archivos procesados correctamente']);
-    }
+  /*  
 
     public function listarDocumentos(Request $request)
     {

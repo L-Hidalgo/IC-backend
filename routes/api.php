@@ -103,15 +103,11 @@ Route::group(['prefix' => 'incorporaciones'], function () {
 
 Route::group(['prefix' => 'file'], function () {
   Route::post('/crear-file', [FileController::class, 'crearFile']);
-  
+  Route::post('/listar-file', [FileController::class, 'listarFile']);
+  Route::get('/{parentId}/children', [FileController::class, 'listarHijos']);
 });
 /*
-Route::group(['prefix' => 'carpeta'], function () {
-  Route::post('/crear-carpeta-file', [CarpetaController::class, 'crearCarpetaFile']);
-  Route::post('/listar-carpetas', [CarpetaController::class, 'listarCarpetas']);
-  
-});
-crear-file
+
 Route::group(['prefix' => 'documentos'], function () {
   Route::post('/upload-scanned-folder', [DocumentoController::class, 'uploadScannedFolder']); 
   Route::post('/listar-documentos', [DocumentoController::class, 'listarDocumentos']);
