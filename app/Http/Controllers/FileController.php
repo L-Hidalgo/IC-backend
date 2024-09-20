@@ -221,12 +221,28 @@ class FileController extends Controller
         return $this->sendPaginated($users);
     }
 
-    public function listarHijos($parentId)
+    public function listarHijos(Request $request, $parentId)
     {
-        $hijos = File::with(['children', 'createdBy', 'modifiedBy']) 
+        $personaDocumento = $request->query('personaFile');
+
+        $query = File::with(['children', 'createdBy', 'modifiedBy'])
             ->where('parent_id', $parentId)
-            ->where('estado_file', 1)
-            ->get();
+            ->where('estado_file', 1);
+
+        if ($personaDocumento) {
+            $query->where(function ($subQuery) use ($personaDocumento) {
+                $subQuery->where('dde_files.nombre_file', 'LIKE', '%' . $personaDocumento . '%')
+                    ->orWhere(function ($q) use ($personaDocumento) {
+                        $q->where('dde_personas.ci_persona', 'LIKE', '%' . $personaDocumento . '%')
+                            ->orWhereRaw(
+                                "CONCAT(dde_personas.nombre_persona, ' ', COALESCE(dde_personas.primer_apellido_persona, ''), ' ', COALESCE(dde_personas.segundo_apellido_persona, '')) LIKE ?",
+                                ['%' . $personaDocumento . '%']
+                            );
+                    });
+            });
+        }
+
+        $hijos = $query->get();
 
         return response()->json($hijos);
     }

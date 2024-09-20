@@ -104,7 +104,8 @@ Route::group(['prefix' => 'incorporaciones'], function () {
 Route::group(['prefix' => 'file'], function () {
   Route::post('/crear-file', [FileController::class, 'crearFile']);
   Route::post('/listar-file', [FileController::class, 'listarFile']);
-  Route::get('/{parentId}/children', [FileController::class, 'listarHijos']);
+  Route::get('/{parentId}/children-file', [FileController::class, 'listarHijos']);
+
 });
 /*
 
