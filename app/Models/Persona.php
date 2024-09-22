@@ -61,8 +61,8 @@ class Persona extends Model
         return $this->hasMany(Imagen::class, 'persona_id', 'id_persona');
     }
 
-    public function documentos()
+    public function file()
     {
-        return $this->hasMany(Documento::class, 'persona_id');
+        return $this->hasMany(File::class, 'persona_id');
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Persona;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use Symfony\Component\HttpFoundation\Response;
 
 class FileController extends Controller
 {
@@ -225,17 +226,17 @@ class FileController extends Controller
     {
         $personaDocumento = $request->query('personaFile');
 
-        $query = File::with(['children', 'createdBy', 'modifiedBy'])
+        $query = File::with(['persona', 'children', 'createdBy', 'modifiedBy'])
             ->where('parent_id', $parentId)
             ->where('estado_file', 1);
 
         if ($personaDocumento) {
             $query->where(function ($subQuery) use ($personaDocumento) {
-                $subQuery->where('dde_files.nombre_file', 'LIKE', '%' . $personaDocumento . '%')
-                    ->orWhere(function ($q) use ($personaDocumento) {
-                        $q->where('dde_personas.ci_persona', 'LIKE', '%' . $personaDocumento . '%')
+                $subQuery->where('nombre_file', 'LIKE', '%' . $personaDocumento . '%')
+                    ->orWhereHas('persona', function ($q) use ($personaDocumento) {
+                        $q->where('ci_persona', 'LIKE', '%' . $personaDocumento . '%')
                             ->orWhereRaw(
-                                "CONCAT(dde_personas.nombre_persona, ' ', COALESCE(dde_personas.primer_apellido_persona, ''), ' ', COALESCE(dde_personas.segundo_apellido_persona, '')) LIKE ?",
+                                "CONCAT(nombre_persona, ' ', COALESCE(primer_apellido_persona, ''), ' ', COALESCE(segundo_apellido_persona, '')) LIKE ?",
                                 ['%' . $personaDocumento . '%']
                             );
                     });
@@ -245,5 +246,59 @@ class FileController extends Controller
         $hijos = $query->get();
 
         return response()->json($hijos);
+    }
+
+    public function verDocumento($fileId)
+    {
+        try {
+            $documento = File::findOrFail($fileId);
+            $filePath = storage_path("app/{$documento->ruta_file}");
+
+            if (!file_exists($filePath)) {
+                return response()->json(['error' => 'Archivo no encontrado.'], Response::HTTP_NOT_FOUND);
+            }
+
+            $fileName = $documento->nombre_file ?: 'documento.pdf';
+
+            $response = response()->file($filePath, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "inline; filename=\"{$fileName}\""
+            ]);
+
+            $response->headers->set('X-Document-Name', $fileName);
+
+            return $response;
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error interno del servidor.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function downloadDocumento($fileId)
+    {
+        $document = File::findOrFail($fileId);
+        $pathToFile = storage_path('app/' . $document->ruta_file);
+
+        if (file_exists($pathToFile)) {
+            return response()->download($pathToFile);
+        } else {
+            return response()->json(['message' => 'Archivo no encontrado'], 404);
+        }
+    }
+
+    public function darBajaDocumento(Request $request, $fileId)
+    {
+        $documento = file::find($fileId);
+
+        if (!$documento) {
+            return response()->json(['error' => 'Documento no encontrado'], 404);
+        }
+
+        $documento->estado_file = 2;
+        $documento->modified_by_file = $request->input('modifiedByFile');
+        $documento->save();
+
+        return response()->json(['message' => 'Documento dado de baja correctamente']);
     }
 }
