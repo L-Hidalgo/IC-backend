@@ -12,6 +12,7 @@ use App\Models\Requisito;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class ExcelDataImport implements ToModel, WithStartRow
 {
@@ -24,53 +25,23 @@ class ExcelDataImport implements ToModel, WithStartRow
     public function model(array $row)
     {
         $gerencia = $this->migrarGerencia($row[0], $row[2]);
-
         $departamento = $this->migrarDepartamento($row[3], $gerencia->id_gerencia);
 
-        $puesto = $this->migrarPuesto($row[1], $row[4], $row[5], $row[6], $row[42], $departamento->id_departamento);
+        $persona = $this->migrarPersona($row[7], $row[9], $row[10], $row[11], $row[12], $row[15], $row[16], $row[17], $row[19]);
 
-        if (isset($row[7], $row[12])) {
-            $persona = $this->migrarPersona(
-                $row[7],
-                $row[9],
-                $row[10],
-                $row[11],
-                $row[12],
-                $row[15],
-                $row[16],
-                $row[17],
-                $row[19]
-            );
+        $personaId = $persona ? $persona->id_persona : null; 
 
-            $puesto->persona_actual_id = $persona->id_persona;
+        $puesto = $this->migrarPuesto($row[1], $row[4], $row[5], $row[6], $row[42], $departamento->id_departamento, $personaId);
 
-            if ($puesto->persona_actual_id) {
-                $estado = Estado::where('nombre_estado', 'Ocupado')->first();
-            } else {
-                $estado = Estado::where('nombre_estado', 'Acefalo')->first();
-            }
-
-            if (!$estado) {
-                if ($puesto->persona_actual_id) {
-                    $estado = new Estado(['nombre_estado' => 'Ocupado']);
-                } else {
-                    $estado = new Estado(['nombre_estado' => 'Acefalo']);
-                }
-                $estado->save();
-            }
-
-            $puesto->estado()->associate($estado);
-            $puesto->save();
-
+        if ($puesto) {
             $funcionario = $this->migrarFuncionario(
                 $row[20], // fecha inicio en el sin
                 $row[21], // fecha inicio en el cargo
                 $puesto->id_puesto,
-                $persona->id_persona
+                $personaId // Aquí está bien usar personaId
             );
+            $this->migrarRequisito($row[43], $row[44], $row[45], $row[46], $puesto->id_puesto);
         }
-
-        $requisitos = $this->migrarRequisito($puesto->id_puesto, $row[43], $row[44], $row[45], $row[46]);
     }
 
     public function migrarGerencia($abreviaturaGerencia, $nombreGerencia): Gerencia
@@ -97,52 +68,6 @@ class ExcelDataImport implements ToModel, WithStartRow
         return $departamento;
     }
 
-    public function migrarPuesto(
-        $item,
-        $denominacion,
-        $salario,
-        $salario_literal,
-        $objetivo,
-        $departamentoId
-    ): Puesto {
-        $puesto = Puesto::where('item_puesto', $item)->first();
-
-        if (!isset($puesto)) {
-            $estadoAcefalia = Estado::where('nombre_estado', 'Acefalo')->first();
-
-            if ($estadoAcefalia !== null) {
-                $puesto = Puesto::create([
-                    'item_puesto' => $item,
-                    'denominacion_puesto' => $denominacion,
-                    'salario_puesto' => $salario,
-                    'salario_literal_puesto' => $salario_literal,
-                    'objetivo_puesto' => $objetivo,
-                    'departamento_id' => $departamentoId,
-                    'estado_id' => $estadoAcefalia->id_estado, // Cambio aquí
-                ]);
-            } else {
-                throw new \Exception('No se encontró el estado "Acefalo"');
-            }
-        } else {
-            $estadoAcefalia = Estado::where('nombre_estado', 'Acefalo')->first();
-
-            if ($estadoAcefalia !== null) {
-                $puesto->denominacion_puesto = $denominacion;
-                $puesto->salario_puesto = $salario;
-                $puesto->salario_literal_puesto = $salario_literal;
-                $puesto->objetivo_puesto = $objetivo;
-                $puesto->departamento_id = $departamentoId;
-                $puesto->estado_id = $estadoAcefalia->id_estado; // Cambio aquí
-                $puesto->persona_actual_id = null;
-                $puesto->save();
-            } else {
-                throw new \Exception('No se encontró el estado "Acefalo"');
-            }
-        }
-
-        return $puesto;
-    }
-
     public function migrarPersona(
         $ci,  // 7
         $exp, // 9
@@ -152,8 +77,12 @@ class ExcelDataImport implements ToModel, WithStartRow
         $profesion,       // 15
         $sexo,            // 16
         $fechaNacimiento, // 17
-        $telefono,        // 19
-    ): Persona {
+        $telefono         // 19
+    ): ?Persona {
+        if (empty($ci)) {
+            return null; 
+        }
+
         $persona = Persona::where('ci_persona', $ci)->first();
 
         $timestamp = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fechaNacimiento);
@@ -183,37 +112,75 @@ class ExcelDataImport implements ToModel, WithStartRow
                 'telefono_persona' => $telefono,
             ]);
         }
+        return $persona; 
+    }
 
-        return $persona;
+    public function migrarPuesto(
+        $item,
+        $denominacion,
+        $salario,
+        $salario_literal,
+        $objetivo,
+        $departamentoId,
+        $personaId
+    ): Puesto {
+        $puesto = Puesto::where('item_puesto', $item)->first();
+
+        $estadoId = $puesto && is_null($puesto->persona_actual_id) ? 1 : 2;
+
+        if ($puesto) {
+            Log::info('Puesto encontrado: ' . $item);
+            $puesto->update([
+                'denominacion_puesto' => $denominacion,
+                'salario_puesto' => $salario,
+                'salario_literal_puesto' => $salario_literal,
+                'objetivo_puesto' => $objetivo,
+                'departamento_id' => $departamentoId,
+                'persona_actual_id' => $personaId ?? null,
+                'estado_id' => $estadoId,
+            ]);
+        } else {
+            $puesto = Puesto::create([
+                'item_puesto' => $item,
+                'denominacion_puesto' => $denominacion,
+                'salario_puesto' => $salario,
+                'salario_literal_puesto' => $salario_literal,
+                'objetivo_puesto' => $objetivo,
+                'departamento_id' => $departamentoId,
+                'persona_actual_id' => $personaId ?? null,
+                'estado_id' => $estadoId,
+            ]);
+        }
+        return $puesto;
     }
 
     public function migrarFuncionario(
         $fchInicioSinFuncionario,
         $fchInicioPuestoFuncionario,
         $puestoId,
-        $personaId,
-    ): Funcionario {
+        $personaId
+    ): ?Funcionario { 
         $persona = Persona::find($personaId);
         $puesto = Puesto::find($puestoId);
-
+    
         if (!$persona || !$puesto) {
-            return null;
+            return null; 
         }
-
+    
         $codigoFileFuncionario = $puesto->item_puesto . '-' . $persona->ci_persona;
-
+    
         $Funcionario = Funcionario::where('fch_inicio_sin_funcionario', $fchInicioSinFuncionario)
             ->where('puesto_id', $puestoId)
             ->where('persona_id', $personaId)
             ->first();
-
+    
         if (!isset($Funcionario)) {
             $timestampfsin = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fchInicioSinFuncionario);
             $fchInicioSinFuncionario = Carbon::createFromTimestamp($timestampfsin)->format('Y-m-d');
-
+    
             $timestampFechaInicio = $this->convertirFechaATimestamp($fchInicioPuestoFuncionario);
             $fchInicioPuestoFuncionario = Carbon::createFromTimestamp($timestampFechaInicio)->format('Y-m-d');
-
+    
             $Funcionario = Funcionario::create([
                 'codigo_file_funcionario' => $codigoFileFuncionario,
                 'fch_inicio_sin_funcionario' => $fchInicioSinFuncionario,
@@ -224,19 +191,29 @@ class ExcelDataImport implements ToModel, WithStartRow
         }
         return $Funcionario;
     }
+        
 
-    public function migrarRequisito($puesto_id, $formacionRequerida, $experienciaProfesionalSegunCargo, $experienciaRelacionadoAlArea, $experienciaEnFuncionesDeMando): Requisito
+    public function migrarRequisito($formacionRequerida, $experienciaProfesionalSegunCargo, $experienciaRelacionadoAlArea, $experienciaEnFuncionesDeMando, $puestoId): Requisito
     {
-        $requisitos = Requisito::where('puesto_id', $puesto_id)->first();
-        if (!isset($requisitos)) {
+        $requisitos = Requisito::where('puesto_id', $puestoId)->first();
+
+        if ($requisitos) {
+            $requisitos->update([
+                'formacion_requisito' => $formacionRequerida,
+                'exp_cargo_requisito' => $experienciaProfesionalSegunCargo,
+                'exp_area_requisito' => $experienciaRelacionadoAlArea,
+                'exp_mando_requisito' => $experienciaEnFuncionesDeMando
+            ]);
+        } else {
             $requisitos = Requisito::create([
-                'puesto_id' => $puesto_id,
+                'puesto_id' => $puestoId,
                 'formacion_requisito' => $formacionRequerida,
                 'exp_cargo_requisito' => $experienciaProfesionalSegunCargo,
                 'exp_area_requisito' => $experienciaRelacionadoAlArea,
                 'exp_mando_requisito' => $experienciaEnFuncionesDeMando
             ]);
         }
+
         return $requisitos;
     }
 

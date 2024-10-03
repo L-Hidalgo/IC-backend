@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
+use ZipArchive;
 
 class FileController extends Controller
 {
@@ -17,6 +18,7 @@ class FileController extends Controller
             'nombreFile' => 'required|string|max:255',
             'tipoDocumentoFile' => 'required|integer',
             'tipoFile' => 'required|integer',
+            'parentId' => 'nullable|integer',
             'createdByFile' => 'required|integer',
             'file' => 'nullable|file',
             'files' => 'nullable|array',
@@ -26,6 +28,7 @@ class FileController extends Controller
         $nombreFile = $request->input('nombreFile');
         $tipoDocumentoFile = $request->input('tipoDocumentoFile');
         $tipoFile = $request->input('tipoFile');
+        $parentId = $request->input('parentId');
         $createdByFile = $request->input('createdByFile');
         $dateFolder = date('d-m-Y');
 
@@ -51,7 +54,7 @@ class FileController extends Controller
                     'ruta_file' => $storagePath,
                     'tipo_file' => $tipoFile,
                     'created_by_file' => $createdByFile,
-                    'parent_id' => null,
+                    'parent_id' => $parentId,
                     'persona_id' => null,
                     'estado_file' => 1,
                 ]);
@@ -118,7 +121,7 @@ class FileController extends Controller
                     'ruta_file' => $storagePath,
                     'tipo_file' => $tipoFile,
                     'created_by_file' => $createdByFile,
-                    'parent_id' => null,
+                    'parent_id' => $parentId,
                     'estado_file' => 1,
                 ]);
 
@@ -172,7 +175,7 @@ class FileController extends Controller
                     'tipo_file' => $tipoFile,
                     'tipo_documento_file' => $tipoDocumentoFile,
                     'ruta_file' => $filePath,
-                    'parent_id' => null,
+                    'parent_id' => $parentId,
                     'created_by_file' => $createdByFile,
                     'estado_file' => 1,
                 ]);
@@ -204,6 +207,44 @@ class FileController extends Controller
             ->leftJoin('users', 'dde_files.created_by_file', '=', 'users.id')
             ->where('dde_files.estado_file', 1)
             ->where('dde_files.tipo_documento_file', 1)
+            ->orderByRaw("CASE WHEN dde_files.tipo_file = 1 THEN 1 WHEN dde_files.tipo_file = 2 THEN 2 END")
+            ->orderBy('dde_files.id_file', 'desc');
+
+        $query->where(function ($subQuery) use ($personaDocumento) {
+            $subQuery->where('dde_files.nombre_file', 'LIKE', '%' . $personaDocumento . '%')
+                ->orWhere(function ($q) use ($personaDocumento) {
+                    $q->where('dde_personas.ci_persona', 'LIKE', '%' . $personaDocumento . '%')
+                        ->orWhereRaw(
+                            "CONCAT(dde_personas.nombre_persona, ' ', COALESCE(dde_personas.primer_apellido_persona, ''), ' ', COALESCE(dde_personas.segundo_apellido_persona, '')) LIKE ?",
+                            ['%' . $personaDocumento . '%']
+                        );
+                });
+        });
+        $users = $query->paginate($limit, ['*'], 'page', $page);
+
+        return $this->sendPaginated($users);
+    } 
+
+    public function listarMemoRap(Request $request)
+    {
+        $limit = $request->input('limit');
+        $page = $request->input('page');
+        $personaDocumento = $request->input('query.personaFile');
+
+        $query = File::select([
+            'dde_files.id_file',
+            'dde_files.nombre_file',
+            'users.name as propietario',
+            'dde_files.updated_at',
+            'dde_files.ruta_file',
+            'dde_files.tipo_documento_file',
+            'dde_files.tipo_file'
+
+        ])
+            ->leftJoin('dde_personas', 'dde_files.persona_id', '=', 'dde_personas.id_persona')
+            ->leftJoin('users', 'dde_files.created_by_file', '=', 'users.id')
+            ->where('dde_files.estado_file', 1)
+            ->where('dde_files.tipo_documento_file', 2)
             ->orderByRaw("CASE WHEN dde_files.tipo_file = 1 THEN 1 WHEN dde_files.tipo_file = 2 THEN 2 END")
             ->orderBy('dde_files.id_file', 'desc');
 
@@ -287,18 +328,99 @@ class FileController extends Controller
         }
     }
 
-    public function darBajaDocumento(Request $request, $fileId)
+    public function modificarFila(Request $request, $fileId)
     {
-        $documento = file::find($fileId);
+        $file = file::find($fileId);
 
-        if (!$documento) {
-            return response()->json(['error' => 'Documento no encontrado'], 404);
+        if (!$file) {
+            return response()->json(['error' => 'File no encontrado'], 404);
         }
 
-        $documento->estado_file = 2;
-        $documento->modified_by_file = $request->input('modifiedByFile');
-        $documento->save();
+        $file->estado_file = 2;
+        $file->modified_by_file = $request->input('modifiedByFile');
+        $file->save();
 
-        return response()->json(['message' => 'Documento dado de baja correctamente']);
+        return response()->json(['message' => 'File dado de baja correctamente']);
+    }
+
+    public function darBajaFile(Request $request, $fileId)
+    {
+        $file = file::find($fileId);
+
+        if (!$file) {
+            return response()->json(['error' => 'File no encontrado'], 404);
+        }
+
+        $file->estado_file = 2;
+        $file->modified_by_file = $request->input('modifiedByFile');
+        $file->save();
+
+        return response()->json(['message' => 'File dado de baja correctamente']);
+    }
+
+    public function mostrarNombreFile($id)
+    {
+        $file = File::findOrFail($id);
+        return response()->json(['id_file' => $file->id_file, 'nombre_file' => $file->nombre_file]);
+    }
+
+    public function modificarNombreFile(Request $request)
+    {
+        $validatedData = $request->validate([
+            'idFile' => 'nullable|integer',
+            'nombreFile' => 'nullable|string',
+            'modifiedByFile' => 'nullable|integer',
+        ]);
+
+        $id = $validatedData['idFile'];
+
+        $updated = File::where('id_file', $id)->update([
+            'nombre_file' => $validatedData['nombreFile'],
+            'modified_by_file' => $validatedData['modifiedByFile'],
+        ]);
+        if ($updated) {
+            return response()->json(['message' => 'File actualizado correctamente']);
+        } else {
+            return response()->json(['message' => 'No se encontró el file para actualizar'], 404);
+        }
+    }
+
+    public function downloadCarpeta($fileId)
+    {
+        $file = File::where('id_file', $fileId)->where('tipo_file', 1)->first();
+
+        if (!$file) {
+            return response()->json(['error' => 'Carpeta no encontrado'], 404);
+        }
+
+        $path = $file->ruta_file;
+
+        if (!Storage::exists($path)) {
+            return response()->json(['error' => 'Carpeta no encontrada'], 404);
+        }
+
+        $files = Storage::allFiles($path);
+        $directories = Storage::allDirectories($path);
+
+        if (empty($files) && empty($directories)) {
+            return response()->json(['error' => 'La carpeta está vacía'], 404);
+        }
+
+        $zip = new ZipArchive();
+        $zipFileName = "$fileId.zip";
+        $zipFilePath = storage_path("app/$zipFileName");
+
+        if ($zip->open($zipFilePath, ZipArchive::CREATE) !== TRUE) {
+            return response()->json(['error' => 'No se pudo crear el archivo zip'], 500);
+        }
+
+        foreach ($files as $file) {
+            $relativePath = str_replace($path . '/', '', $file);
+            $zip->addFile(storage_path("app/$file"), $relativePath);
+        }
+
+        $zip->close();
+
+        return response()->download($zipFilePath)->deleteFileAfterSend(true);
     }
 }
