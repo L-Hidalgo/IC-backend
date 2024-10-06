@@ -223,7 +223,7 @@ class FileController extends Controller
         $users = $query->paginate($limit, ['*'], 'page', $page);
 
         return $this->sendPaginated($users);
-    } 
+    }
 
     public function listarMemoRap(Request $request)
     {

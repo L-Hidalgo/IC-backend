@@ -60,29 +60,24 @@ class DesignacionEvaluacionSheet implements FromArray, WithHeadings, WithStyles
         $fechaNacimiento = Carbon::parse($incorporacion->persona->fch_nacimiento_persona);
         $edad = $fechaNacimiento->age;
 
-        $detalle_observacion = "No se registró la observación de evaluación";
-
-        if (!empty($incorporacion->obs_evaluacion_incorporacion)) {
+        if (empty($incorporacion->obs_evaluacion_incorporacion)) {
+            $detalle_observacion = "No se registró la observación de evaluación";
+        } else {
             if ($incorporacion->obs_evaluacion_incorporacion == 'Cumple') {
                 $detalle_observacion = "Si cumple";
             } elseif ($incorporacion->obs_evaluacion_incorporacion == 'No cumple') {
-                if (empty($incorporacion->detalle_obs_evaluacion_incorporacion)) {
+                if (empty($incorporacion->obs_evaluacion_detalle_incorporacion)) {
                     $detalle_observacion = "No se registró el detalle de observación de evaluación";
                 } else {
-                    $detalle_observacion = $incorporacion->detalle_obs_evaluacion_incorporacion;
+                    $detalle_observacion = $incorporacion->obs_evaluacion_detalle_incorporacion;
                 }
             }
-        }
-
-        $formacionAcademica = 'NO SE REGISTRO FORMACIÓN ACADÉMICA';
-        if (!empty($incorporacion->persona->formacion) && !empty($incorporacion->persona->formacion[0]->gradoAcademico)) {
-            $formacionAcademica = mb_strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico);
         }
 
         $datos = [
             'NOMBRE' => mb_strtoupper($incorporacion->persona->nombre_persona . ' ' . $incorporacion->persona->primer_apellido_persona . ' ' . $incorporacion->persona->segundo_apellido_persona),
             'EDAD' => $edad . ' AÑOS',
-            'FORMACIÓN ACADÉMICA' => $formacionAcademica,
+            'FORMACIÓN ACADÉMICA' => mb_strtoupper($incorporacion->persona->formacion[0]->gradoAcademico->nombre_grado_academico) ?? 'NO SE REGISTRO FORMACIÓN ACADÉMICA',
             'EXPERIENCIA' => $incorporacion->exp_evaluacion_incorporacion == 0 ? 'NO CUENTA CON EXPERIENCIA EN SERVICIO DE IMPUESTOS NACIONALES' : 'SI CUENTA CON EXPERIENCIA EN IMPUESTOS NACIONALES',
             'ITEM' => $incorporacion->puesto_nuevo->item_puesto,
             'DENOMINACION DEL PUESTO' => $incorporacion->puesto_nuevo->denominacion_puesto,
@@ -94,9 +89,9 @@ class DesignacionEvaluacionSheet implements FromArray, WithHeadings, WithStyles
             'EXP. RELACIONADA AL AREA DE FORMACIÓN  DEL ITEM' => '',
             'EXP. EN FUNCIONES DE MANDO DEL ITEM' => '',
             'OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ EVALUACIÓN' : mb_strtoupper($incorporacion->obs_evaluacion_incorporacion),
-            'DETALLE DE OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->detalle_obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ EL DETALLE DE EVALUACIÓN' : mb_strtoupper($incorporacion->detalle_obs_evaluacion_incorporacion),
+            'DETALLE DE OBSERVACIÓN DE EVALUACIÓN' => mb_strtoupper($detalle_observacion),
             'FECHA DE OBSERVACIÓN DE EVALUACIÓN' => empty($incorporacion->fch_obs_evaluacion_incorporacion) ? 'NO SE REGISTRÓ LA FCH. DE EVALUACIÓN' : $incorporacion->fch_obs_evaluacion_incorporacion,
-            'RESPONSABLE' => $incorporacion->createdBy->name,
+            'RESPONSABLE' => $incorporacion->user->name,
         ];
 
         foreach ($incorporacion->puesto_nuevo->requisitos as $requisito) {
@@ -111,7 +106,6 @@ class DesignacionEvaluacionSheet implements FromArray, WithHeadings, WithStyles
 
         return $datos;
     }
-
 
     public function styles(Worksheet $sheet)
     {
@@ -130,15 +124,15 @@ class DesignacionEvaluacionSheet implements FromArray, WithHeadings, WithStyles
         $this->adjustColumnWidths($sheet);
         return [];
     }
-
+    
     protected function adjustColumnWidths(Worksheet $sheet)
     {
-        $highestColumn = $sheet->getHighestColumn();
+        $highestColumn = $sheet->getHighestColumn(); 
         $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
 
         for ($col = 1; $col <= $highestColumnIndex; ++$col) {
             $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
-            $sheet->getColumnDimension($column)->setAutoSize(true);
+            $sheet->getColumnDimension($column)->setAutoSize(true); 
         }
     }
 }

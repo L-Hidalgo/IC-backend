@@ -10,7 +10,6 @@ use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
 use LdapRecord\Laravel\Auth\HasLdapUser;
 use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements LdapAuthenticatable
 {
@@ -87,13 +86,9 @@ class User extends Authenticatable implements LdapAuthenticatable
     $this->guid = $guid;
   }
 
-  public function createdIncorporaciones(): HasMany
+  public function incorporacion()
   {
-    return $this->hasMany(Incorporacion::class, 'created_by_incorporacion');
+    return $this->hasMany(Incorporacion::class, 'user_id', 'id');
   }
-
-  public function modifiedIncorporaciones(): HasMany
-  {
-    return $this->hasMany(Incorporacion::class, 'modified_by_incorporacion');
-  }
+ 
 }

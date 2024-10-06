@@ -13,18 +13,18 @@ class Funcionario extends Model
     protected $primaryKey = 'id_funcionario';
 
     protected $fillable = [
-        'codigo_file_funcionario', //jalado de la planila
+        'codigo_file_funcionario', 
+
         'fch_inicio_sin_funcionario',
-        'fch_fin_sin_funcionario',
         'fch_inicio_puesto_funcionario',
+
+        'fch_fin_sin_funcionario',
         'fch_fin_puesto_funcionario',
+
         'motivo_baja_funcionario',
-        //'personal_antiguo_en_el_cargo',
+        
         'puesto_id',
         'persona_id',
-        //'estado',        
-        //'creador_user_id',
-        //'actualizador_user_id'
     ];
 
     protected $casts = [
