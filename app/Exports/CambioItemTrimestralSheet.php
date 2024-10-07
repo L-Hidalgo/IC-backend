@@ -88,7 +88,7 @@ class CambioItemTrimestralSheet implements FromArray, WithHeadings, WithStyles
             'EXP. RELACIONADA AL AREA DE FORMACIÓN DEL ITEM PROPUESTO' => '',
             'EXP. EN FUNCIONES DE MANDO DEL ITEM PROPUESTO' => '',
             'FECHA DE INCORPORACIÓN' => $fechaIncorporacionFormateada,
-            'RESPONSABLE' => $incorporacion->user->name,
+            'RESPONSABLE' => $incorporacion->createdBy->name,
             'OBSERVACIÓN' => ' '
         ];
 
@@ -108,8 +108,8 @@ class CambioItemTrimestralSheet implements FromArray, WithHeadings, WithStyles
     public function styles(Worksheet $sheet)
     {
         $sheet->getStyle('A1:R1')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1A7BA8']]
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'name' => 'Tahoma', 'size' => 10],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '012e58']]
         ]);
 
         $sheet->setAutoFilter('A1:R1');
@@ -122,6 +122,19 @@ class CambioItemTrimestralSheet implements FromArray, WithHeadings, WithStyles
             $sheet->getStyle('K2:K' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
         }
 
+        $this->adjustColumnWidths($sheet);
+
         return [];
+    }
+
+    protected function adjustColumnWidths(Worksheet $sheet)
+    {
+        $highestColumn = $sheet->getHighestColumn();
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+        for ($col = 1; $col <= $highestColumnIndex; ++$col) {
+            $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
     }
 }

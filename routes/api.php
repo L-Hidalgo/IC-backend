@@ -12,6 +12,7 @@ use App\Http\Controllers\ImportarExcelController;
 use App\Http\Controllers\IncorporacionesController;
 use App\Http\Controllers\PersonasController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\ImportarImagesController;
 use App\Http\Controllers\InterinatoController;
 use App\Http\Controllers\PlanillaController;
@@ -29,7 +30,7 @@ Route::group(['prefix' => 'users'], function () {
   Route::get('/listar-users-dde', [UserController::class, 'listarUsersDDE']);
   Route::get('/{userId}/listar-user-roles', [RolController::class, 'listarUsersRoles']);
   Route::get('/listar-roles', [RolController::class, 'listarRoles']);
-  
+
   Route::put('/updateRolUser/{userId}', [UserController::class, 'update']);
   Route::get('/{userId}/userRol', [UserController::class, 'obtenerRolUser']);
 });
@@ -40,7 +41,6 @@ Route::group(['prefix' => 'administracion'], function () {
   Route::post('/upload-imagenes-funcionarios', [ImportarImagesController::class, 'importarImgFuncionarios']);
   Route::get('{userCi}/img-user-administrador', [ImportarImagesController::class, 'getImgUserAdministrador']);
   Route::get('{userCi}/img-users', [ImportarImagesController::class, 'getImgUserAdministrador']);
-  
 });
 
 Route::group(['prefix' => 'planilla'], function () {
@@ -52,20 +52,22 @@ Route::group(['prefix' => 'planilla'], function () {
 
 Route::group(['prefix' => 'interinatos'], function () {
   Route::post('/crear-interinato', [InterinatoController::class, 'crearInterinato']);
-  Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']); 
-  Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']); 
-  Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);  
+  Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']);
+  Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']);
+  Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);
   Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']);
 });
 
 // incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
-  Route::put('/', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
-  Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listPaginateIncorporaciones']);
-  Route::post('/filtrar-incorporaciones', [IncorporacionesController::class, 'byFiltrosIncorporacion']);
+  Route::put('/crear-actualizar-incorporacion', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
+  Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listarIncorporaciones']);
   Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
-  Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
-  Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
+  Route::get('/{incorporacionId}/gen-form-R0078', [IncorporacionesController::class, 'generarFormR0078']);
+  Route::get('/{incorporacionId}/gen-form-R1401', [IncorporacionesController::class, 'generarFormR1401']);
+  Route::get('/{incorporacionId}/gen-form-R1023', [IncorporacionesController::class, 'generarFormR1023']);
+  Route::get('/{incorporacionId}/gen-form-R1129', [IncorporacionesController::class, 'generarFormR1129']);
+  Route::get('/{incorporacionId}/gen-form-R0980', [IncorporacionesController::class, 'generarFormR0980']);
   Route::get('/{incorporacionId}/gen-inf-minuta', [IncorporacionesController::class, 'generarInfMinuta']);
   Route::get('/{incorporacionId}/gen-inf-nota', [IncorporacionesController::class, 'generarInfNota']);
   Route::get('/{incorporacionId}/gen-rap', [IncorporacionesController::class, 'generarRap']);
@@ -74,26 +76,36 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-acta-posesion', [IncorporacionesController::class, 'generarActaPosesion']);
   Route::get('/{incorporacionId}/gen-form-R1418', [IncorporacionesController::class, 'generarFormR1418']);
   Route::get('/{incorporacionId}/gen-form-R1419', [IncorporacionesController::class, 'generarFormR1419']);
-  Route::get('/{incorporacionId}/gen-form-R0980', [IncorporacionesController::class, 'generarFormR0980']);
-  //formularios para incorporacion
-  Route::get('/{incorporacionId}/gen-form-R0078', [IncorporacionesController::class, 'generarFormR0078']);
-  Route::get('/{incorporacionId}/gen-form-R1401', [IncorporacionesController::class, 'generarFormR1401']);
-  //formularios de cambio item
-  Route::get('/{incorporacionId}/gen-form-R1023', [IncorporacionesController::class, 'generarFormR1023']);
-  Route::get('/{incorporacionId}/gen-form-R1129', [IncorporacionesController::class, 'generarFormR1129']);
-  // otros formularios de incorporacion
   Route::get('/{incorporacionId}/gen-R0716', [IncorporacionesController::class, 'generarR0716']);
   Route::get('/{incorporacionId}/gen-R0921', [IncorporacionesController::class, 'generarR0921']);
   Route::get('/{incorporacionId}/gen-R0976', [IncorporacionesController::class, 'generarR0976']);
-  Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);
   Route::get('/{incorporacionId}/gen-R1469', [IncorporacionesController::class, 'generarR1469']);
+  Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);
+  Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
+  Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
+  Route::get('/{ciPersona}/by-ciPersona-inc', [IncorporacionesController::class, 'byCiPersonaFormIncorporacion']);
+  Route::get('/{ciPersona}/by-ciPersona-camb-item', [IncorporacionesController::class, 'byCiPersonaFormCambioItem']);
+
+  
 
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
   //---------------------------------------------------------------------------------
-  Route::get('/{ciPersona}/by-ci-persona-form-inc', [IncorporacionesController::class, 'byCiPersonaFormIncorporacion']);
-});
 
+});
+Route::group(['prefix' => 'file'], function () {
+  Route::post('/crear-file', [FileController::class, 'crearFile']);
+  Route::post('/listar-file', [FileController::class, 'listarFile']);
+  Route::post('/listar-memo-rap', [FileController::class, 'listarMemoRap']);
+  Route::get('/{parentId}/children-file', [FileController::class, 'listarHijos']);
+  Route::get('/{fileId}/ver-documento', [FileController::class, 'verDocumento']);
+  Route::get('/{fileId}/download-documento', [FileController::class, 'downloadDocumento']);
+  Route::patch('/{fileId}/modificar-file', [FileController::class, 'modificarFila']);
+  Route::patch('/{fileId}/dar-baja-file', [FileController::class, 'darBajaFile']);
+  Route::get('/{fileId}/mostrar-nombre-file', [FileController::class, 'mostrarNombreFile']);
+  Route::put('/{fileId}/modificar-nombre-file', [FileController::class, 'modificarNombreFile']);
+  Route::get('/{fileId}/download-carpeta', [FileController::class, 'downloadCarpeta']);
+});
 /* ------------------------------------------ Formacion ------------------------------------------ */
 Route::group(['prefix' => 'formaciones'], function () {
   Route::put('/', [FormacionController::class, 'crearActualizarFormacion']);

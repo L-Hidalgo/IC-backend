@@ -34,17 +34,17 @@ class Puesto extends Model
     {
         return $this->hasMany(Interinato::class, 'puesto_actual_id', 'id_puesto');
     }
-
+    
     public function interinos()
     {
         return $this->hasMany(Interinato::class, 'puesto_nuevo_id', 'id_puesto');
     }
-
+    
     public function persona_actual()
     {
         return $this->belongsTo(Persona::class, 'persona_actual_id', 'id_persona');
     }
-
+    
     public function funcionario()
     {
         return $this->hasMany(Funcionario::class, 'puesto_id', 'id_puesto');
@@ -68,5 +68,10 @@ class Puesto extends Model
     public function incorporacion()
     {
         return $this->hasMany(Incorporacion::class);
+    }
+
+    public function setEstadoIdAttribute($value)
+    {
+        $this->attributes['estado_id'] = $this->persona_actual_id ? 2 : $value;
     }
 }

@@ -29,7 +29,7 @@ class ExcelDataImport implements ToModel, WithStartRow
 
         $persona = $this->migrarPersona($row[7], $row[9], $row[10], $row[11], $row[12], $row[15], $row[16], $row[17], $row[19]);
 
-        $personaId = $persona ? $persona->id_persona : null; 
+        $personaId = $persona ? $persona->id_persona : null;
 
         $puesto = $this->migrarPuesto($row[1], $row[4], $row[5], $row[6], $row[42], $departamento->id_departamento, $personaId);
 
@@ -80,7 +80,7 @@ class ExcelDataImport implements ToModel, WithStartRow
         $telefono         // 19
     ): ?Persona {
         if (empty($ci)) {
-            return null; 
+            return null;
         }
 
         $persona = Persona::where('ci_persona', $ci)->first();
@@ -112,7 +112,7 @@ class ExcelDataImport implements ToModel, WithStartRow
                 'telefono_persona' => $telefono,
             ]);
         }
-        return $persona; 
+        return $persona;
     }
 
     public function migrarPuesto(
@@ -159,28 +159,28 @@ class ExcelDataImport implements ToModel, WithStartRow
         $fchInicioPuestoFuncionario,
         $puestoId,
         $personaId
-    ): ?Funcionario { 
+    ): ?Funcionario {
         $persona = Persona::find($personaId);
         $puesto = Puesto::find($puestoId);
-    
+
         if (!$persona || !$puesto) {
-            return null; 
+            return null;
         }
-    
+
         $codigoFileFuncionario = $puesto->item_puesto . '-' . $persona->ci_persona;
-    
+
         $Funcionario = Funcionario::where('fch_inicio_sin_funcionario', $fchInicioSinFuncionario)
             ->where('puesto_id', $puestoId)
             ->where('persona_id', $personaId)
             ->first();
-    
+
         if (!isset($Funcionario)) {
             $timestampfsin = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fchInicioSinFuncionario);
             $fchInicioSinFuncionario = Carbon::createFromTimestamp($timestampfsin)->format('Y-m-d');
-    
+
             $timestampFechaInicio = $this->convertirFechaATimestamp($fchInicioPuestoFuncionario);
             $fchInicioPuestoFuncionario = Carbon::createFromTimestamp($timestampFechaInicio)->format('Y-m-d');
-    
+
             $Funcionario = Funcionario::create([
                 'codigo_file_funcionario' => $codigoFileFuncionario,
                 'fch_inicio_sin_funcionario' => $fchInicioSinFuncionario,
@@ -191,7 +191,7 @@ class ExcelDataImport implements ToModel, WithStartRow
         }
         return $Funcionario;
     }
-        
+
 
     public function migrarRequisito($formacionRequerida, $experienciaProfesionalSegunCargo, $experienciaRelacionadoAlArea, $experienciaEnFuncionesDeMando, $puestoId): Requisito
     {

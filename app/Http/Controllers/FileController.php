@@ -23,6 +23,7 @@ class FileController extends Controller
             'file' => 'nullable|file',
             'files' => 'nullable|array',
             'files.*' => 'file',
+            'paths' => 'array'
         ]);
 
         $nombreFile = $request->input('nombreFile');
@@ -42,10 +43,6 @@ class FileController extends Controller
                     return response()->json(['message' => 'Tipo de documento no válido.'], 400);
                 }
 
-                if (Storage::exists($storagePath)) {
-                    return response()->json(['message' => 'La carpeta ya existe.'], 400);
-                }
-
                 Storage::makeDirectory($storagePath);
 
                 $carpeta = File::create([
@@ -53,13 +50,39 @@ class FileController extends Controller
                     'tipo_documento_file' => $tipoDocumentoFile,
                     'ruta_file' => $storagePath,
                     'tipo_file' => $tipoFile,
-                    'created_by_file' => $createdByFile,
+                    'created_by_file' => null,
                     'parent_id' => $parentId,
                     'persona_id' => null,
                     'estado_file' => 1,
                 ]);
+                $paths = json_decode($request->input('paths'));
+                foreach ($request->file('files') as $index => $uploadedFile) {
+                    $uploadedFilePath = $paths[$index]->filePath;
+                    $pathParts = explode('/', $uploadedFilePath);
+                    $initialPath = $storagePath;
+                    $lastParentId = $parentId;
+                    foreach ($pathParts as $key => $pathPart) {
+                        if ($key != 0) {
+                            if ($pathPart != $uploadedFile->getClientOriginalname()) {
+                                $newPath = $initialPath . '/' . $pathPart;
+                                Storage::makeDirectory($newPath);
 
-                foreach ($request->file('files') as $uploadedFile) {
+                                $carpeta = File::create([
+                                    'nombre_file' => $nombreFile,
+                                    'tipo_documento_file' => $tipoDocumentoFile,
+                                    'ruta_file' => $newPath,
+                                    'tipo_file' => 1,
+                                    'created_by_file' => null,
+                                    'parent_id' => $lastParentId,
+                                    'persona_id' => null,
+                                    'estado_file' => 1,
+                                ]);
+                                $initialPath = $newPath;
+                                $lastParentId = $carpeta->id;
+                            }
+                        }
+                    }
+
                     $fileStoragePath = ($tipoDocumentoFile == 1)
                         ? storage_path("app/scanned_documents/file/{$dateFolder}/{$carpeta->nombre_file}/")
                         : storage_path("app/scanned_documents/mem-rap/{$dateFolder}/{$carpeta->nombre_file}/");
@@ -74,6 +97,7 @@ class FileController extends Controller
 
                     $fileNameWithExtension = $uploadedFile->getClientOriginalName();
                     $uniqueFileName = $fileNameWithExtension;
+
                     $fileName = pathinfo($fileNameWithExtension, PATHINFO_FILENAME);
 
                     if (!$uploadedFile->move($fileStoragePath, $uniqueFileName)) {

@@ -78,7 +78,7 @@ class DesignacionTrimestralSheet implements FromArray, WithHeadings, WithStyles
             'EXP. RELACIONADA AL AREA DE FORMACIÓN  DEL ITEM' => '',
             'EXP. EN FUNCIONES DE MANDO DEL ITEM' => '',
             'FECHA DE INCORPORACIÓN' => $fechaIncorporacionFormateada,
-            'RESPONSABLE' => $incorporacion->user->name,
+            'RESPONSABLE' => $incorporacion->createdBy->name,
             'OBSERVACIÓN' => ' '
         ];
 
@@ -98,12 +98,11 @@ class DesignacionTrimestralSheet implements FromArray, WithHeadings, WithStyles
     public function styles(Worksheet $sheet)
     {
         $sheet->getStyle('A1:M1')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1A59A8']]
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'name' => 'Tahoma', 'size' => 10],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '012e58']]
         ]);
 
         $sheet->setAutoFilter('A1:M1');
-
         $sheet->setTitle('Designación');
 
         $lastRow = $sheet->getHighestRow();
@@ -111,6 +110,19 @@ class DesignacionTrimestralSheet implements FromArray, WithHeadings, WithStyles
             $sheet->getStyle('F2:F' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
         }
 
+        $this->adjustColumnWidths($sheet);
+
         return [];
+    }
+
+    protected function adjustColumnWidths(Worksheet $sheet)
+    {
+        $highestColumn = $sheet->getHighestColumn();
+        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+        for ($col = 1; $col <= $highestColumnIndex; ++$col) {
+            $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
     }
 }
