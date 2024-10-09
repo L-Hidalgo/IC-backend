@@ -19,11 +19,10 @@ class FileController extends Controller
             'tipoDocumentoFile' => 'required|integer',
             'tipoFile' => 'required|integer',
             'parentId' => 'nullable|integer',
-            'createdByFile' => 'required|integer',
-            'file' => 'nullable|file',
+            'createdByFile' => 'nullable|integer',
             'files' => 'nullable|array',
             'files.*' => 'file',
-            'paths' => 'array'
+            'paths' => 'nullable|json'
         ]);
 
         $nombreFile = $request->input('nombreFile');
@@ -35,103 +34,93 @@ class FileController extends Controller
 
         if ($tipoFile == 1) {
             if ($request->hasFile('files')) {
-                if ($tipoDocumentoFile == 1) {
-                    $storagePath = "scanned_documents/file/{$dateFolder}/{$nombreFile}";
-                } elseif ($tipoDocumentoFile == 2) {
-                    $storagePath = "scanned_documents/mem-rap/{$dateFolder}/{$nombreFile}";
-                } else {
-                    return response()->json(['message' => 'Tipo de documento no válido.'], 400);
-                }
+                $storagePath = $tipoDocumentoFile == 1
+                    ? "scanned_documents/file/{$dateFolder}/{$nombreFile}"
+                    : "scanned_documents/mem-rap/{$dateFolder}/{$nombreFile}";
 
                 Storage::makeDirectory($storagePath);
 
-                $carpeta = File::create([
+                $carpeta = File::firstOrCreate([
+                    'ruta_file' => $storagePath
+                ], [
                     'nombre_file' => $nombreFile,
                     'tipo_documento_file' => $tipoDocumentoFile,
-                    'ruta_file' => $storagePath,
                     'tipo_file' => $tipoFile,
-                    'created_by_file' => null,
+                    'created_by_file' => $createdByFile,
                     'parent_id' => $parentId,
                     'persona_id' => null,
                     'estado_file' => 1,
                 ]);
+
                 $paths = json_decode($request->input('paths'));
+
                 foreach ($request->file('files') as $index => $uploadedFile) {
                     $uploadedFilePath = $paths[$index]->filePath;
                     $pathParts = explode('/', $uploadedFilePath);
                     $initialPath = $storagePath;
-                    $lastParentId = $parentId;
+                    $lastParentId = $carpeta->id_file;
+
                     foreach ($pathParts as $key => $pathPart) {
                         if ($key != 0) {
-                            if ($pathPart != $uploadedFile->getClientOriginalname()) {
+                            if ($pathPart != $uploadedFile->getClientOriginalName()) {
                                 $newPath = $initialPath . '/' . $pathPart;
                                 Storage::makeDirectory($newPath);
 
-                                $carpeta = File::create([
-                                    'nombre_file' => $nombreFile,
+                                $subcarpeta = File::firstOrCreate([
+                                    'ruta_file' => $newPath
+                                ], [
+                                    'nombre_file' => $pathPart,
                                     'tipo_documento_file' => $tipoDocumentoFile,
-                                    'ruta_file' => $newPath,
                                     'tipo_file' => 1,
-                                    'created_by_file' => null,
+                                    'created_by_file' => $createdByFile,
                                     'parent_id' => $lastParentId,
                                     'persona_id' => null,
                                     'estado_file' => 1,
                                 ]);
+
+                                $lastParentId = $subcarpeta->id_file;
                                 $initialPath = $newPath;
-                                $lastParentId = $carpeta->id;
                             }
                         }
                     }
 
-                    $fileStoragePath = ($tipoDocumentoFile == 1)
-                        ? storage_path("app/scanned_documents/file/{$dateFolder}/{$carpeta->nombre_file}/")
-                        : storage_path("app/scanned_documents/mem-rap/{$dateFolder}/{$carpeta->nombre_file}/");
-
-                    if (!$uploadedFile) {
-                        return response()->json(['message' => 'No se ha subido ningún archivo.'], 400);
-                    }
+                    $fileStoragePath = storage_path("app/{$initialPath}/");
 
                     if (!file_exists($fileStoragePath)) {
                         mkdir($fileStoragePath, 0777, true);
                     }
 
                     $fileNameWithExtension = $uploadedFile->getClientOriginalName();
-                    $uniqueFileName = $fileNameWithExtension;
-
-                    $fileName = pathinfo($fileNameWithExtension, PATHINFO_FILENAME);
-
-                    if (!$uploadedFile->move($fileStoragePath, $uniqueFileName)) {
+                    if (!$uploadedFile->move($fileStoragePath, $fileNameWithExtension)) {
                         return response()->json(['message' => 'Error al mover el archivo.'], 500);
                     }
 
-                    $filePath = ($tipoDocumentoFile == 1)
-                        ? "scanned_documents/file/{$dateFolder}/{$carpeta->nombre_file}/{$uniqueFileName}"
-                        : "scanned_documents/mem-rap/{$dateFolder}/{$carpeta->nombre_file}/{$uniqueFileName}";
+                    $filePath = "{$initialPath}/{$fileNameWithExtension}";
 
+                    $fileNameWithExtension = $uploadedFile->getClientOriginalName();
+                    $uniqueFileName = $fileNameWithExtension;
+                    $fileName = pathinfo($fileNameWithExtension, PATHINFO_FILENAME);
+                    
                     $persona = is_numeric($fileName)
-                        ? Persona::where('ci_persona', $fileName)->first()
-                        : Persona::whereRaw('CONCAT(nombre_persona, " ", primer_apellido_persona, " ", segundo_apellido_persona) LIKE ?', ['%' . $fileName . '%'])->first();
+                    ? Persona::where('ci_persona', $fileName)->first()
+                    : Persona::whereRaw('CONCAT(nombre_persona, " ", primer_apellido_persona, " ", segundo_apellido_persona) LIKE ?', ['%' . $fileName . '%'])->first();
 
                     File::create([
                         'persona_id' => $persona ? $persona->id_persona : null,
-                        'nombre_file' => $uniqueFileName,
+                        'nombre_file' => $fileNameWithExtension,
                         'tipo_file' => 2,
                         'tipo_documento_file' => $tipoDocumentoFile,
                         'ruta_file' => $filePath,
-                        'parent_id' => $carpeta->id_file,
+                        'parent_id' => $lastParentId,
                         'created_by_file' => $createdByFile,
                         'estado_file' => 1,
                     ]);
                 }
-                return response()->json(['message' => 'Carpeta y documento creado exitosamente.'], 201);
+                return response()->json(['message' => 'Carpeta y documento creados exitosamente.'], 201);
             } else {
-                if ($tipoDocumentoFile == 1) {
-                    $storagePath = "scanned_documents/file/{$dateFolder}/{$nombreFile}";
-                } elseif ($tipoDocumentoFile == 2) {
-                    $storagePath = "scanned_documents/mem-rap/{$dateFolder}/{$nombreFile}";
-                } else {
-                    return response()->json(['message' => 'Tipo de documento no válido.'], 400);
-                }
+                $storagePath = $tipoDocumentoFile == 1
+                    ? "scanned_documents/file/{$dateFolder}/{$nombreFile}"
+                    : "scanned_documents/mem-rap/{$dateFolder}/{$nombreFile}";
 
                 if (Storage::exists($storagePath)) {
                     return response()->json(['message' => 'La carpeta ya existe.'], 400);
@@ -159,13 +148,10 @@ class FileController extends Controller
             try {
                 $uploadedFile = $request->file('file');
 
-                if ($tipoDocumentoFile == 1) {
-                    $storagePath = storage_path("app/scanned_documents/file/{$dateFolder}/");
-                } elseif ($tipoDocumentoFile == 2) {
-                    $storagePath = storage_path("app/scanned_documents/mem-rap/{$dateFolder}/");
-                } else {
-                    return response()->json(['message' => 'Tipo de documento no válido.'], 400);
-                }
+                $storagePath = $tipoDocumentoFile == 1
+                    ? "scanned_documents/file/{$dateFolder}/{$nombreFile}"
+                    : "scanned_documents/mem-rap/{$dateFolder}/{$nombreFile}";
+
 
                 if (!$uploadedFile) {
                     return response()->json(['message' => 'No se ha subido ningún archivo.'], 400);

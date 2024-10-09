@@ -5,7 +5,6 @@ namespace App\Imports;
 use App\Models\Gerencia;
 use App\Models\Departamento;
 use App\Models\Puesto;
-use App\Models\Estado;
 use App\Models\Persona;
 use App\Models\Funcionario;
 use App\Models\Requisito;
