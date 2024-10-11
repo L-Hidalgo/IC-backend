@@ -10,14 +10,13 @@ return new class extends Migration
     {
         Schema::create('dde_incorporaciones', function (Blueprint $table) {
 
-
             $table->integer('id_incorporacion')->unsigned()->autoIncrement();
             $table->integer('persona_id')->nullable()->unsigned();
             $table->integer('puesto_actual_id')->nullable()->unsigned();
             $table->integer('puesto_nuevo_id')->nullable()->unsigned();
             //datos de evaluacion
             $table->string('obs_evaluacion_incorporacion', 10)->nullable();
-            $table->string('detalle_obs_evaluacion_incorporacion', 100)->nullable();
+            $table->string('detalle_obs_evaluacion_incorporacion')->nullable();
             $table->string('exp_evaluacion_incorporacion', 25)->nullable();
             $table->date('fch_obs_evaluacion_incorporacion')->nullable();
             //datos de inf nota y minuta            

@@ -21,8 +21,8 @@ return new class extends Migration
         
         // Insertar los estados "Acefalo" y "Ocupado"
         DB::table('dde_estados')->insert([
-            ['id_estado' => 1, 'nombre_estado' => 'Ocupado', 'created_at' => now(), 'updated_at' => now()],
-            ['id_estado' => 2, 'nombre_estado' => 'Acéfalo', 'created_at' => now(), 'updated_at' => now()]
+            ['id_estado' => 1, 'nombre_estado' => 'Acéfalo', 'created_at' => now(), 'updated_at' => now()],
+            ['id_estado' => 2, 'nombre_estado' => 'Ocupado', 'created_at' => now(), 'updated_at' => now()]
         ]);
     }
 

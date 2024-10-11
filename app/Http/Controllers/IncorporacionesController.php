@@ -61,17 +61,17 @@ class IncorporacionesController extends Controller
             return response()->json(['error' => 'El puesto especificado no existe!!!'], 400);
         }
 
-        // Manejo del puesto actual
-        if (isset($validatedData['puestoActualId'])) {
+       if (isset($validatedData['puestoActualId'])) {
             $puestoActual = Puesto::find($validatedData['puestoActualId']);
             if ($puestoActual && $puestoActual->persona_actual_id == $validatedData['personaId']) {
+                $puestoActual->persona_respaldo_id = $puestoActual->persona_actual_id;
                 $puestoActual->persona_actual_id = null;
                 $puestoActual->estado_id = 1; // desocupado
                 $puestoActual->save();
             }
         }
 
-        // Asignación del nuevo puesto
+        $puesto->persona_respaldo_id = $puesto->persona_actual_id;
         $puesto->persona_actual_id = $validatedData['personaId'];
         $puesto->estado_id = 2; // ocupado
         $puesto->save();
@@ -85,7 +85,7 @@ class IncorporacionesController extends Controller
             $incorporacion->codigo_memorandum_incorporacion = '08240000';
             $incorporacion->codigo_rap_incorporacion = '032400000';
 
-            $incorporacion->estado_incorporacion = 1; 
+            $incorporacion->estado_incorporacion = 1;
             Log::info('Estado de incorporación inicial establecido:', ['estado_incorporacion' => $incorporacion->estado_incorporacion]);
         }
 
@@ -130,23 +130,18 @@ class IncorporacionesController extends Controller
             isset($validatedData['citeInformeIncorporacion']) &&
             isset($validatedData['fchInformeIncorporacion']) &&
             isset($validatedData['fchIncorporacion']) ||
-
-
             isset($validatedData['citeNotaMinutaIncorporacion']) &&
             isset($validatedData['fchNotaMinutaIncorporacion']) ||
-
-
             isset($validatedData['citeRapIncorporacion']) &&
             isset($validatedData['codigoRapIncorporacion']) &&
             isset($validatedData['fchRapIncorporacion']) ||
-
             isset($validatedData['citeMemorandumIncorporacion']) &&
             isset($validatedData['codigoMemorandumIncorporacion']) &&
-            isset($validatedData['fchMemorandumIncorporacion']) 
+            isset($validatedData['fchMemorandumIncorporacion'])
         ) {
-            $incorporacion->estado_incorporacion = 2; 
+            $incorporacion->estado_incorporacion = 2;
             Log::info('Estado si ingresa nota, rap y memo:', ['estado_incorporacion' => $incorporacion->estado_incorporacion]);
-        } 
+        }
 
         if (
             $incorporacion->puesto_nuevo_id !== null &&
@@ -161,70 +156,22 @@ class IncorporacionesController extends Controller
             $incorporacion->cite_informe_incorporacion !== null &&
             $incorporacion->fch_informe_incorporacion !== null &&
             $incorporacion->fch_incorporacion !== null &&
-
             $incorporacion->cite_nota_minuta_incorporacion !== null &&
             $incorporacion->fch_nota_minuta_incorporacion !== null &&
-
             $incorporacion->cite_rap_incorporacion !== null &&
             $incorporacion->codigo_rap_incorporacion !== null &&
             $incorporacion->fch_rap_incorporacion !== null &&
-
             $incorporacion->cite_memorandum_incorporacion !== null &&
             $incorporacion->codigo_memorandum_incorporacion !== null &&
-            $incorporacion->fch_memorandum_incorporacion !== null  
+            $incorporacion->fch_memorandum_incorporacion !== null
         ) {
-            $incorporacion->estado_incorporacion = 3; 
+            $incorporacion->estado_incorporacion = 3;
             Log::info('Estado si todo se cumple:', ['estado_incorporacion' => $incorporacion->estado_incorporacion]);
-        } 
-    
+        }
+
         $incorporacion->save();
 
         return $this->sendObject($incorporacion, 'Datos registrados exitosamente!!');
-    }
-
-
-    public function darBajaIncorporacion($incorporacionId)
-    {
-        $incorporacion = Incorporacion::find($incorporacionId);
-
-        if (!$incorporacion) {
-            return response()->json(['error' => 'Incorporación no encontrada'], 404);
-        }
-
-        $puestoActualAnterior = $incorporacion->puesto_actual_id;
-        $puestoNuevoAnterior = $incorporacion->puesto_nuevo_id;
-
-        $puestoActual = Puesto::find($puestoActualAnterior);
-        if ($puestoActual) {
-            if ($puestoActual->persona_anterior_id === null) {
-                $puestoActual->persona_actual_id = $puestoActual->persona_anterior_id;
-                $puestoActual->estado_id = 1;
-            } else {
-                $puestoActual->persona_actual_id = $puestoActual->persona_anterior_id;
-                $puestoActual->persona_anterior_id = null;
-                $puestoActual->estado_id = 2;
-            }
-            $puestoActual->save();
-        }
-
-        $puestoNuevo = Puesto::find($puestoNuevoAnterior);
-        if ($puestoNuevo) {
-            if ($puestoNuevo->persona_anterior_id === null) {
-                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_anterior_id;
-                $puestoNuevo->estado_id = 1;
-            } else {
-                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_anterior_id;
-                $puestoNuevo->persona_anterior_id = null;
-                $puestoNuevo->estado_id = 2;
-            }
-            $puestoNuevo->save();
-        }
-
-        $incorporacion->estado_incorporacion = 3;
-
-        $incorporacion->save();
-
-        return response()->json(['message' => 'Incorporación dada de baja exitosamente'], 200);
     }
 
     public function listarIncorporaciones(Request $request)
@@ -249,7 +196,9 @@ class IncorporacionesController extends Controller
             'puesto_actual.departamento.gerencia:id_gerencia,nombre_gerencia',
             'createdBy',
             'modifiedBy',
-        ])->orderBy('id_incorporacion', 'desc');
+        ])
+            ->where('estado_incorporacion', '!=', 4)
+            ->orderBy('id_incorporacion', 'desc');
 
         if ($encargado) {
             $query->whereHas('createdBy', function ($q) use ($encargado) {
@@ -280,6 +229,53 @@ class IncorporacionesController extends Controller
         $incorporaciones = $query->paginate($limit, ['*'], 'page', $page);
 
         return $this->sendPaginated($incorporaciones);
+    }
+
+    public function darBajaIncorporacion(Request $request, $incorporacionId)
+    {
+        $userId = $request->input('modifiedByIncorporacion');
+
+        $incorporacion = Incorporacion::find($incorporacionId);
+
+        if (!$incorporacion) {
+            return response()->json(['error' => 'Incorporación no encontrada.'], 404);
+        }
+
+        if ($incorporacion->puesto_actual_id) {
+            $puestoActual = Puesto::find($incorporacion->puesto_actual_id);
+            if ($puestoActual) {
+                $puestoActual->persona_actual_id = $puestoActual->persona_respaldo_id;
+                $puestoActual->save();
+
+                if (is_null($puestoActual->persona_actual_id)) {
+                    $puestoActual->estado_id = 1;
+                } else {
+                    $puestoActual->estado_id = 2;
+                }
+                $puestoActual->save();
+            }
+        }
+
+        if ($incorporacion->puesto_nuevo_id) {
+            $puestoNuevo = Puesto::find($incorporacion->puesto_nuevo_id);
+            if ($puestoNuevo) {
+                $puestoNuevo->persona_actual_id = $puestoNuevo->persona_respaldo_id;
+                $puestoNuevo->save();
+
+                if (is_null($puestoNuevo->persona_actual_id)) {
+                    $puestoNuevo->estado_id = 1;
+                } else {
+                    $puestoNuevo->estado_id = 2;
+                }
+                $puestoNuevo->save();
+            }
+        }
+
+        $incorporacion->modified_by_incorporacion = $userId;
+        $incorporacion->estado_incorporacion = 4;
+        $incorporacion->save();
+
+        return response()->json(['message' => 'Incorporación dada de baja con éxito.']);
     }
 
     //formularios de evaluacion
@@ -1551,6 +1547,8 @@ class IncorporacionesController extends Controller
         $disk = Storage::disk('form_templates');
         $pathTemplate = $disk->path('R-1469-01.docx');
         $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $this->valoresComunesByIncorporacion($templateProcessor, $incorporacion);
 
         $nombreCompleto = mb_strtoupper(
             $incorporacion->persona->nombre_persona . ' ' .

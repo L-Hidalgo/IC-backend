@@ -50,7 +50,7 @@ class Incorporacion extends Model
 
         'created_by_incorporacion',
         'modified_by_incorporacion',
-        'estado_incorporacion', //estado 1: sin registro, 2:en proceso, 3:finalizado
+        'estado_incorporacion', //estado 1: sin registro, 2:en proceso, 3:finalizado, 4:DarBaja
     ];
 
     public function persona()

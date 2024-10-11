@@ -62,7 +62,7 @@ Route::group(['prefix' => 'interinatos'], function () {
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/crear-actualizar-incorporacion', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
   Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listarIncorporaciones']);
-  Route::put('/{incorporacionId}/darBajaIncorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
+  Route::put('/{incorporacionId}/dar-baja-incorporacion', [IncorporacionesController::class, 'darBajaIncorporacion']);
   Route::get('/{incorporacionId}/gen-form-R0078', [IncorporacionesController::class, 'generarFormR0078']);
   Route::get('/{incorporacionId}/gen-form-R1401', [IncorporacionesController::class, 'generarFormR1401']);
   Route::get('/{incorporacionId}/gen-form-R1023', [IncorporacionesController::class, 'generarFormR1023']);
@@ -80,14 +80,11 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-R0921', [IncorporacionesController::class, 'generarR0921']);
   Route::get('/{incorporacionId}/gen-R0976', [IncorporacionesController::class, 'generarR0976']);
   Route::get('/{incorporacionId}/gen-R1469', [IncorporacionesController::class, 'generarR1469']);
-  Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);
+  Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);  
   Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
   Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
   Route::get('/{ciPersona}/by-ciPersona-inc', [IncorporacionesController::class, 'byCiPersonaFormIncorporacion']);
   Route::get('/{ciPersona}/by-ciPersona-camb-item', [IncorporacionesController::class, 'byCiPersonaFormCambioItem']);
-
-  
-
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
   //---------------------------------------------------------------------------------
@@ -131,8 +128,8 @@ Route::group(['prefix' => 'instituciones'], function () {
 });
 /* ------------------------------------------- Puesto ------------------------------------------- */
 Route::group(['prefix' => 'puestos'], function () {
-  Route::get('/{item}/by-item', [PuestoController::class, 'getByItem']);
-  Route::get('/{item}/by-item-actual', [PuestoController::class, 'getByItemActual']);
+  Route::get('/{item}/buscar-item', [PuestoController::class, 'getPuestoByItem']);
+  Route::get('/{item}/buscar-item-actual', [PuestoController::class, 'getPuestoByItemActual']);
   Route::get('/{puestoId}/requisito', [PuestoController::class, 'getRequisitoPuesto']);
 });
 /* ------------------------------------------ Personas ------------------------------------------ */

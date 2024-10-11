@@ -21,7 +21,7 @@ class File extends Model
         'nombre_file',
         'ruta_file',
         'tipo_documento_file',
-        'tipo_file',
+        'tipo_file', // '1:carpeta' o '2:documento'
         'persona_id',
         'parent_id',
         'estado_file',

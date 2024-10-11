@@ -100,10 +100,10 @@ class FileController extends Controller
                     $fileNameWithExtension = $uploadedFile->getClientOriginalName();
                     $uniqueFileName = $fileNameWithExtension;
                     $fileName = pathinfo($fileNameWithExtension, PATHINFO_FILENAME);
-                    
+
                     $persona = is_numeric($fileName)
-                    ? Persona::where('ci_persona', $fileName)->first()
-                    : Persona::whereRaw('CONCAT(nombre_persona, " ", primer_apellido_persona, " ", segundo_apellido_persona) LIKE ?', ['%' . $fileName . '%'])->first();
+                        ? Persona::where('ci_persona', $fileName)->first()
+                        : Persona::whereRaw('CONCAT(nombre_persona, " ", primer_apellido_persona, " ", segundo_apellido_persona) LIKE ?', ['%' . $fileName . '%'])->first();
 
                     File::create([
                         'persona_id' => $persona ? $persona->id_persona : null,
@@ -199,9 +199,7 @@ class FileController extends Controller
 
     public function listarFile(Request $request)
     {
-        $limit = $request->input('limit');
-        $page = $request->input('page');
-        $personaDocumento = $request->input('query.personaFile');
+        $personaDocumento = $request->input('filtro');
 
         $query = File::select([
             'dde_files.id_file',
@@ -210,8 +208,8 @@ class FileController extends Controller
             'dde_files.updated_at',
             'dde_files.ruta_file',
             'dde_files.tipo_documento_file',
-            'dde_files.tipo_file'
-
+            'dde_files.tipo_file',
+            'dde_files.parent_id'
         ])
             ->leftJoin('dde_personas', 'dde_files.persona_id', '=', 'dde_personas.id_persona')
             ->leftJoin('users', 'dde_files.created_by_file', '=', 'users.id')
@@ -230,10 +228,12 @@ class FileController extends Controller
                         );
                 });
         });
-        $users = $query->paginate($limit, ['*'], 'page', $page);
 
-        return $this->sendPaginated($users);
+        $results = $query->get();
+
+        return response()->json($results);
     }
+
 
     public function listarMemoRap(Request $request)
     {
@@ -248,8 +248,8 @@ class FileController extends Controller
             'dde_files.updated_at',
             'dde_files.ruta_file',
             'dde_files.tipo_documento_file',
-            'dde_files.tipo_file'
-
+            'dde_files.tipo_file',
+            'dde_files.parent_id'
         ])
             ->leftJoin('dde_personas', 'dde_files.persona_id', '=', 'dde_personas.id_persona')
             ->leftJoin('users', 'dde_files.created_by_file', '=', 'users.id')
