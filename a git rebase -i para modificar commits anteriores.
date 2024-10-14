@@ -1,0 +1,161 @@
+[33mcommit 72425706baecb63adf8abf3ff0fb1866f6383def[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m, [m[1;31morigin/dev[m[33m)[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Mon Oct 14 19:09:06 2024 -0400
+
+    modulo de incorporaciones y file
+
+[33mcommit b9349e3102af8d2a069f6bdc971e6a96c7161bf0[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Thu Sep 26 16:26:22 2024 -0400
+
+    api de file
+
+[33mcommit 334a5ec623e783d9da6ba99ca59bdb2ddc28aaf0[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Thu Sep 26 16:10:27 2024 -0400
+
+    modificacion de plantillas R-0980 Y R-1469
+
+[33mcommit 287caea5f952ad29f4e9bcb928583ee5404c3d17[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Thu Sep 26 16:06:36 2024 -0400
+
+    digitalizacion 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#149 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#160 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#157 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#156 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#154 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#153 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#152 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#146 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#148
+
+[33mcommit 9791aafb5475a0dfc01b562d9483a1faf5276e2d[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Tue Sep 10 20:54:00 2024 -0400
+
+    añadir boton de editar a incorporaciones 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#147 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#144 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#143
+
+[33mcommit 4d08f5998b9e3fcf9f057a9406603653229d6033[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Fri Sep 6 19:12:01 2024 -0400
+
+    correccion de errores y estilo 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#138 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#142
+
+[33mcommit 338cae0b69bfeecee1893c7c4511e2d3da7553c3[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Thu Sep 5 19:08:57 2024 -0400
+
+    modificacion de filtro de incorporacion, registro y estilo 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#139 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#140 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#138
+
+[33mcommit 058610558c7fc3729427d4f1d73e19eaeeb4c9ac[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Aug 28 19:47:25 2024 -0400
+
+    modales y reportes 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#128 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#127 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#126
+
+[33mcommit b96a0d9cc814563fb01c071b3f9bd1fc857cd16a[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Tue Aug 27 19:00:52 2024 -0400
+
+    modificar los registros 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#124
+
+[33mcommit bd2308ffd9b111657e1757a56a977729acf9b2df[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Mon Aug 26 19:53:25 2024 -0400
+
+    creacion de modal para evaluacion 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#123
+
+[33mcommit 6cb3a8f4531747d3d90d0cc425b761de3279a978[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Mon Aug 26 11:41:22 2024 -0400
+
+    error de paginacion 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#121
+
+[33mcommit 8ea001e52212f152f78fbb438dec91527a80a4ef[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Fri Aug 23 19:10:12 2024 -0400
+
+    modificacion de filtros, paginacion y estilos 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#120
+
+[33mcommit cbdc525641345927979066c03731aed164e45534[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Fri Aug 23 11:42:21 2024 -0400
+
+    formularios para descargar documentos 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#119
+
+[33mcommit 9072918254210f469d3d7f1310104dc5d62f7935[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Thu Aug 22 17:50:07 2024 -0400
+
+    card para descargar formularios 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#118
+
+[33mcommit 4e3e9728f69e84a72a34fa5888a1cb5fbd6602a5[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Aug 21 20:04:21 2024 -0400
+
+    paginacion de usuarios 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#117
+
+[33mcommit 9d3ef45642b97b5f58253603e687cf10770488e2[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Aug 21 13:07:58 2024 -0400
+
+    solucion a errores de presentacion con jefe Jonathan 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#113
+
+[33mcommit 86cd22877d2b412ca467e216037a8357fdf3b889[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Aug 21 10:28:41 2024 -0400
+
+    modificacion de importacion de datos de planilla 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#113
+
+[33mcommit 6de888baf8db030f280330b27d11729fafb7c9c7[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Tue Aug 20 19:16:03 2024 -0400
+
+    Modificacion del estado de interinato y el dato de la persona 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#112
+
+[33mcommit db44742153e36860bd30e3bcbc0b4ec9f8d3a4fd[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Mon Aug 19 17:33:53 2024 -0400
+
+    modificacion de api inf-puesto-persona 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#111
+
+[33mcommit 3af08d768ee6e26d72fa1bee14765fcd1e7e2795[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Fri Aug 16 18:07:20 2024 -0400
+
+    registro de interinato 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#107
+
+[33mcommit bd1e276e041f484581dd0950690ed5c8bdfb9209[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Aug 14 12:44:06 2024 -0400
+
+    cambios realizados antes de subir a produccion y pruebas 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#105 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#106
+
+[33mcommit 7a4b639e7e2c3f9fcdd75351c207c8d13b77216d[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Aug 14 09:43:21 2024 -0400
+
+    modificaciones en filtro y en retorno de datos
+
+[33mcommit 10a47d0655154e514abd4ea4f1ba220ead3e0653[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Mon Aug 12 21:06:06 2024 -0400
+
+    modificaciones en modulo administracion 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#99 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#100
+
+[33mcommit d87ee8b999c066975c206d1e888c2c78e1c230f3[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Aug 7 21:29:11 2024 -0400
+
+    Agregando laravel task scheduling a editar interinatos 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#91
+
+[33mcommit 90e2d4bd7da7b91d748e7814b8b6754a3a3587b2[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Aug 7 18:49:46 2024 -0400
+
+    modificaciones en registrar un interinato 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#90 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#89 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#88
+
+[33mcommit 177ad063ec71737ac4d7f2755e6d99270732d29e[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Wed Jul 31 20:29:30 2024 -0400
+
+    Modificar interinato 04-soporte-administrativo-institucional/rrhh/planilla/ng-planilla#44
+
+[33mcommit d49d4df07064e716d6fca6e540a9cdd9f77ddecb[m
+Author: lesly.alvarado <lesly.alvarado@impuestos.gob.bo>
+Date:   Tue Jul 30 19:54:40 2024 -0400
+
+    modificacion de creacion de 

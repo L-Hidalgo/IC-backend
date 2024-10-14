@@ -38,7 +38,9 @@ class FileController extends Controller
                     ? "scanned_documents/file/{$dateFolder}/{$nombreFile}"
                     : "scanned_documents/mem-rap/{$dateFolder}/{$nombreFile}";
 
-                Storage::makeDirectory($storagePath);
+                if (!Storage::exists($storagePath)) {
+                    Storage::makeDirectory($storagePath);
+                }
 
                 $carpeta = File::firstOrCreate([
                     'ruta_file' => $storagePath
@@ -121,10 +123,6 @@ class FileController extends Controller
                 $storagePath = $tipoDocumentoFile == 1
                     ? "scanned_documents/file/{$dateFolder}/{$nombreFile}"
                     : "scanned_documents/mem-rap/{$dateFolder}/{$nombreFile}";
-
-                if (Storage::exists($storagePath)) {
-                    return response()->json(['message' => 'La carpeta ya existe.'], 400);
-                }
 
                 Storage::makeDirectory($storagePath);
 
