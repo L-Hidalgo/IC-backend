@@ -232,12 +232,9 @@ class FileController extends Controller
         return response()->json($results);
     }
 
-
     public function listarMemoRap(Request $request)
     {
-        $limit = $request->input('limit');
-        $page = $request->input('page');
-        $personaDocumento = $request->input('query.personaFile');
+        $personaDocumento = $request->input('filtro');
 
         $query = File::select([
             'dde_files.id_file',
@@ -266,9 +263,10 @@ class FileController extends Controller
                         );
                 });
         });
-        $users = $query->paginate($limit, ['*'], 'page', $page);
 
-        return $this->sendPaginated($users);
+        $results = $query->get();
+
+        return response()->json($results);
     }
 
     public function listarHijos(Request $request, $parentId)

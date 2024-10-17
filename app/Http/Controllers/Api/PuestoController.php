@@ -44,7 +44,6 @@ class PuestoController extends Controller
         }
     }
 
-
     public function getList()
     {
         $puestos = Puesto::select(['denominacion_puesto', 'item_puesto', 'id'])->get();
