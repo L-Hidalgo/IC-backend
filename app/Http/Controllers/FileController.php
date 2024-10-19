@@ -199,7 +199,8 @@ class FileController extends Controller
     {
         $personaDocumento = $request->input('filtro');
 
-        $query = File::select([
+        $query = File::with('createdBy')
+        ->select([
             'dde_files.id_file',
             'dde_files.nombre_file',
             'users.name as propietario',
@@ -207,7 +208,8 @@ class FileController extends Controller
             'dde_files.ruta_file',
             'dde_files.tipo_documento_file',
             'dde_files.tipo_file',
-            'dde_files.parent_id'
+            'dde_files.parent_id',
+            'dde_files.created_by_file'
         ])
             ->leftJoin('dde_personas', 'dde_files.persona_id', '=', 'dde_personas.id_persona')
             ->leftJoin('users', 'dde_files.created_by_file', '=', 'users.id')

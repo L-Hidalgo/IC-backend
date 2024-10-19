@@ -85,7 +85,15 @@ class ExcelDataImport implements ToModel, WithStartRow
         $persona = Persona::where('ci_persona', $ci)->first();
 
         $timestamp = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fechaNacimiento);
-        $fechaNacimiento = Carbon::createFromTimestamp($timestamp)->format('Y-m-d');
+        $fechaNacimiento = Carbon::createFromTimestamp($timestamp, 'America/La_Paz');
+
+        // Verifica la fecha usando error_log
+        error_log("Fecha: " . $fechaNacimiento->format('Y-m-d'));
+
+        // Formatea la fecha para insertar en la base de datos
+        $fechaNacimientoFormatted = $fechaNacimiento->format('Y-m-d');
+
+
 
         if ($persona) {
             $persona->update([
@@ -95,7 +103,7 @@ class ExcelDataImport implements ToModel, WithStartRow
                 'nombre_persona' => $nombres,
                 'profesion_persona' => $profesion,
                 'genero_persona' => $sexo,
-                'fch_nacimiento_persona' => $fechaNacimiento,
+                'fch_nacimiento_persona' => $fechaNacimientoFormatted,
                 'telefono_persona' => $telefono,
             ]);
         } else {
@@ -175,10 +183,10 @@ class ExcelDataImport implements ToModel, WithStartRow
 
         if (!isset($Funcionario)) {
             $timestampfsin = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($fchInicioSinFuncionario);
-            $fchInicioSinFuncionario = Carbon::createFromTimestamp($timestampfsin)->format('Y-m-d');
+            $fchInicioSinFuncionario = Carbon::createFromTimestamp($timestampfsin, 'America/La_Paz')->format('Y-m-d');
 
             $timestampFechaInicio = $this->convertirFechaATimestamp($fchInicioPuestoFuncionario);
-            $fchInicioPuestoFuncionario = Carbon::createFromTimestamp($timestampFechaInicio)->format('Y-m-d');
+            $fchInicioPuestoFuncionario = Carbon::createFromTimestamp($timestampFechaInicio, 'America/La_Paz')->format('Y-m-d');
 
             $Funcionario = Funcionario::create([
                 'codigo_file_funcionario' => $codigoFileFuncionario,

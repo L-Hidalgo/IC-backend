@@ -16,12 +16,14 @@ class Interinato extends Model
 
   protected $fillable = [
     'puesto_nuevo_id',    //importante
-    'titular_puesto_nuevo_id',
     'puesto_actual_id',   //importante
-    'titular_puesto_actual_id',
     'fch_inicio_interinato',  //importante
     'fch_fin_interinato',     //importante
-    'estado_designacion_interinato', // 0: nuevo, 1:enDestino, 2:finalizado, 3:suspendido
+    'estado_designacion_interinato', // 0: nuevo, 1:enDestino, 2:finalizado, 3:suspendido //1 activo 2 inactivo
+    'created_by_interinato',
+    'modified_by_interinato',
+    'titular_puesto_nuevo_id',
+    'titular_puesto_actual_id',
     //Desginacion
     'proveido_tramite_interinato',
     'cite_nota_informe_minuta_interinato',
@@ -47,20 +49,12 @@ class Interinato extends Model
     'codigo_suspencion',
     'fch_designacion_suspencion',
     'motivo_suspencion',
-
     'sayri_interinato',
-    'created_by_interinato',
-    'modified_by_interinato',
   ];
 
   public function puestoActual()
   {
     return $this->belongsTo(Puesto::class, 'puesto_actual_id', 'id_puesto');
-  }
-  
-  public function personaActual()
-  {
-    return $this->belongsTo(Persona::class, 'titular_puesto_actual_id', 'id_persona');
   }
 
   public function puestoNuevo()
@@ -72,6 +66,12 @@ class Interinato extends Model
   {
     return $this->belongsTo(Persona::class, 'titular_puesto_nuevo_id', 'id_persona');
   }
+
+  public function personaActual()
+  {
+    return $this->belongsTo(Persona::class, 'titular_puesto_actual_id', 'id_persona');
+  }
+
 
   public function usuarioCreador()
   {
@@ -87,7 +87,7 @@ class Interinato extends Model
   // {
   //   $fechaActual = Carbon::now();
   //   if ($this->fch_inicio_interinato <= $fechaActual->toDateString() && $this->estado === 0) {
-      
+
   //     if ($this->puesto_actual_id && $this->puesto_nuevo_id) {
   //       $puestoActual = $this->puestoActual;
   //       $puestoNuevo = $this->puestoNuevo;

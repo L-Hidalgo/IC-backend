@@ -488,13 +488,13 @@ class IncorporacionesController extends Controller
 
         $templateProcessor->setValue('puestoActual.item', $incorporacion->puesto_actual->item_puesto);
 
-        $templateProcessor->setValue('puestoActual.gerencia', $incorporacion->puesto_actual->departamento->gerencia->nombre_gerencia);
+        $templateProcessor->setValue('puestoActual.gerencia', mb_strtoupper($incorporacion->puesto_actual->departamento->gerencia->nombre_gerencia));
 
-        $templateProcessor->setValue('puestoActual.departamento', $incorporacion->puesto_actual->departamento->nombre_departamento);
+        $templateProcessor->setValue('puestoActual.departamento', mb_strtoupper($incorporacion->puesto_actual->departamento->nombre_departamento));
 
-        $templateProcessor->setValue('puestoActual.denominacion', $incorporacion->puesto_actual->denominacion_puesto);
+        $templateProcessor->setValue('puestoActual.denominacion', mb_strtoupper($incorporacion->puesto_actual->denominacion_puesto));
 
-        $salarioFormateado = number_format($incorporacion->puesto_nuevo->salario_puesto / 1000, 3, '.', '');
+        $salarioFormateado = number_format($incorporacion->puesto_actual->salario_puesto / 1000, 3, '.', '');
         $templateProcessor->setValue('puestoActual.salario', $salarioFormateado);
 
         $fileName = 'R-1023-01 ' . mb_strtoupper($incorporacion->persona->nombre_persona) . ' ' . mb_strtoupper($incorporacion->persona->primer_apellido_persona) . ' ' . mb_strtoupper($incorporacion->persona->segundo_apellido_persona) . ' ' . $incorporacion->descargas;

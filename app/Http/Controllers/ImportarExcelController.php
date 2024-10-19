@@ -15,7 +15,7 @@ class ImportarExcelController extends Controller
     {
         // Validación del archivo
         $request->validate([
-            'archivoPlanilla' => 'required|file|mimes:xlsx,xls|max:2048', // Ajusta el tamaño máximo según lo necesites
+            'archivoPlanilla' => 'required|file|mimes:xlsx,xls', // Ajusta el tamaño máximo según lo necesites
         ]);
 
         try {

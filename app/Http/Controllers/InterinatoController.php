@@ -2,17 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\InterinatoDataImport;
 use App\Models\Interinato;
 use App\Models\Puesto;
+use Dotenv\Exception\InvalidFileException as ExceptionInvalidFileException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Exceptions\InvalidFileException;
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\File;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class InterinatoController extends Controller
 {
 
     public function crearInterinato(Request $request)
     {
-        // Validación de los datos
         $validatedData = $request->validate([
             'idInterinato' => 'nullable|integer',
             'puestoNuevoId' => 'nullable|integer',
@@ -27,14 +36,19 @@ class InterinatoController extends Controller
             'citeRapInterinato' => 'nullable|string',
             'codigoRapInterinato' => 'nullable|string',
             'fchMemorandumRapInterinato' => 'nullable|date',
-            'fchInicioInterinato' => 'nullable|date',
-            'fchFinInterinato' => 'nullable|date',
+
             'totalDiasInterinato' => 'nullable|integer',
             'periodoInterinato' => 'nullable|string',
             'tipoNotaInformeMinutaInterinato' => 'nullable|string',
             'observacionesInterinato' => 'nullable|string',
             'sayriInterinato' => 'nullable|string',
             'createdByInterinato' => 'nullable|integer',
+
+
+            'puestoNuevoId' => 'nullable|integer',
+            'puestoActualId' => 'nullable|integer',
+            'fchInicioInterinato' => 'nullable|date',
+            'fchFinInterinato' => 'nullable|date',
         ]);
 
         if ($request->has('puestoActualId') && $request->fchInicioInterinato && $request->fchFinInterinato) {
@@ -108,37 +122,9 @@ class InterinatoController extends Controller
 
     public function listarInterinatos(Request $request)
     {
+        $personaInterinato = $request->input('query');
         $limit = $request->input('limit');
-        $page = $request->input('page', 1);
-
-        $query = Interinato::with([
-            'personaNuevo',
-            'personaActual',
-
-            'puestoNuevo:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puestoNuevo.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puestoNuevo.departamento.gerencia:id_gerencia,nombre_gerencia',
-
-            'puestoActual:id_puesto,item_puesto,denominacion_puesto,departamento_id',
-            'puestoActual.departamento:id_departamento,nombre_departamento,gerencia_id',
-            'puestoActual.departamento.gerencia:id_gerencia,nombre_gerencia',
-
-            'usuarioCreador',
-            'usuarioModificador'
-        ])->orderBy('created_at', 'desc');
-
-        $interinatos = $query->paginate($limit, ['*'], 'page', $page);
-
-        return $this->sendPaginated($interinatos);
-    }
-
-    public function byFiltrosInterinatos(Request $request)
-    {
-        $params = $request->all();
-
-        $limit = $params['limit'];
-        $page = $params['page'] ?? 1;
-        $puestoPersona = $params['puestoPersona'] ?? null;
+        $page = $request->input('page');
 
         $query = Interinato::with([
             'personaNuevo',
@@ -153,24 +139,22 @@ class InterinatoController extends Controller
             'usuarioModificador'
         ])->orderBy('created_at', 'desc');
 
-        if (!empty($puestoPersona)) {
-            $query->where(function ($query) use ($puestoPersona) {
-                if (is_numeric($puestoPersona)) {
-                    $query->whereHas('puestoNuevo', function ($query) use ($puestoPersona) {
-                        $query->where('item_puesto', $puestoPersona);
-                    });
-                }
+        $query->where('estado_designacion_interinato', 0);
 
-                $query->orWhereHas('personaActual', function ($query) use ($puestoPersona) {
-                    $query->where(function ($query) use ($puestoPersona) {
-                        $query->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $puestoPersona . '%']);
+        if (!empty($personaInterinato)) {
+            $query->where(function ($query) use ($personaInterinato) {
+                $query->whereHas('puestoNuevo', function ($query) use ($personaInterinato) {
+                    $query->where('denominacion_puesto', 'LIKE', '%' . $personaInterinato . '%');
+                })
+                    ->orWhereHas('personaActual', function ($query) use ($personaInterinato) {
+                        $query->where(function ($query) use ($personaInterinato) {
+                            $query->whereRaw("CONCAT(nombre_persona, ' ', primer_apellido_persona, ' ', segundo_apellido_persona) LIKE ?", ['%' . $personaInterinato . '%']);
+                        });
                     });
-                });
             });
         }
 
         $interinatos = $query->paginate($limit, ['*'], 'page', $page);
-        
 
         return $this->sendPaginated($interinatos);
     }
@@ -240,5 +224,20 @@ class InterinatoController extends Controller
         } else {
             return response()->json(['message' => 'No se encontró el interinato para actualizar'], 404);
         }
+    }
+
+    public function darBajaInterinato($interinatoId)
+    {
+        $interinato = Interinato::find($interinatoId);
+
+        if (!$interinato) {
+            return response()->json(['message' => 'Interinato no encontrado.'], 404);
+        }
+
+        $interinato->estado_designacion_interinato = 1;
+
+        $interinato->save();
+
+        return response()->json(['message' => 'Interinato dado de baja exitosamente.'], 200);
     }
 }
