@@ -16,6 +16,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\ImportarImagesController;
 use App\Http\Controllers\InterinatoController;
 use App\Http\Controllers\PlanillaController;
+use App\Http\Controllers\PlantillaController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -74,21 +75,32 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-R0921', [IncorporacionesController::class, 'generarR0921']);
   Route::get('/{incorporacionId}/gen-R0976', [IncorporacionesController::class, 'generarR0976']);
   Route::get('/{incorporacionId}/gen-R1469', [IncorporacionesController::class, 'generarR1469']);
-  Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);  
+  Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);
   Route::get('/{filename}/download-plantillas-inc', [IncorporacionesController::class, 'downloadPlantillasIncorporacion']);
-
- 
-
-
+  Route::get('/view-configuracion-plantillas', function () {
+    $path = storage_path('app/pdfs/Configuracion de plantillas de incorporacion.pdf');
+    return response()->download($path);
+  });
 
   Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
   Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
- 
+
   //imagenes de las personas
   Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
   //---------------------------------------------------------------------------------
 
 });
+
+Route::group(['prefix' => 'plantilla'], function () {
+  Route::post('/upload-plantilla', [PlantillaController::class, 'uploadPlantilla']);
+  Route::post('/listar-plantillas', [PlantillaController::class, 'listarPlantillas']); 
+  Route::put('/{plantillaId}/revertir-plantilla', [IncorporacionesController::class, 'revertirPlantilla']);
+
+  
+
+});
+
+
 Route::group(['prefix' => 'file'], function () {
   Route::post('/crear-file', [FileController::class, 'crearFile']);
   Route::post('/listar-file', [FileController::class, 'listarFile']);
@@ -106,7 +118,7 @@ Route::group(['prefix' => 'file'], function () {
 Route::group(['prefix' => 'interinatos'], function () {
   Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']);
   Route::post('/crear-interinato', [InterinatoController::class, 'crearInterinato']);
-  Route::post('upload-interinato', [InterinatoController::class, 'uploadInterinato']);  
+  Route::post('upload-interinato', [InterinatoController::class, 'uploadInterinato']);
   Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']);
   Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);
   Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']);  //dar-baja-interinato
