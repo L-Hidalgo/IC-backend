@@ -980,15 +980,15 @@ class IncorporacionesController extends Controller
 
         if (isset($incorporacion->puesto_actual) && isset($incorporacion->puesto_nuevo)) {
             if (preg_match('/^(Gerente|Secretaria|Jefe de Unidad|Servicios Generales Ejecutivo|Responsable Staff)/', $incorporacion->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('/libreNombramiento/cambioItem/infMinutaCambioItemLibreNombramiento.docx');
+                $pathTemplate = $disk->path('infMinutaCambioItemLibreNombramiento.docx');
             } else {
-                $pathTemplate = $disk->path('/cambioItem/infMinutaCambioItem.docx');
+                $pathTemplate = $disk->path('infMinutaCambioItem.docx');
             }
         } elseif (isset($incorporacion->puesto_nuevo)) {
             if (preg_match('/^(Gerente|Secretaria|Jefe de Unidad|Servicios Generales Ejecutivo|Responsable Staff)/', $incorporacion->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('/libreNombramiento/incorporacion/infMinutaIncorporacionLibreNombramiento.docx');
+                $pathTemplate = $disk->path('infMinutaIncorporacionLibreNombramiento.docx');
             } else {
-                $pathTemplate = $disk->path('/incorporacion/infMinutaIncorporacion.docx');
+                $pathTemplate = $disk->path('infMinutaIncorporacion.docx');
             }
         }
 
@@ -1053,15 +1053,15 @@ class IncorporacionesController extends Controller
 
         if (isset($incorporacion->puesto_actual) && isset($incorporacion->puesto_nuevo)) {
             if (preg_match('/^(Gerente|Secretaria|Jefe de Unidad|Servicios Generales Ejecutivo|Responsable Staff)/', $incorporacion->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('/libreNombramiento/cambioItem/infNotaCambioItemLibreNombramiento.docx');
+                $pathTemplate = $disk->path('infNotaCambioItemLibreNombramiento.docx');
             } else {
-                $pathTemplate = $disk->path('/cambioItem/infNotaCambioItem.docx');
+                $pathTemplate = $disk->path('infNotaCambioItem.docx');
             }
         } elseif (isset($incorporacion->puesto_nuevo)) {
             if (preg_match('/^(Gerente|Secretaria|Jefe de Unidad|Servicios Generales Ejecutivo|Responsable Staff)/', $incorporacion->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('/libreNombramiento/incorporacion/infNotaIncorporacionLibreNombramiento.docx');
+                $pathTemplate = $disk->path('infNotaIncorporacionLibreNombramiento.docx');
             } else {
-                $pathTemplate = $disk->path('/incorporacion/infNotaIncorporacion.docx');
+                $pathTemplate = $disk->path('infNotaIncorporacion.docx');
             }
         }
 
@@ -1126,15 +1126,15 @@ class IncorporacionesController extends Controller
 
         if (isset($incorporacion->puesto_actual) && isset($incorporacion->puesto_nuevo)) {
             if (preg_match('/^(Gerente|Secretaria|Jefe de Unidad|Servicios Generales Ejecutivo|Responsable Staff)/', $incorporacion->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('/libreNombramiento/cambioItem/rapCambioItemLibreNombramiento.docx');
+                $pathTemplate = $disk->path('rapCambioItemLibreNombramiento.docx');
             } else {
-                $pathTemplate = $disk->path('/cambioItem/rapCambioItem.docx');
+                $pathTemplate = $disk->path('rapCambioItem.docx');
             }
         } elseif (isset($incorporacion->puesto_nuevo)) {
             if (preg_match('/^(Gerente|Secretaria|Jefe de Unidad|Servicios Generales Ejecutivo|Responsable Staff)/', $incorporacion->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('/libreNombramiento/incorporacion/rapIncorporacionLibreNombramiento.docx');
+                $pathTemplate = $disk->path('rapIncorporacionLibreNombramiento.docx');
             } else {
-                $pathTemplate = $disk->path('/incorporacion/rapIncorporacion.docx');
+                $pathTemplate = $disk->path('rapIncorporacion.docx');
             }
         }
 
@@ -1195,15 +1195,15 @@ class IncorporacionesController extends Controller
 
         if (isset($incorporacion->puesto_actual) && isset($incorporacion->puesto_nuevo)) {
             if (preg_match('/^(Gerente|Secretaria|Jefe de Unidad|Servicios Generales Ejecutivo|Responsable Staff)/', $incorporacion->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('/libreNombramiento/cambioItem/memorandumCambioItemLibreNombramiento.docx');
+                $pathTemplate = $disk->path('memorandumCambioItemLibreNombramiento.docx');
             } else {
-                $pathTemplate = $disk->path('/cambioItem/memorandumCambioItem.docx');
+                $pathTemplate = $disk->path('memorandumCambioItem.docx');
             }
         } elseif (isset($incorporacion->puesto_nuevo)) {
             if (preg_match('/^(Gerente|Secretaria|Jefe de Unidad|Servicios Generales Ejecutivo|Responsable Staff)/', $incorporacion->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('/libreNombramiento/incorporacion/memorandumIncorporacionLibreNombramiento.docx');
+                $pathTemplate = $disk->path('memorandumIncorporacionLibreNombramiento.docx');
             } else {
-                $pathTemplate = $disk->path('/incorporacion/memorandumIncorporacion.docx');
+                $pathTemplate = $disk->path('memorandumIncorporacion.docx');
             }
         }
 
@@ -1458,7 +1458,7 @@ class IncorporacionesController extends Controller
         }
 
         $disk = Storage::disk('form_templates');
-        $pathTemplate = $disk->path('/incorporacion/R-0716.docx'); // ruta de plantilla
+        $pathTemplate = $disk->path('R-0716.docx'); // ruta de plantilla
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
@@ -1484,7 +1484,7 @@ class IncorporacionesController extends Controller
         }
 
         $disk = Storage::disk('form_templates');
-        $pathTemplate = $disk->path('/incorporacion/R-0921.docx'); // ruta de plantilla
+        $pathTemplate = $disk->path('R-0921.docx'); // ruta de plantilla
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
@@ -1509,7 +1509,7 @@ class IncorporacionesController extends Controller
         }
 
         $disk = Storage::disk('form_templates');
-        $pathTemplate = $disk->path('/incorporacion/R-0976.docx');
+        $pathTemplate = $disk->path('R-0976.docx');
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
@@ -1568,7 +1568,7 @@ class IncorporacionesController extends Controller
         }
 
         $disk = Storage::disk('form_templates');
-        $pathTemplate = $disk->path('/incorporacion/R-SGC-0033.docx'); // ruta de plantilla
+        $pathTemplate = $disk->path('R-SGC-0033.docx'); // ruta de plantilla
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
@@ -1594,35 +1594,35 @@ class IncorporacionesController extends Controller
             'R-1023' => 'R-1023.docx',
             'R-1129' => 'R-1129.docx',
 
-            'infMinutaIncorporacion' => 'incorporacion/infMinutaIncorporacion.docx',
-            'infNotaIncorporacion' => 'incorporacion/infNotaIncorporacion.docx',
-            'memorandumIncorporacion' => 'incorporacion/memorandumIncorporacion.docx',
-            'rapIncorporacion' => 'incorporacion/rapIncorporacion.docx',
+            'infMinutaIncorporacion' => 'infMinutaIncorporacion.docx',
+            'infNotaIncorporacion' => 'infNotaIncorporacion.docx',
+            'memorandumIncorporacion' => 'memorandumIncorporacion.docx',
+            'rapIncorporacion' => 'rapIncorporacion.docx',
 
-            'infMinutaIncorporacionLibre' => 'libreNombramiento/incorporacion/infMinutaIncorporacionLibreNombramiento.docx',
-            'infNotaIncorporacionLibre' => 'libreNombramiento/incorporacion/infNotaIncorporacionLibreNombramiento.docx',
-            'memorandumIncorporacionLibre' => 'libreNombramiento/incorporacion/memorandumIncorporacionLibreNombramiento.docx',
-            'rapIncorporacionLibre' => 'libreNombramiento/incorporacion/rapIncorporacionLibreNombramiento.docx',
+            'infMinutaIncorporacionLibreNombramiento' => 'infMinutaIncorporacionLibreNombramiento.docx',
+            'infNotaIncorporacionLibreNombramiento' => 'infNotaIncorporacionLibreNombramiento.docx',
+            'memorandumIncorporacionLibreNombramiento' => 'memorandumIncorporacionLibreNombramiento.docx',
+            'rapIncorporacionLibreNombramiento' => 'rapIncorporacionLibreNombramiento.docx',
 
-            'infMinutaCambioItem' => 'cambioItem/infMinutaCambioItem.docx',
-            'infNotaCambioItem' => 'cambioItem/infNotaCambioItem.docx',
-            'memorandumCambioItem' => 'cambioItem/memorandumCambioItem.docx',
-            'rapCambioItem' => 'cambioItem/rapCambioItem.docx',
+            'infMinutaCambioItem' => 'infMinutaCambioItem.docx',
+            'infNotaCambioItem' => 'infNotaCambioItem.docx',
+            'memorandumCambioItem' => 'memorandumCambioItem.docx',
+            'rapCambioItem' => 'rapCambioItem.docx',
 
-            'infMinutaCambioItemLibre' => 'libreNombramiento/cambioItem/infMinutaCambioItemLibreNombramiento.docx',
-            'infNotaCambioItemLibre' => 'libreNombramiento/cambioItem/infNotaCambioItemLibreNombramiento.docx',
-            'memorandumCambioItemLibre' => 'libreNombramiento/cambioItem/memorandumCambioItemLibreNombramiento.docx',
-            'rapCambioItemLibre' => 'libreNombramiento/cambioItem/rapCambioItemLibreNombramiento.docx', 
+            'infMinutaCambioItemLibreNombramiento' => 'infMinutaCambioItemLibreNombramiento.docx',
+            'infNotaCambioItemLibreNombramiento' => 'infNotaCambioItemLibreNombramiento.docx',
+            'memorandumCambioItemLibreNombramiento' => 'memorandumCambioItemLibreNombramiento.docx',
+            'rapCambioItemLibreNombramiento' => 'rapCambioItemLibreNombramiento.docx', 
 
             'R-1418' => 'R-1418.xlsx',
             'R-1419' => 'R-1419.xlsx',
             'actaEntrega' => 'actaEntrega.docx',
             'actaPosesion' => 'actaPosesion.docx',
-            'R-0716' => 'incorporacion/R-0716.docx',
-            'R-0976' => 'incorporacion/R-0976.docx',
-            'R-0921' => 'incorporacion/R-0921.docx',
+            'R-0716' => 'R-0716.docx',
+            'R-0976' => 'R-0976.docx',
+            'R-0921' => 'R-0921.docx',
             'R-1469' => 'R-1469.docx',
-            'R-SGC-0033' => 'incorporacion/R-SGC-0033.docx'
+            'R-SGC-0033' => 'R-SGC-0033.docx'
         ];
 
         if (!array_key_exists($filename, $allowedFiles)) {
@@ -1638,7 +1638,6 @@ class IncorporacionesController extends Controller
         return response()->download($path);
     }
 
-    //reportes en excel de incorporaciones 
     public function genReportEvaluacion(Request $request)
     {
         $validatedData = $request->validate([

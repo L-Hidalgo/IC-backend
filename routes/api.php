@@ -94,7 +94,7 @@ Route::group(['prefix' => 'incorporaciones'], function () {
 Route::group(['prefix' => 'plantilla'], function () {
   Route::post('/upload-plantilla', [PlantillaController::class, 'uploadPlantilla']);
   Route::post('/listar-plantillas', [PlantillaController::class, 'listarPlantillas']); 
-  Route::put('/{plantillaId}/revertir-plantilla', [IncorporacionesController::class, 'revertirPlantilla']);
+  Route::put('/{plantillaId}/revertir-plantilla', [PlantillaController::class, 'revertirPlantilla']);
 
   
 
@@ -155,7 +155,7 @@ Route::group(['prefix' => 'puestos'], function () {
 });
 /* ------------------------------------------ Personas ------------------------------------------ */
 Route::group(['prefix' => 'personas'], function () {
-  Route::put('/', [PersonasController::class, 'crearActualizarPersona']);
+  Route::put('/registrar-persona', [PersonasController::class, 'crearActualizarPersona']);
   Route::get('/{idPersona}', [PersonasController::class, 'getById']);
   Route::get('/{ciPersona}/by-ci', [PersonasController::class, 'getByCi']);
 });

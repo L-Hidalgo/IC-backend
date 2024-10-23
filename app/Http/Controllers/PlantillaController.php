@@ -23,35 +23,35 @@ class PlantillaController extends Controller
             'R-1023.docx',
             'R-1129.docx',
 
-            'incorporacion/infMinutaIncorporacion.docx',
-            'incorporacion/infNotaIncorporacion.docx',
-            'incorporacion/memorandumIncorporacion.docx',
-            'incorporacion/rapIncorporacion.docx',
+            'infMinutaIncorporacion.docx',
+            'infNotaIncorporacion.docx',
+            'memorandumIncorporacion.docx',
+            'rapIncorporacion.docx',
 
-            'libreNombramiento/incorporacion/infMinutaIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/infNotaIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/memorandumIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/rapIncorporacionLibreNombramiento.docx',
+            'infMinutaIncorporacionLibreNombramiento.docx',
+            'infNotaIncorporacionLibreNombramiento.docx',
+            'memorandumIncorporacionLibreNombramiento.docx',
+            'rapIncorporacionLibreNombramiento.docx',
 
-            'cambioItem/infMinutaCambioItem.docx',
-            'cambioItem/infNotaCambioItem.docx',
-            'cambioItem/memorandumCambioItem.docx',
-            'cambioItem/rapCambioItem.docx',
+            'infMinutaCambioItem.docx',
+            'infNotaCambioItem.docx',
+            'memorandumCambioItem.docx',
+            'rapCambioItem.docx',
 
-            'libreNombramiento/cambioItem/infMinutaCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/infNotaCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/memorandumCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/rapCambioItemLibreNombramiento.docx',
+            'infMinutaCambioItemLibreNombramiento.docx',
+            'infNotaCambioItemLibreNombramiento.docx',
+            'memorandumCambioItemLibreNombramiento.docx',
+            'rapCambioItemLibreNombramiento.docx',
 
             'R-1418.xlsx',
             'R-1419.xlsx',
             'actaEntrega.docx',
             'actaPosesion.docx',
-            'incorporacion/R-0716.docx',
-            'incorporacion/R-0976.docx',
-            'incorporacion/R-0921.docx',
+            'R-0716.docx',
+            'R-0976.docx',
+            'R-0921.docx',
             'R-1469.docx',
-            'incorporacion/R-SGC-0033.docx'
+            'R-SGC-0033.docx'
         ];
 
         if (in_array($filename, $allowedFiles)) {
@@ -84,7 +84,7 @@ class PlantillaController extends Controller
 
             return response()->json(['message' => 'Archivo subido y reemplazado exitosamente.']);
         } else {
-            return response()->json(['error' => 'Archivo no permitido.'], 400);
+            return response()->json(['error' => "El archivo '$filename' no coincide con los archivos permitidos."], 400);
         }
     }
 
@@ -124,14 +124,16 @@ class PlantillaController extends Controller
 
     public function revertirPlantilla($plantillaId, Request $request)
     {
+        $storagePath = storage_path('app/form_templates');
+
         $plantilla = Plantilla::find($plantillaId);
 
         if (!$plantilla) {
-            return response()->json(['message' => 'Plantilla no encontrada'], 404);
+            return response()->json(['error' => 'Plantilla no encontrada'], 404);
         }
 
         $nombrePlantilla = $plantilla->nombre_plantilla;
-        $rutaPlantillaActual = $plantilla->ruta_plantilla;
+        $rutaPlantilla = $plantilla->ruta_plantilla;
 
         $allowedFiles = [
             'R-0078.docx',
@@ -139,70 +141,44 @@ class PlantillaController extends Controller
             'R-1401.docx',
             'R-1023.docx',
             'R-1129.docx',
-            'incorporacion/infMinutaIncorporacion.docx',
-            'incorporacion/infNotaIncorporacion.docx',
-            'incorporacion/memorandumIncorporacion.docx',
-            'incorporacion/rapIncorporacion.docx',
-            'libreNombramiento/incorporacion/infMinutaIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/infNotaIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/memorandumIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/rapIncorporacionLibreNombramiento.docx',
-            'cambioItem/infMinutaCambioItem.docx',
-            'cambioItem/infNotaCambioItem.docx',
-            'cambioItem/memorandumCambioItem.docx',
-            'cambioItem/rapCambioItem.docx',
-            'libreNombramiento/cambioItem/infMinutaCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/infNotaCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/memorandumCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/rapCambioItemLibreNombramiento.docx',
+            'infMinutaIncorporacion.docx',
+            'infNotaIncorporacion.docx',
+            'memorandumIncorporacion.docx',
+            'rapIncorporacion.docx',
+            'infMinutaIncorporacionLibreNombramiento.docx',
+            'infNotaIncorporacionLibreNombramiento.docx',
+            'memorandumIncorporacionLibreNombramiento.docx',
+            'rapIncorporacionLibreNombramiento.docx',
+            'infMinutaCambioItem.docx',
+            'infNotaCambioItem.docx',
+            'memorandumCambioItem.docx',
+            'rapCambioItem.docx',
+            'infMinutaCambioItemLibreNombramiento.docx',
+            'infNotaCambioItemLibreNombramiento.docx',
+            'memorandumCambioItemLibreNombramiento.docx',
+            'rapCambioItemLibreNombramiento.docx',
             'R-1418.xlsx',
             'R-1419.xlsx',
             'actaEntrega.docx',
             'actaPosesion.docx',
-            'incorporacion/R-0716.docx',
-            'incorporacion/R-0976.docx',
-            'incorporacion/R-0921.docx',
+            'R-0716.docx',
+            'R-0976.docx',
+            'R-0921.docx',
             'R-1469.docx',
-            'incorporacion/R-SGC-0033.docx'
+            'R-SGC-0033.docx'
         ];
 
-     
-    }
+        $fileToDelete = $storagePath . '/' . $nombrePlantilla;
+        if (in_array($nombrePlantilla, $allowedFiles) && file_exists($fileToDelete)) {
+            unlink($fileToDelete);
+        }
 
+        if (file_exists($rutaPlantilla)) {
+            copy($rutaPlantilla, $fileToDelete);
+        } else {
+            return response()->json(['error' => 'Archivo original no encontrado'], 404);
+        }
 
-    private function getLocalFiles()
-    {
-        return [
-            'R-0078.docx',
-            'R-0980.docx',
-            'R-1401.docx',
-            'R-1023.docx',
-            'R-1129.docx',
-            'incorporacion/infMinutaIncorporacion.docx',
-            'incorporacion/infNotaIncorporacion.docx',
-            'incorporacion/memorandumIncorporacion.docx',
-            'incorporacion/rapIncorporacion.docx',
-            'libreNombramiento/incorporacion/infMinutaIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/infNotaIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/memorandumIncorporacionLibreNombramiento.docx',
-            'libreNombramiento/incorporacion/rapIncorporacionLibreNombramiento.docx',
-            'cambioItem/infMinutaCambioItem.docx',
-            'cambioItem/infNotaCambioItem.docx',
-            'cambioItem/memorandumCambioItem.docx',
-            'cambioItem/rapCambioItem.docx',
-            'libreNombramiento/cambioItem/infMinutaCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/infNotaCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/memorandumCambioItemLibreNombramiento.docx',
-            'libreNombramiento/cambioItem/rapCambioItemLibreNombramiento.docx',
-            'R-1418.xlsx',
-            'R-1419.xlsx',
-            'actaEntrega.docx',
-            'actaPosesion.docx',
-            'incorporacion/R-0716.docx',
-            'incorporacion/R-0976.docx',
-            'incorporacion/R-0921.docx',
-            'R-1469.docx',
-            'incorporacion/R-SGC-0033.docx'
-        ];
+        return response()->json(['success' => 'Plantilla revertida correctamente']);
     }
 }

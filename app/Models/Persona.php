@@ -41,6 +41,11 @@ class Persona extends Model
         return $this->hasMany(Formacion::class, 'persona_id', 'id_persona');
     }
     
+    public function imagenes()
+    {
+        return $this->hasMany(Imagen::class, 'persona_id', 'id_persona');
+    }
+
     public function puestos_actual()
     {
         return $this->hasMany(Puesto::class, 'persona_actual_id', 'id_persona');
@@ -54,11 +59,6 @@ class Persona extends Model
     public function incorporacionFormulario()
     {
         return $this->hasMany(Incorporacion::class, 'persona_id', 'id_persona');
-    }
-
-    public function imagenes()
-    {
-        return $this->hasMany(Imagen::class, 'persona_id', 'id_persona');
     }
 
     public function file()
