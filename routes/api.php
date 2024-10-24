@@ -85,9 +85,6 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
   Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
 
-  //imagenes de las personas
-  Route::get('/imagen-persona/{personaId}', [ImportarImagesController::class, 'getImagenFuncionario']);
-  //---------------------------------------------------------------------------------
 
 });
 
@@ -156,6 +153,7 @@ Route::group(['prefix' => 'puestos'], function () {
 /* ------------------------------------------ Personas ------------------------------------------ */
 Route::group(['prefix' => 'personas'], function () {
   Route::put('/registrar-persona', [PersonasController::class, 'crearActualizarPersona']);
+  Route::get('/{personaId}/imagen-persona', [ImportarImagesController::class, 'getImagenFuncionario']);
   Route::get('/{idPersona}', [PersonasController::class, 'getById']);
   Route::get('/{ciPersona}/by-ci', [PersonasController::class, 'getByCi']);
 });

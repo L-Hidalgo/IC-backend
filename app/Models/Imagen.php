@@ -22,5 +22,4 @@ class Imagen extends Model
     {
         return $this->belongsTo(Persona::class, 'persona_id', 'id_persona');
     }
-
 }
