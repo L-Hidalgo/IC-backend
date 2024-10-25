@@ -23,32 +23,29 @@ class InterinatoController extends Controller
     public function crearInterinato(Request $request)
     {
         $validatedData = $request->validate([
-            'idInterinato' => 'nullable|integer',
-            'puestoNuevoId' => 'nullable|integer',
-            'puestoActualId' => 'nullable|integer',
-            'proveidoTramiteInterinato' => 'nullable|string',
-            'citeNotaInformeMinutaInterinato' => 'nullable|string',
-            'fchCiteNotaInfMinutaInterinato' => 'nullable|date',
-            'citeInformeInterinato' => 'nullable|string',
-            'fojasInformeInterinato' => 'nullable|string',
-            'citeMemorandumInterinato' => 'nullable|string',
-            'codigoMemorandumInterinato' => 'nullable|string',
-            'citeRapInterinato' => 'nullable|string',
-            'codigoRapInterinato' => 'nullable|string',
-            'fchMemorandumRapInterinato' => 'nullable|date',
-
-            'totalDiasInterinato' => 'nullable|integer',
-            'periodoInterinato' => 'nullable|string',
-            'tipoNotaInformeMinutaInterinato' => 'nullable|string',
-            'observacionesInterinato' => 'nullable|string',
-            'sayriInterinato' => 'nullable|string',
-            'createdByInterinato' => 'nullable|integer',
-
-
             'puestoNuevoId' => 'nullable|integer',
             'puestoActualId' => 'nullable|integer',
             'fchInicioInterinato' => 'nullable|date',
             'fchFinInterinato' => 'nullable|date',
+
+            'citeInformeInstruccionInterinato' => 'nullable|string',
+            'fchInformeInstruccionInterinato' => 'nullable|date',
+            'proveidoInterinato' => 'nullable|string',
+            'numTramiteHpInterinato' => 'nullable|string',
+            'citeInformeInterinato' => 'nullable|string',
+            'fchCiteInformeInterinato' => 'nullable|date',
+            'numFojasInformeInterinato' => 'nullable|integer',
+
+            'citeRapInterinato' => 'nullable|string',
+            'codigoRapInterinato' => 'nullable|string',
+            'numFojasRapInterinato' => 'nullable|integer',
+
+            'citeMemInterinato' => 'nullable|string',
+            'codigoMemInterinato' => 'nullable|string',
+            'codigoFileInterinato' => 'nullable|string',
+            'fchMemorandumRapInterinato' => 'nullable|date',
+
+            'createdInterinato' => 'nullable|integer',            
         ]);
 
         if ($request->has('puestoActualId') && $request->fchInicioInterinato && $request->fchFinInterinato) {
@@ -90,33 +87,35 @@ class InterinatoController extends Controller
         }
 
         $interinato = Interinato::create([
-            'proveido_tramite_interinato' => $validatedData['proveidoTramiteInterinato'],
-            'cite_nota_informe_minuta_interinato' => $validatedData['citeNotaInformeMinutaInterinato'],
-            'fch_cite_nota_inf_minuta_interinato' => $validatedData['fchCiteNotaInfMinutaInterinato'],
             'puesto_nuevo_id' => $validatedData['puestoNuevoId'],
-            'titular_puesto_nuevo_id' => $titularPuestoNuevoId,
             'puesto_actual_id' => $validatedData['puestoActualId'],
+            'titular_puesto_nuevo_id' => $titularPuestoNuevoId,
             'titular_puesto_actual_id' => $titularPuestoActualId,
-            'cite_informe_interinato' => $validatedData['citeInformeInterinato'],
-            'fojas_informe_interinato' => $validatedData['fojasInformeInterinato'],
-            'cite_memorandum_interinato' => $validatedData['citeMemorandumInterinato'],
-            'codigo_memorandum_interinato' => $validatedData['codigoMemorandumInterinato'],
-            'cite_rap_interinato' => $validatedData['citeRapInterinato'],
-            'codigo_rap_interinato' => $validatedData['codigoRapInterinato'],
-            'fch_memorandum_rap_interinato' => $validatedData['fchMemorandumRapInterinato'],
             'fch_inicio_interinato' => $validatedData['fchInicioInterinato'],
             'fch_fin_interinato' => $validatedData['fchFinInterinato'],
-            'total_dias_interinato' => $validatedData['totalDiasInterinato'],
-            'periodo_interinato' => $validatedData['periodoInterinato'],
-            'created_by_interinato' => $validatedData['createdByInterinato'],
-            'tipo_nota_informe_minuta_interinato' => $validatedData['tipoNotaInformeMinutaInterinato'],
-            'observaciones_interinato' => $validatedData['observacionesInterinato'],
-            'sayri_interinato' => $validatedData['sayriInterinato'],
-            'estado_designacion_interinato' => 0,
+
+            'cite_informe_instruccion_interinato' => $validatedData['citeInformeInstruccionInterinato'],
+            'fch_informe_instruccion_interinato' => $validatedData['fchInformeInstruccionInterinato'],
+            'proveido_interinato' => $validatedData['proveidoInterinato'],
+            'num_tramite_hp_interinato' => $validatedData['numTramiteHpInterinato'],
+            'cite_informe_interinato' => $validatedData['citeInformeInterinato'],
+            'fch_cite_informe_interinato' => $validatedData['fchCiteInformeInterinato'],
+            'num_fojas_informe_interinato' => $validatedData['numFojasInformeInterinato'],
+
+            'cite_rap_interinato' => $validatedData['citeRapInterinato'],
+            'codigo_rap_interinato' => $validatedData['codigoRapInterinato'],
+            'num_fojas_rap_interinato' => $validatedData['numFojasRapInterinato'],
+
+            'cite_mem_interinato' => $validatedData['citeMemInterinato'],
+            'codigo_mem_interinato' => $validatedData['codigoMemInterinato'],
+            'codigo_file_interinato' => $validatedData['codigoFileInterinato'],
+            'fch_memorandum_rap_interinato' => $validatedData['fchMemorandumRapInterinato'],
+
+            'created_interinato' => $validatedData['createdInterinato'],
+            'estado_designacion_interinato' => 1,
         ]);
 
         $interinato->save();
-
         return response()->json(['message' => 'Interinato creado correctamente', 'data' => $interinato], 200);
     }
 

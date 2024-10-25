@@ -49,17 +49,14 @@ return new class extends Migration
                 $table->date('fch_designacion_suspencion')->nullable();
                 $table->date('motivo_suspencion')->nullable();
 
-                $table->string('sayri_interinato', 20)->nullable();
-                $table->foreign('created_by_interinato')->references('id')->on('users');
-                $table->foreign('modified_by_interinato')->references('id')->on('users');
-
+                
+                $table->foreign('created_interinato')->references('id')->on('users');
+                $table->foreign('modified_interinato')->references('id')->on('users');
                 $table->foreign('puesto_nuevo_id')->references('id_puesto')->on('dde_puestos');
-                $table->foreign('titular_puesto_nuevo_id')->references('id_persona')->on('dde_personas');
                 $table->foreign('puesto_actual_id')->references('id_puesto')->on('dde_puestos');
+                $table->foreign('titular_puesto_nuevo_id')->references('id_persona')->on('dde_personas');
                 $table->foreign('titular_puesto_actual_id')->references('id_persona')->on('dde_personas');
                 $table->timestamps();
-                $table->timestamp('fecha_inicio')->nullable()->default(null);
-                $table->timestamp('fecha_fin')->nullable()->default(null);
             });
         }
     }
