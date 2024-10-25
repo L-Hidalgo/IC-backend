@@ -17,11 +17,18 @@ class PuestoController extends Controller
             ->first();
 
         if ($puesto) {
-            $puesto->interinos = $puesto->interinos()->where('fch_inicio_interinato', '<=', Carbon::now()->toDateString())->where('fch_fin_interinato', '>=', Carbon::now()->toDateString())->where('estado_designacion_interinato', 0)->get();
+            $puesto->interinos = $puesto->interinos()
+                ->where('fch_inicio_interinato', '<=', Carbon::now()->toDateString())
+                ->where('fch_fin_interinato', '>=', Carbon::now()->toDateString())
+                ->where('estado_designacion_interinato', 1)
+                ->get();
 
             return $this->sendObject($puesto);
         } else {
-            return null;
+            return response()->json([
+                'message' => 'Puesto no encontrado.',
+                'transsacton' => false
+            ], 404);
         }
     }
 
@@ -56,14 +63,15 @@ class PuestoController extends Controller
         return $this->sendSuccess($puesto);
     }
 
-   
+
     public function getRequisitoPuesto($puestoId)
     {
         $requisito = Requisito::where('puesto_id', $puestoId)->first();
         return $this->sendObject($requisito);
     }
 
-    public function getPuestoByItemDetalle(){
+    public function getPuestoByItemDetalle()
+    {
         $totalPuestos = Puesto::count();
 
         $puestosOcupados = Puesto::where('estado_id', 2)->count();

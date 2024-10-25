@@ -51,7 +51,6 @@ Route::group(['prefix' => 'planilla'], function () {
   Route::get('/{puestoId}/inf-persona-puesto', [PlanillaController::class, 'infPersonaPuesto']);
 });
 
-// incorporaciones
 Route::group(['prefix' => 'incorporaciones'], function () {
   Route::put('/crear-actualizar-incorporacion', [IncorporacionesController::class, 'crearActualizarIncorporacion']);
   Route::post('/listar-incorporaciones', [IncorporacionesController::class, 'listarIncorporaciones']);
@@ -76,27 +75,30 @@ Route::group(['prefix' => 'incorporaciones'], function () {
   Route::get('/{incorporacionId}/gen-R0976', [IncorporacionesController::class, 'generarR0976']);
   Route::get('/{incorporacionId}/gen-R1469', [IncorporacionesController::class, 'generarR1469']);
   Route::get('/{incorporacionId}/gen-RSGC-0033', [IncorporacionesController::class, 'generarRSGC0033']);
+  Route::post('/gen-report-eval', [IncorporacionesController::class, 'genReportEvaluacion']);
+  Route::post('/gen-report-trimestral', [IncorporacionesController::class, 'genReportTrimestral']);
+});
+
+Route::group(['prefix' => 'plantilla'], function () {
   Route::get('/{filename}/download-plantillas-inc', [IncorporacionesController::class, 'downloadPlantillasIncorporacion']);
+  Route::post('/upload-plantilla', [PlantillaController::class, 'uploadPlantilla']);
+  Route::post('/listar-plantillas', [PlantillaController::class, 'listarPlantillas']);
+  Route::put('/{plantillaId}/revertir-plantilla', [PlantillaController::class, 'revertirPlantilla']);
   Route::get('/view-configuracion-plantillas', function () {
     $path = storage_path('app/pdfs/Configuracion de plantillas de incorporacion.pdf');
     return response()->download($path);
   });
-
-  Route::post('/genReportEval', [IncorporacionesController::class, 'genReportEvaluacion']);
-  Route::post('/genReportTrimestral', [IncorporacionesController::class, 'genReportTrimestral']);
-
-
 });
 
-Route::group(['prefix' => 'plantilla'], function () {
-  Route::post('/upload-plantilla', [PlantillaController::class, 'uploadPlantilla']);
-  Route::post('/listar-plantillas', [PlantillaController::class, 'listarPlantillas']); 
-  Route::put('/{plantillaId}/revertir-plantilla', [PlantillaController::class, 'revertirPlantilla']);
-
-  
-
+Route::group(['prefix' => 'interinatos'], function () {
+  Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']);
+  Route::post('/crear-interinato', [InterinatoController::class, 'crearInterinato']);
+  Route::post('upload-interinato', [InterinatoController::class, 'uploadInterinato']);
+  Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']);
+  Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);
+  Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']);  //dar-baja-interinato
+  Route::put('/{interinatoId}/dar-baja-interinato', [InterinatoController::class, 'darBajaInterinato']);
 });
-
 
 Route::group(['prefix' => 'file'], function () {
   Route::post('/crear-file', [FileController::class, 'crearFile']);
@@ -112,15 +114,7 @@ Route::group(['prefix' => 'file'], function () {
   Route::get('/{fileId}/download-carpeta', [FileController::class, 'downloadCarpeta']);
 });
 
-Route::group(['prefix' => 'interinatos'], function () {
-  Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']);
-  Route::post('/crear-interinato', [InterinatoController::class, 'crearInterinato']);
-  Route::post('upload-interinato', [InterinatoController::class, 'uploadInterinato']);
-  Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']);
-  Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);
-  Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']);  //dar-baja-interinato
-  Route::put('/{interinatoId}/dar-baja-interinato', [InterinatoController::class, 'darBajaInterinato']);
-});
+
 /* ------------------------------------------ Formacion ------------------------------------------ */
 Route::group(['prefix' => 'formaciones'], function () {
   Route::put('/', [FormacionController::class, 'crearActualizarFormacion']);
