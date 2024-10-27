@@ -93,10 +93,20 @@ Route::group(['prefix' => 'plantilla'], function () {
 Route::group(['prefix' => 'interinatos'], function () {
   Route::post('/listar-interinatos', [InterinatoController::class, 'listarInterinatos']);
   Route::post('/crear-interinato', [InterinatoController::class, 'crearInterinato']);
+  Route::get('/{interinatoId}/gen-form-informe-cobinado', [InterinatoController::class, 'generarFormInformeCombinado']);
+  Route::get('/{interinatoId}/gen-form-informe', [InterinatoController::class, 'generarFormInforme']);
+  Route::get('/{interinatoId}/gen-form-rap', [InterinatoController::class, 'generarFormRap']);
+  Route::get('/{interinatoId}/gen-form-mem', [InterinatoController::class, 'generarFormMemorandum']);
+  Route::get('/{interinatoId}/gen-form-rap-suspencion', [InterinatoController::class, 'generarFormRapSuspencion']);
+  Route::get('/{interinatoId}/mostrar-interinato', [InterinatoController::class, 'mostrarInterinato']);
+  Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']); 
+
+
+
   Route::post('upload-interinato', [InterinatoController::class, 'uploadInterinato']);
   Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']);
-  Route::get('/{interinatoId}/mostrar-modificar-interinato', [InterinatoController::class, 'mostrarModificarInterinato']);
-  Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']);  //dar-baja-interinato
+
+   //dar-baja-interinato
   Route::put('/{interinatoId}/dar-baja-interinato', [InterinatoController::class, 'darBajaInterinato']);
 });
 

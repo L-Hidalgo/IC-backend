@@ -61,6 +61,11 @@ class Persona extends Model
         return $this->hasMany(Incorporacion::class, 'persona_id', 'id_persona');
     }
 
+    public function interinato()
+    {
+        return $this->hasMany(Incorporacion::class, 'persona_id', 'id_persona');
+    }
+
     public function file()
     {
         return $this->hasMany(File::class, 'persona_id');

@@ -2,4 +2,7 @@
 !public/
 !.gitignore
 !form_templates
+!form_templates_interinato
+!plantillas_backup
+!pdfs
 !img_personas

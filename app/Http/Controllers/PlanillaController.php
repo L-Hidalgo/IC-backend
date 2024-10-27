@@ -77,14 +77,14 @@ class PlanillaController extends Controller
                 ->where('puesto_nuevo_id', $personaPuesto->idPuesto)
                 ->whereDate('fch_inicio_interinato', '<=', $today)
                 ->whereDate('fch_fin_interinato', '>=', $today)
-                ->where('estado_designacion_interinato', 0)
+                ->where('estado_interinato', 1)
                 ->get();
 
             $personaPuesto->interinatosDe = Interinato::with('personaActual')
                 ->where('puesto_actual_id', $personaPuesto->idPuesto)
                 ->whereDate('fch_inicio_interinato', '<=', $today)
                 ->whereDate('fch_fin_interinato', '>=', $today)
-                ->where('estado_designacion_interinato', 0)
+                ->where('estado_interinato', 1)
                 ->get();
 
             return $personaPuesto;

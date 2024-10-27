@@ -20,7 +20,7 @@ class PuestoController extends Controller
             $puesto->interinos = $puesto->interinos()
                 ->where('fch_inicio_interinato', '<=', Carbon::now()->toDateString())
                 ->where('fch_fin_interinato', '>=', Carbon::now()->toDateString())
-                ->where('estado_designacion_interinato', 1)
+                ->where('estado_interinato', 1)
                 ->get();
 
             return $this->sendObject($puesto);
