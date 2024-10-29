@@ -27,7 +27,6 @@ class Persona extends Model
         'telefono_persona',
         'fecha_inicio',
         'fecha_fin'
-        //'imagen',
     ];
 
     protected $casts = [

@@ -53,29 +53,62 @@ class IncorporacionesController extends Controller
             'fchRapIncorporacion' => 'nullable|string',
         ]);
 
-        if (!isset($validatedData['puestoNuevoId']) || !isset($validatedData['personaId'])) {
-            return response()->json(['error' => 'El puesto no tiene a una persona asociada!!!'], 400);
-        }
 
         $puesto = Puesto::find($validatedData['puestoNuevoId']);
         if (!$puesto) {
             return response()->json(['error' => 'El puesto especificado no existe!!!'], 400);
         }
 
+        $puestoActual = null;
         if (isset($validatedData['puestoActualId'])) {
             $puestoActual = Puesto::find($validatedData['puestoActualId']);
-            if ($puestoActual && $puestoActual->persona_actual_id == $validatedData['personaId']) {
-                $puestoActual->persona_respaldo_id = $puestoActual->persona_actual_id;
-                $puestoActual->persona_actual_id = null;
-                $puestoActual->estado_id = 1; // desocupado
-                $puestoActual->save();
+            if (!$puestoActual) {
+                return response()->json(['error' => 'El puesto actual especificado no existe!!!'], 400);
             }
         }
 
-        $puesto->persona_respaldo_id = $puesto->persona_actual_id;
-        $puesto->persona_actual_id = $validatedData['personaId'];
-        $puesto->estado_id = 2; // ocupado
-        $puesto->save();
+        if (isset($validatedData['personaId']) && $puesto->estado_id == 1) {
+            $puesto->persona_respaldo_id = null; 
+            $puesto->persona_actual_id = $validatedData['personaId'];
+            $puesto->estado_id = 2; // ocupado
+            $puesto->save();
+        }
+
+        if ($puestoActual && isset($validatedData['personaId'])) {
+            if ($puesto->estado_id == 2 && $puestoActual->estado_id == 2) {
+                $tempPersona = $puesto->persona_actual_id;
+
+                $puesto->persona_actual_id = $puestoActual->persona_actual_id;
+                $puestoActual->persona_actual_id = $tempPersona;
+
+                $puesto->save();
+                $puestoActual->save();
+
+                Incorporacion::create([
+                    'puesto_nuevo_id' => $validatedData['puestoNuevoId'],
+                    'puesto_actual_id' => $validatedData['puestoActualId'],
+                    'persona_id' => $puesto->persona_actual_id,
+                ]);
+
+                Incorporacion::create([
+                    'puesto_nuevo_id' => $validatedData['puestoActualId'],
+                    'puesto_actual_id' => $validatedData['puestoNuevoId'],
+                    'persona_id' => $puestoActual->persona_actual_id,
+                ]);
+            } else {
+                if ($puestoActual->persona_actual_id == $validatedData['personaId']) {
+                    $puestoActual->persona_respaldo_id = $puestoActual->persona_actual_id;
+                    $puestoActual->persona_actual_id = null;
+                    $puestoActual->estado_id = 1; 
+                    $puestoActual->save();
+                }
+
+                $puesto->persona_respaldo_id = $puesto->persona_actual_id;
+                $puesto->persona_actual_id = $validatedData['personaId'];
+                $puesto->estado_id = 2; 
+                $puesto->save();
+            }
+        }
 
         $incorporacion = Incorporacion::where('persona_id', $validatedData['personaId'])
             ->where('puesto_nuevo_id', $validatedData['puestoNuevoId'])
@@ -1301,7 +1334,7 @@ class IncorporacionesController extends Controller
         }
 
         $disk = Storage::disk('form_templates');
-        
+
         $pathTemplate = $disk->path('actaPosesion.docx');
 
         $templateProcessor = new TemplateProcessor($pathTemplate);
@@ -1583,59 +1616,6 @@ class IncorporacionesController extends Controller
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
-    }
-
-    public function downloadPlantillasIncorporacion($filename)
-    {
-        $allowedFiles = [
-            'R-0078' => 'R-0078.docx',
-            'R-0980' => 'R-0980.docx',
-            'R-1401' => 'R-1401.docx',
-            'R-1023' => 'R-1023.docx',
-            'R-1129' => 'R-1129.docx',
-
-            'infMinutaIncorporacion' => 'infMinutaIncorporacion.docx',
-            'infNotaIncorporacion' => 'infNotaIncorporacion.docx',
-            'memorandumIncorporacion' => 'memorandumIncorporacion.docx',
-            'rapIncorporacion' => 'rapIncorporacion.docx',
-
-            'infMinutaIncorporacionLibreNombramiento' => 'infMinutaIncorporacionLibreNombramiento.docx',
-            'infNotaIncorporacionLibreNombramiento' => 'infNotaIncorporacionLibreNombramiento.docx',
-            'memorandumIncorporacionLibreNombramiento' => 'memorandumIncorporacionLibreNombramiento.docx',
-            'rapIncorporacionLibreNombramiento' => 'rapIncorporacionLibreNombramiento.docx',
-
-            'infMinutaCambioItem' => 'infMinutaCambioItem.docx',
-            'infNotaCambioItem' => 'infNotaCambioItem.docx',
-            'memorandumCambioItem' => 'memorandumCambioItem.docx',
-            'rapCambioItem' => 'rapCambioItem.docx',
-
-            'infMinutaCambioItemLibreNombramiento' => 'infMinutaCambioItemLibreNombramiento.docx',
-            'infNotaCambioItemLibreNombramiento' => 'infNotaCambioItemLibreNombramiento.docx',
-            'memorandumCambioItemLibreNombramiento' => 'memorandumCambioItemLibreNombramiento.docx',
-            'rapCambioItemLibreNombramiento' => 'rapCambioItemLibreNombramiento.docx', 
-
-            'R-1418' => 'R-1418.xlsx',
-            'R-1419' => 'R-1419.xlsx',
-            'actaEntrega' => 'actaEntrega.docx',
-            'actaPosesion' => 'actaPosesion.docx',
-            'R-0716' => 'R-0716.docx',
-            'R-0976' => 'R-0976.docx',
-            'R-0921' => 'R-0921.docx',
-            'R-1469' => 'R-1469.docx',
-            'R-SGC-0033' => 'R-SGC-0033.docx'
-        ];
-
-        if (!array_key_exists($filename, $allowedFiles)) {
-            return response()->json(['error' => 'File not found'], Response::HTTP_NOT_FOUND);
-        }
-
-        $path = storage_path('app/form_templates/' . $allowedFiles[$filename]);
-
-        if (!file_exists($path)) {
-            return response()->json(['error' => 'File not found'], Response::HTTP_NOT_FOUND);
-        }
-
-        return response()->download($path);
     }
 
     public function genReportEvaluacion(Request $request)

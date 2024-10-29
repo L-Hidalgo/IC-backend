@@ -80,7 +80,8 @@ Route::group(['prefix' => 'incorporaciones'], function () {
 });
 
 Route::group(['prefix' => 'plantilla'], function () {
-  Route::get('/{filename}/download-plantillas-inc', [IncorporacionesController::class, 'downloadPlantillasIncorporacion']);
+  Route::get('/{filename}/download-plantillas-inc', [PlantillaController::class, 'downloadPlantillasIncorporacion']);
+  Route::get('/{filename}/download-plantillas-interinato', [PlantillaController::class, 'downloadPlantillasInterinato']);
   Route::post('/upload-plantilla', [PlantillaController::class, 'uploadPlantilla']);
   Route::post('/listar-plantillas', [PlantillaController::class, 'listarPlantillas']);
   Route::put('/{plantillaId}/revertir-plantilla', [PlantillaController::class, 'revertirPlantilla']);
@@ -97,17 +98,20 @@ Route::group(['prefix' => 'interinatos'], function () {
   Route::get('/{interinatoId}/gen-form-informe', [InterinatoController::class, 'generarFormInforme']);
   Route::get('/{interinatoId}/gen-form-rap', [InterinatoController::class, 'generarFormRap']);
   Route::get('/{interinatoId}/gen-form-mem', [InterinatoController::class, 'generarFormMemorandum']);
-  Route::get('/{interinatoId}/gen-form-rap-suspencion', [InterinatoController::class, 'generarFormRapSuspencion']);
+  Route::get('/{interinatoId}/gen-form-mem-suspencion', [InterinatoController::class, 'generarFormMemSuspencion']);
   Route::get('/{interinatoId}/mostrar-interinato', [InterinatoController::class, 'mostrarInterinato']);
   Route::put('/{interinatoId}/modificar-interinato', [InterinatoController::class, 'modificarInterinato']); 
-
-
-
+  Route::put('/{interinatoId}/dar-baja-interinato', [InterinatoController::class, 'darBajaInterinato']);
   Route::post('upload-interinato', [InterinatoController::class, 'uploadInterinato']);
+  Route::get('/export-interinato-excel', [InterinatoController::class, 'exportInterinatoExcel']);
+
+
+
+  
   Route::post('/filtrar-interinato', [InterinatoController::class, 'byFiltrosInterinatos']);
 
    //dar-baja-interinato
-  Route::put('/{interinatoId}/dar-baja-interinato', [InterinatoController::class, 'darBajaInterinato']);
+  
 });
 
 Route::group(['prefix' => 'file'], function () {

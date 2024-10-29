@@ -26,7 +26,8 @@ return new class extends Migration
             $table->string('num_tramite_hp_interinato')->nullable();
             $table->string('cite_informe_interinato')->nullable();
             $table->date('fch_cite_informe_interinato')->nullable();
-            $table->integer('num_fojas_informe_interinato')->nullable();
+            $table->integer('num_fojas_informe_interinato')->nullable(); 
+            $table->integer('tipo_solicitud_informe')->nullable(); 
 
             $table->string('cite_rap_interinato')->nullable();
             $table->string('codigo_rap_interinato')->nullable();

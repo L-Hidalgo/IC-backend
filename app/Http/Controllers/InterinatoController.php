@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\InterinatosExport;
 use App\Imports\InterinatoDataImport;
 use App\Models\Interinato;
 use App\Models\Persona;
 use App\Models\Puesto;
 use Dotenv\Exception\InvalidFileException as ExceptionInvalidFileException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Exceptions\InvalidFileException;
-
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\File;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Carbon\Carbon;
-
+use Exception;
+use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\RowCellIterator;
 
 class InterinatoController extends Controller
 {
@@ -39,6 +39,7 @@ class InterinatoController extends Controller
                 'citeInformeInterinato' => 'nullable|string',
                 'fchCiteInformeInterinato' => 'nullable|date',
                 'numFojasInformeInterinato' => 'nullable|integer',
+                'tipoSolicitudInforme' => 'nullable|integer',
 
                 'citeRapInterinato' => 'nullable|string',
                 'codigoRapInterinato' => 'nullable|string',
@@ -66,6 +67,7 @@ class InterinatoController extends Controller
                 'cite_informe_interinato' => $validatedData['citeInformeInterinato'],
                 'fch_cite_informe_interinato' => $validatedData['fchCiteInformeInterinato'],
                 'num_fojas_informe_interinato' => $validatedData['numFojasInformeInterinato'],
+                'tipo_solicitud_informe' => $validatedData['tipoSolicitudInforme'],
 
                 'cite_rap_interinato' => $validatedData['citeRapInterinato'],
                 'codigo_rap_interinato' => $validatedData['codigoRapInterinato'],
@@ -228,26 +230,40 @@ class InterinatoController extends Controller
 
         $templateProcessor->setValue('interinato.citeMem', $interinato->cite_mem_interinato);
         $templateProcessor->setValue('interinato.codigoMem', $interinato->codigo_mem_interinato);
+
         $carbonFechaRapMem = Carbon::parse($interinato->fch_memorandum_rap_interinato);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaRapMem->locale('es_UY');
         $fechaRapMemFormateada = $carbonFechaRapMem->isoFormat('LL');
         $templateProcessor->setValue('interinato.fechaRapMem', $fechaRapMemFormateada);
 
+        $templateProcessor->setValue('interinato.citeMemSuspencion', $interinato->cite_suspencion_interinato);
+        $templateProcessor->setValue('interinato.codigoMemSuspension', $interinato->codigo_suspencion_interinato);
+
+        $carbonFechaSuspencionInterinato = Carbon::parse($interinato->fch_suspencion_interinato);
+        setlocale(LC_TIME, 'es_UY');
+        $carbonFechaSuspencionInterinato->locale('es_UY');
+        $fechaSuspencionInterinatoFormateada = $carbonFechaSuspencionInterinato->isoFormat('LL');
+        $templateProcessor->setValue('interinato.fchMemSuspencion', $fechaSuspencionInterinatoFormateada);
+
         $templateProcessor->setValue('interinato.citeInformeInstruccion', $interinato->cite_informe_instruccion_interinato);
+
         $carbonFechaInformeInstruccion = Carbon::parse($interinato->fch_informe_instruccion_interinato);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaInformeInstruccion->locale('es_UY');
         $fechaInformeInstruccionFormateada = $carbonFechaInformeInstruccion->isoFormat('LL');
-        $templateProcessor->setValue('incorporacion.fechaInformeInstruccion', $fechaInformeInstruccionFormateada);
+        $templateProcessor->setValue('interinato.fechaInformeInstruccion', $fechaInformeInstruccionFormateada);
+
         $templateProcessor->setValue('interinato.hojaProveido', $interinato->proveido_interinato);
         $templateProcessor->setValue('interinato.numTramite', $interinato->num_tramite_hp_interinato);
         $templateProcessor->setValue('interinato.citeInforme', $interinato->cite_informe_interinato);
+
         $carbonFechaInformw = Carbon::parse($interinato->fch_cite_informe_interinato);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaInformw->locale('es_UY');
         $fechaInformeFormateada = $carbonFechaInformw->isoFormat('LL');
         $templateProcessor->setValue('interinato.fechaInforme', $fechaInformeFormateada);
+
         $templateProcessor->setValue('interinato.numFojasInforme', $interinato->num_fojas_informe_interinato);
         $numFojas = $interinato->num_fojas_informe_interinato;
         $numerosEnLetras = [
@@ -317,49 +333,23 @@ class InterinatoController extends Controller
                 $numFojasEnLetras .= $numerosEnLetras[$numFojas];
             }
         }
-        $templateProcessor->setValue('interinato.numFojasLetrasInforme', $numFojasEnLetras);
-
-        $templateProcessor->setValue('persona.nombreCompleto', $interinato->persona->nombre_persona . ' ' . $interinato->persona->primer_apellido_persona . ' ' . $interinato->persona->segundo_apellido_persona);
-        $templateProcessor->setValue('persona.nombreCompleto', $interinato->persona->primer_apellido_persona);
-
-        $templateProcessor->setValue('persona.ci', $interinato->persona->ci_persona . ' ' . $interinato->persona->exp_persona);
-
-        $templateProcessor->setValue('puestoNuevo.denominacion', $interinato->puesto_nuevo->denominacion_puesto);
-
-        $nombreDepartamento = $interinato->puesto_nuevo->departamento->nombre_departamento;
-        $inicialDepartamento = substr($nombreDepartamento, 0, 1);
-        if (in_array($inicialDepartamento, ['D'])) {
-            $valorDepartamento = 'del ' . $nombreDepartamento;
-        } elseif (in_array($inicialDepartamento, ['G', 'U'])) {
-            $valorDepartamento = 'de la ' . $nombreDepartamento;
-        } else {
-            $valorDepartamento = 'de ' . $nombreDepartamento;
-        }
-        $templateProcessor->setValue('puestoNuevo.departamentoConector', $valorDepartamento);
-
-        $nombreGerencia = $interinato->puesto_nuevo->departamento->gerencia->nombre_gerencia;
-        $inicialGerencia = substr($nombreGerencia, 0, 1);
-        if (in_array($inicialGerencia, ['P'])) {
-            $valorDepartamento = 'de ' . $nombreGerencia;
-        } else {
-            $valorDepartamento = 'de la ' . $nombreGerencia;
-        }
-        $templateProcessor->setValue('puestoNuevo.gerenciaConector', $valorDepartamento);
-
-        $templateProcessor->setValue('puestoNuevo.gerencia', $interinato->puesto_nuevo->departamento->gerencia->nombre_gerencia);
+        $templateProcessor->setValue('interinato.numFojasLetrasInforme', $numFojasEnLetras);  
 
         $carbonFechaInicioInterinato = Carbon::parse($interinato->fch_inicio_interinato);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaInicioInterinato->locale('es_UY');
         $fechaInicioInterinatoFormateada = $carbonFechaInicioInterinato->isoFormat('LL');
         $templateProcessor->setValue('interinato.fechaInicioInterinato', $fechaInicioInterinatoFormateada);
+
         $carbonFechaFinInterinato = Carbon::parse($interinato->fch_fin_interinato);
         setlocale(LC_TIME, 'es_UY');
         $carbonFechaFinInterinato->locale('es_UY');
         $fechaFinInterinatoFormateada = $carbonFechaFinInterinato->isoFormat('LL');
         $templateProcessor->setValue('interinato.fechaFinInterinato', $fechaFinInterinatoFormateada);
+
         $templateProcessor->setValue('interinato.nombreUsuarioCreador', $interinato->createdBy->name);
-        $templateProcessor->setValue('interinato.denominacioPuestoUsuario', $interinato->createdBy->cargo);
+        $templateProcessor->setValue('interinato.denominacionPuestoUsuario', $interinato->createdBy->cargo);   
+        $templateProcessor->setValue('interinato.tipoSolicitudInforme', $interinato->tipo_solicitud_informe);
 
         $nombreCompletoUsuario = $interinato->createdBy->name;
         $partes = explode(' ', $nombreCompletoUsuario);
@@ -369,7 +359,7 @@ class InterinatoController extends Controller
         }
         $templateProcessor->setValue('interinato.abrevNombreUsuario', $abreviatura);
 
-        $sexo = $interinato->persona->genero_persona;
+        $sexo = $interinato->personaActual->genero_persona;
         if ($sexo === 'M') {
             $templateProcessor->setValue('interinato.tituloRespeto', 'Señor');
             $templateProcessor->setValue('interinato.conector', 'al servidor público');
@@ -381,6 +371,46 @@ class InterinatoController extends Controller
             $templateProcessor->setValue('interinato.conector2', 'de la  servidora público');
             $templateProcessor->setValue('interinato.conector3', 'la  servidora público');
         }
+
+        $templateProcessor->setValue('persona.nombreCompleto', $interinato->personaActual->nombre_persona . ' ' . $interinato->personaActual->primer_apellido_persona . ' ' . $interinato->personaActual->segundo_apellido_persona);
+        $templateProcessor->setValue('persona.tituloRespeto', $interinato->personaActual->primer_apellido_persona);
+
+        $templateProcessor->setValue('persona.ci', $interinato->personaActual->ci_persona . ' ' . $interinato->personaActual->exp_persona);
+
+        if (isset($interinato->personaActual) && $interinato->personaActual->funcionario->isNotEmpty()) {
+            foreach ($interinato->personaActual->funcionario as $funcionario) {
+                $codigoFile = $funcionario->codigo_file_funcionario;
+                $templateProcessor->setValue('persona.codigoFile', $codigoFile); 
+            }
+        } else {
+            $templateProcessor->setValue('persona.codigoFile', 'Valor no disponible');
+        }        
+
+        $templateProcessor->setValue('puestoNuevo.denominacion', $interinato->puestoNuevo->denominacion_puesto);
+
+        $nombreDepartamento = $interinato->puestoNuevo->departamento->nombre_departamento;
+        $inicialDepartamento = substr($nombreDepartamento, 0, 1);
+        if (in_array($inicialDepartamento, ['D'])) {
+            $valorDepartamento = 'del ' . $nombreDepartamento;
+        } elseif (in_array($inicialDepartamento, ['G', 'U'])) {
+            $valorDepartamento = 'de la ' . $nombreDepartamento;
+        } else {
+            $valorDepartamento = 'de ' . $nombreDepartamento;
+        }
+        $templateProcessor->setValue('puestoNuevo.departamentoConector', $valorDepartamento);
+
+        $templateProcessor->setValue('puestoNuevo.departamento', $interinato->puestoNuevo->departamento->nombre_departamento);
+
+        $nombreGerencia = $interinato->puestoNuevo->departamento->gerencia->nombre_gerencia;
+        $inicialGerencia = substr($nombreGerencia, 0, 1);
+        if (in_array($inicialGerencia, ['P'])) {
+            $valorDepartamento = 'de ' . $nombreGerencia;
+        } else {
+            $valorDepartamento = 'de la ' . $nombreGerencia;
+        }
+        $templateProcessor->setValue('puestoNuevo.gerenciaConector', $valorDepartamento);
+
+        $templateProcessor->setValue('puestoNuevo.gerencia', $interinato->puestoNuevo->departamento->gerencia->nombre_gerencia);
     }
 
     public function generarFormInformeCombinado($interinatoId)
@@ -391,33 +421,30 @@ class InterinatoController extends Controller
             return response('', 404);
         }
 
-        $disk = Storage::disk('form_templates_interinato');
+        $disk = Storage::disk('form_templates');
 
-
-
-        if (isset($interinato->puesto_actual) && isset($interinato->puesto_nuevo)) {
-            if (preg_match('/^(Gerente)/', $interinato->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('informeCombinadoGerente.docx');
+        if (isset($interinato->personaActual) && isset($interinato->puestoNuevo)) {
+            if (preg_match('/^G/', $interinato->puestoNuevo->denominacion_puesto)) {
+                $pathTemplate = $disk->path('/interinatos/informeCombinadoGerente.docx');
             } else {
-                $pathTemplate = $disk->path('rapJefe.docx');
+                $pathTemplate = $disk->path('/interinatos/informeCombinadoJefe.docx');
             }
         }
-
+        
         $templateProcessor = new TemplateProcessor($pathTemplate);
 
         $this->valoresComunesByInterinato($templateProcessor, $interinato);
 
-        $fileName = 'RAP' . ' ' . strtoupper($interinato->persona->nombre_persona . ' ' . $interinato->persona->primer_apellido_persona . ' ' . $interinato->persona->segundo_apellido_persona) . ' ' . $interinato->descargas;
+        $fileName = 'INFORME COMBINADO DE ' . mb_strtoupper($interinato->personaActual->nombre_persona) . ' ' . mb_strtoupper($interinato->personaActual->primer_apellido_persona) . ' ' . mb_strtoupper($interinato->personaActual->segundo_apellido_persona) . ' ' . $interinato->descargas;
 
         $interinato->descargas++;
 
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        $savedPath = $disk->path('/interinatos/generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
 
         return response()->download($savedPath)->deleteFileAfterSend(true);
     }
-
 
     public function generarFormRap($interinatoId)
     {
@@ -427,13 +454,13 @@ class InterinatoController extends Controller
             return response('', 404);
         }
 
-        $disk = Storage::disk('form_templates_interinato');
+        $disk = Storage::disk('form_templates');
 
-        if (isset($interinato->puesto_actual) && isset($interinato->puesto_nuevo)) {
-            if (preg_match('/^(Gerente)/', $interinato->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('rapGerente.docx');
+        if (isset($interinato->personaActual) && isset($interinato->puestoNuevo)) {
+            if (preg_match('/^G/', $interinato->puestoNuevo->denominacion_puesto)) {
+                $pathTemplate = $disk->path('/interinatos/rapGerente.docx');
             } else {
-                $pathTemplate = $disk->path('rapJefe.docx');
+                $pathTemplate = $disk->path('/interinatos/rapJefe.docx');
             }
         }
 
@@ -445,7 +472,7 @@ class InterinatoController extends Controller
 
         $interinato->descargas++;
 
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        $savedPath = $disk->path('/interinatos/generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
 
@@ -460,13 +487,13 @@ class InterinatoController extends Controller
             return response('', 404);
         }
 
-        $disk = Storage::disk('form_templates_interinato');
+        $disk = Storage::disk('form_templates');
 
-        if (isset($interinato->puesto_actual) && isset($interinato->puesto_nuevo)) {
-            if (preg_match('/^(Gerente)/', $interinato->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('informeGerente.docx');
+        if (isset($interinato->personaActual) && isset($interinato->puestoNuevo)) {
+            if (preg_match('/^G/', $interinato->puestoNuevo->denominacion_puesto)) {
+                $pathTemplate = $disk->path('/interinatos/informeGerente.docx');
             } else {
-                $pathTemplate = $disk->path('informeJefe.docx');
+                $pathTemplate = $disk->path('/interinatos/informeJefe.docx');
             }
         }
 
@@ -474,11 +501,11 @@ class InterinatoController extends Controller
 
         $this->valoresComunesByInterinato($templateProcessor, $interinato);
 
-        $fileName = 'RAP' . ' ' . strtoupper($interinato->persona->nombre_persona . ' ' . $interinato->persona->primer_apellido_persona . ' ' . $interinato->persona->segundo_apellido_persona) . ' ' . $interinato->descargas;
+        $fileName = 'INFORME' . ' ' . strtoupper($interinato->persona->nombre_persona . ' ' . $interinato->persona->primer_apellido_persona . ' ' . $interinato->persona->segundo_apellido_persona) . ' ' . $interinato->descargas;
 
         $interinato->descargas++;
 
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        $savedPath = $disk->path('/interinatos/generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
 
@@ -493,13 +520,13 @@ class InterinatoController extends Controller
             return response('', 404);
         }
 
-        $disk = Storage::disk('form_templates_interinato');
+        $disk = Storage::disk('form_templates');
 
-        if (isset($interinato->puesto_actual) && isset($interinato->puesto_nuevo)) {
-            if (preg_match('/^(Gerente)/', $interinato->puesto_nuevo->denominacion_puesto)) {
-                $pathTemplate = $disk->path('memorandumGerente.docx');
+        if (isset($interinato->personaActual) && isset($interinato->puestoNuevo)) {
+            if (preg_match('/^G/', $interinato->puestoNuevo->denominacion_puesto)) {
+                $pathTemplate = $disk->path('/interinatos/memorandumGerente.docx');
             } else {
-                $pathTemplate = $disk->path('memorandumJefe.docx');
+                $pathTemplate = $disk->path('/interinatos/memorandumJefe.docx');
             }
         }
 
@@ -507,11 +534,38 @@ class InterinatoController extends Controller
 
         $this->valoresComunesByInterinato($templateProcessor, $interinato);
 
-        $fileName = 'RAP' . ' ' . strtoupper($interinato->persona->nombre_persona . ' ' . $interinato->persona->primer_apellido_persona . ' ' . $interinato->persona->segundo_apellido_persona) . ' ' . $interinato->descargas;
+        $fileName = 'MEMORANDUM' . ' ' . strtoupper($interinato->persona->nombre_persona . ' ' . $interinato->persona->primer_apellido_persona . ' ' . $interinato->persona->segundo_apellido_persona) . ' ' . $interinato->descargas;
 
         $interinato->descargas++;
 
-        $savedPath = $disk->path('generados/') . $fileName . '.docx';
+        $savedPath = $disk->path('/interinatos/generados/') . $fileName . '.docx';
+
+        $templateProcessor->saveAs($savedPath);
+
+        return response()->download($savedPath)->deleteFileAfterSend(true);
+    }
+
+    public function generarFormMemSuspencion($interinatoId)
+    {
+        $interinato = Interinato::find($interinatoId);
+
+        if (!isset($interinato)) {
+            return response('', 404);
+        }
+
+        $disk = Storage::disk('form_templates');
+
+        $pathTemplate = $disk->path('/interinatos/memoradunSuspencion.docx');
+        
+        $templateProcessor = new TemplateProcessor($pathTemplate);
+
+        $this->valoresComunesByInterinato($templateProcessor, $interinato);
+
+        $fileName = 'MEM SUSPENCION ' . mb_strtoupper($interinato->personaActual->nombre_persona) . ' ' . mb_strtoupper($interinato->personaActual->primer_apellido_persona) . ' ' . mb_strtoupper($interinato->personaActual->segundo_apellido_persona) . ' ' . $interinato->descargas;
+
+        $interinato->descargas++;
+
+        $savedPath = $disk->path('/interinatos/generados/') . $fileName . '.docx';
 
         $templateProcessor->saveAs($savedPath);
 
@@ -545,6 +599,7 @@ class InterinatoController extends Controller
             'citeInformeInterinato' => 'nullable|string',
             'fchCiteInformeInterinato' => 'nullable|date',
             'numFojasInformeInterinato' => 'nullable|integer',
+            'tipoSolicitudInforme' => 'nullable|integer',
 
             'citeRapInterinato' => 'nullable|string',
             'codigoRapInterinato' => 'nullable|string',
@@ -564,13 +619,18 @@ class InterinatoController extends Controller
 
         $id = $validatedData['idInterinato'];
 
+        $validatedData['fchInformeInstruccionInterinato'] = date('Y-m-d H:i:s', strtotime($validatedData['fchInformeInstruccionInterinato']));
+        $validatedData['fchCiteInformeInterinato'] = date('Y-m-d H:i:s', strtotime($validatedData['fchCiteInformeInterinato']));
+        $validatedData['fchMemorandumRapInterinato'] = date('Y-m-d H:i:s', strtotime($validatedData['fchMemorandumRapInterinato']));
+        $validatedData['fchSuspencionInterinato'] = date('Y-m-d H:i:s', strtotime($validatedData['fchSuspencionInterinato']));
+
         if (
             !empty($validatedData['citeSuspencionInterinato']) &&
             !empty($validatedData['codigoSuspencionInterinato']) &&
             !empty($validatedData['fchSuspencionInterinato'])
         ) {
+            $updated = Interinato::where('id_interinato', $id)->update([
 
-            Interinato::create([
                 'cite_informe_instruccion_interinato' => $validatedData['citeInformeInstruccionInterinato'],
                 'fch_informe_instruccion_interinato' => $validatedData['fchInformeInstruccionInterinato'],
                 'proveido_interinato' => $validatedData['proveidoInterinato'],
@@ -578,6 +638,7 @@ class InterinatoController extends Controller
                 'cite_informe_interinato' => $validatedData['citeInformeInterinato'],
                 'fch_cite_informe_interinato' => $validatedData['fchCiteInformeInterinato'],
                 'num_fojas_informe_interinato' => $validatedData['numFojasInformeInterinato'],
+                'tipo_solicitud_informe' => $validatedData['tipoSolicitudInforme'],
 
                 'cite_rap_interinato' => $validatedData['citeRapInterinato'],
                 'codigo_rap_interinato' => $validatedData['codigoRapInterinato'],
@@ -585,11 +646,12 @@ class InterinatoController extends Controller
 
                 'cite_mem_interinato' => $validatedData['citeMemInterinato'],
                 'codigo_mem_interinato' => $validatedData['codigoMemInterinato'],
+                'codigo_file_interinato' => $validatedData['codigoFileInterinato'],
                 'fch_memorandum_rap_interinato' => $validatedData['fchMemorandumRapInterinato'],
 
                 'cite_suspencion_interinato' => $validatedData['citeSuspencionInterinato'],
-                'codigoSuspencionInterinato' => $validatedData['codigoSuspencionInterinato'],
-                'fch_memorandum_rap_interinato' => $validatedData['fchMemorandumRapInterinato'],
+                'codigo_suspencion_interinato' => $validatedData['codigoSuspencionInterinato'],
+                'fch_suspencion_interinato' => $validatedData['fchSuspencionInterinato'],
 
                 'estado_interinato' => 3,
             ]);
@@ -603,9 +665,12 @@ class InterinatoController extends Controller
                 'cite_informe_interinato' => $validatedData['citeInformeInterinato'],
                 'fch_cite_informe_interinato' => $validatedData['fchCiteInformeInterinato'],
                 'num_fojas_informe_interinato' => $validatedData['numFojasInformeInterinato'],
+                'tipo_solicitud_informe' => $validatedData['tipoSolicitudInforme'],
+
                 'cite_rap_interinato' => $validatedData['citeRapInterinato'],
                 'codigo_rap_interinato' => $validatedData['codigoRapInterinato'],
                 'num_fojas_rap_interinato' => $validatedData['numFojasRapInterinato'],
+
                 'cite_mem_interinato' => $validatedData['citeMemInterinato'],
                 'codigo_mem_interinato' => $validatedData['codigoMemInterinato'],
                 'codigo_file_interinato' => $validatedData['codigoFileInterinato'],
@@ -620,8 +685,7 @@ class InterinatoController extends Controller
         }
     }
 
-
-    public function darBajaInterinato($interinatoId)
+    public function darBajaInterinato(Request $request, $interinatoId)
     {
         $interinato = Interinato::find($interinatoId);
 
@@ -629,10 +693,122 @@ class InterinatoController extends Controller
             return response()->json(['message' => 'Interinato no encontrado.'], 404);
         }
 
-        $interinato->estado_designacion_interinato = 1;
+        $modifiedInterinato = $request->input('modifiedInterinato');
+        $interinato->modified_interinato = $modifiedInterinato;
 
-        $interinato->save();
+        $interinato->estado_interinato = 4;
 
-        return response()->json(['message' => 'Interinato dado de baja exitosamente.'], 200);
+        if ($interinato->save()) {
+            return response()->json(['message' => 'Interinato dado de baja exitosamente.'], 200);
+        } else {
+            return response()->json(['message' => 'Error al dar de baja el interinato.'], 500);
+        }
+    }
+
+    public function uploadInterinato(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls',
+        ]);
+
+        $filePath = $request->file('file')->store('uploads');
+        $spreadsheet = IOFactory::load(storage_path('app/' . $filePath));
+
+        $sheetNames = $spreadsheet->getSheetNames();
+        $designacionesSheetIndex = array_search('DESIGNACIONES', $sheetNames);
+
+        if ($designacionesSheetIndex === false) {
+            return response()->json(['message' => 'Hoja "DESIGNACIONES" no encontrada.'], 404);
+        }
+
+        $sheet = $spreadsheet->getSheet($designacionesSheetIndex);
+
+        foreach ($sheet->getRowIterator(2) as $row) {
+            $data = [];
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            // Leer los valores de las celdas
+            $cellIterator->next();  // a
+            $data['cite_informe_instruccion_interinato'] = $cellIterator->current()->getValue(); // b
+            $data['fch_informe_instruccion_interinato'] = $cellIterator->current()->getValue(); // c
+            $cellIterator->next(); // d
+
+            $itemDestino = $cellIterator->current()->getValue();  // e
+            $puestoNuevo = Puesto::where('item_puesto', $itemDestino)->first();
+            $data['puesto_nuevo_id'] = $puestoNuevo ? $puestoNuevo->id : null;
+
+            for ($i = 0; $i < 7; $i++) {
+                $cellIterator->next();
+            }
+            $itemActual = $cellIterator->current()->getValue(); // N
+            $puestoActual = Puesto::where('item_puesto', $itemActual)->first();
+            $data['puesto_actual_id'] = $puestoActual ? $puestoActual->id : null;
+
+            for ($i = 0; $i < 8; $i++) {
+                $cellIterator->next();
+            }
+            $ciPersona = $cellIterator->current()->getValue(); // W
+            $persona = Persona::where('ci_persona', $ciPersona)->first();
+            $data['persona_id'] = $persona ? $persona->id : null;
+
+            for ($i = 0; $i < 3; $i++) {
+                $cellIterator->next();
+            }
+
+            // Leer los siguientes valores
+            $data['cite_informe_interinato'] = $cellIterator->current()->getValue(); // AA
+            $data['num_fojas_informe_interinato'] = $cellIterator->current()->getValue(); // AB
+            $data['cite_mem_interinato'] = $cellIterator->current()->getValue(); // AC
+            $data['codigo_mem_interinato'] = $cellIterator->current()->getValue(); // AD
+            $data['cite_rap_interinato'] = $cellIterator->current()->getValue(); // AE
+            $data['codigo_rap_interinato'] = $cellIterator->current()->getValue(); // AF
+            $data['fch_memorandum_rap_internato'] = $cellIterator->current()->getValue(); // AG
+            $cellIterator->next();
+            $data['fch_inicio_interinato'] = $cellIterator->current()->getValue(); // AI
+            $data['fch_fin_interinato'] = $cellIterator->current()->getValue(); // AJ
+
+            // Log de los datos leídos
+            Log::info('Datos leídos:', $data);
+
+            // Validar la fecha de finalización
+            $fchFinInterinato = $data['fch_fin_interinato'];
+
+            if (empty($fchFinInterinato) || (is_string($fchFinInterinato) && strpos($fchFinInterinato, '=') === 0)) {
+                continue;
+            }
+
+            try {
+                $fchFinInterinato = \Carbon\Carbon::createFromFormat('d/m/Y', $fchFinInterinato);
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            if ($fchFinInterinato->lt(now())) {
+                continue;
+            }
+
+            for ($i = 0; $i < 4; $i++) {
+                $cellIterator->next();
+            }
+            $data['tipo_solicitud_informe'] = $cellIterator->current()->getValue(); // AO
+
+            // Log de los datos que se van a insertar
+            Log::info('Datos a insertar en Interinato:', $data);
+
+            Interinato::create($data);
+        }
+
+        return response()->json(['message' => 'Datos subidos correctamente.']);
+    }
+
+
+
+
+
+
+    public function  exportInterinatoExcel()
+    {
+        return Excel::download(new InterinatosExport, 'Reporte_Interinatos.xlsx');
     }
 }

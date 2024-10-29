@@ -29,6 +29,7 @@ class Interinato extends Model
     'cite_informe_interinato',
     'fch_cite_informe_interinato',
     'num_fojas_informe_interinato',
+    'tipo_solicitud_informe', //1 informe, 2 nota, 3 minuta
 
     'cite_rap_interinato',
     'codigo_rap_interinato',
